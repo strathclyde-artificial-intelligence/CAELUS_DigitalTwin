@@ -12,4 +12,4 @@ class AnraTelemetryPush(Subscriber):
         print(datapoint)
 
     def subscribes_to_streams(self):
-        return [ATTITUDE]
+        return []
