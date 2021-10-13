@@ -5,6 +5,8 @@ This repo consists of all components for the Digital Twin architecture (CAELUS).
 The installation script `install_all.sh` will take care of installing all dependencies.
 Issue `sh install_all.sh` to install every dependency.
 
+**WARNING**: After any change to a dependency you **must** re-install that dependency (for simplicityt, re-run `sh install_all.sh`).
+
 # GIT Workflow
 This repository uses the [git-subrepo](https://github.com/ingydotnet/git-subrepo) package to track multiple repos.
 Editing a subrepo (all folders in `Dependencies`) and pushing it to the upstream will result in the code for that subrepo's repo to be updated.
