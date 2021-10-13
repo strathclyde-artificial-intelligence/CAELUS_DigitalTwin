@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/strathclyde-artificial-intelligence/6-dof-simulator
+	branch = main
+	commit = 0dc3a43fb82b740a3c6e7262ce5b6648f63f1d90
+	parent = b294784cf41b560349cebf3ffac862f0b20e77c6
+	method = merge
+	cmdver = 0.4.3
