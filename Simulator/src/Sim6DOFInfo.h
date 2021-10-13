@@ -1,3 +1,0 @@
-#define Sim6DOF_VERSION_MAJOR 0
-#define Sim6DOF_VERSION_MINOR 0
-
