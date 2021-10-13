@@ -1,4 +1,5 @@
 VENV_LOCATION="./venv";
+DEPENDENCIES_FOLDER="./Dependencies";
 
 if ! [[ -d $VENV_LOCATION ]]; then
     echo "Virtual environment not present. Creating virtual environment named 'venv' at $VENV_LOCATION.";
@@ -11,18 +12,5 @@ if [ !$INVENV ]; then
     source "${VENV_LOCATION}/bin/activate";
 fi
 
-DEPENDENCIES_FOLDER="./Dependencies";
-PROBE_SYSTEM="${DEPENDENCIES_FOLDER}/CAELUS_ProbeSystem";
-THERMAL_MODEL="${DEPENDENCIES_FOLDER}/CAELUS_ThermalModel";
-SMARTSKIES="${DEPENDENCIES_FOLDER}/CAELUS_SmartSkies";
-POWER_MODELS="${DEPENDENCIES_FOLDER}/CAELUS_PowerModels";
-SIMULATOR="${DEPENDENCIES_FOLDER}/Simulator"
-
-echo "Installing Python Dependencies";
-pip3 install $PROBE_SYSTEM --upgrade
-pip3 install $THERMAL_MODEL --upgrade
-pip3 install $SMARTSKIES --upgrade
-pip3 install $POWER_MODELS --upgrade
-
-echo "Installing Simulator"
-$(cd $SIMULATOR; bash setup.sh;);
+sh install_py_deps.sh $DEPENDENCIES_FOLDER
+sh install_simulator.sh $DEPENDENCIES_FOLDER
