@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/strathclyde-artificial-intelligence/CAELUS_ProbeSystem
+	branch = main
+	commit = 7aab6a98c39edd96a7f153abcba58e280d547000
+	parent = 7d12527eeadafaa69c5c3922c9d9748e8b2ad397
+	method = merge
+	cmdver = 0.4.3
