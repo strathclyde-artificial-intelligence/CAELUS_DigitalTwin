@@ -6,9 +6,9 @@ from .Interfaces.Stoppable import Stoppable
 
 class SimulationStack(Stoppable):
 
-    def __init__(self, logger = logging.getLogger(__name__)):
+    def __init__(self, stream_handler = None, logger = logging.getLogger(__name__)):
         self.__operation_queue: [Operation] = []
-        self.__sim_controller = SimulationController()
+        self.__sim_controller = SimulationController(stream_handler=stream_handler)
         self.__logger = logger
 
     def run_operation(self, operation: Operation):

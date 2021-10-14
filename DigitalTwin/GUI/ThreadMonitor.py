@@ -11,7 +11,7 @@ class ThreadMonitor():
         self.thread_monitor_window = 'ThreadMonitor'
         self.thread_monitor_table = f'{self.thread_monitor_window}.Table' 
 
-        with self.__dpg.window(tag=self.thread_monitor_window):
+        with self.__dpg.window(label=self.thread_monitor_window, tag=self.thread_monitor_window):
             with self.__dpg.table(header_row=True, tag=self.thread_monitor_table):
                 self.__dpg.add_table_column(label='Thread Name')
                 self.__dpg.add_table_column(label='PID')

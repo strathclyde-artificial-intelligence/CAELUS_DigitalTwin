@@ -6,20 +6,20 @@ from .Wrappers.SimulatorWrapper import SimulatorWrapper
 
 class SimulationController(Stoppable):
     
-    def __init__(self, logger = logging.getLogger(__name__)):
+    def __init__(self, stream_handler=None, logger = logging.getLogger(__name__)):
         self.__logger = logger
         self.__px4_wrapper = None
         self.__simulator_wrapper = None
-        self.__initialise_px4()
-        self.__initialise_simulator()
+        self.__initialise_px4(stream_handler)
+        self.__initialise_simulator(stream_handler)
 
-    def __initialise_px4(self):
+    def __initialise_px4(self, stream_handler):
         self.__logger.info('Initialising PX4 instance...')
-        self.__px4_wrapper = PX4Wrapper('/Users/h3xept/Desktop/PX4-Autopilot')
+        self.__px4_wrapper = PX4Wrapper('/Users/h3xept/Desktop/PX4-Autopilot', stream_handler=stream_handler)
 
-    def __initialise_simulator(self):
+    def __initialise_simulator(self, stream_handler):
         self.__logger.info('Initialising simulator instance...')
-        self.__simulator_wrapper = SimulatorWrapper(f"{'/'.join(os.path.dirname(__file__).split('/')[:-1])}/Dependencies/Simulator/build/")
+        self.__simulator_wrapper = SimulatorWrapper(f"{'/'.join(os.path.dirname(__file__).split('/')[:-1])}/Dependencies/Simulator/build/", stream_handler=stream_handler)
 
     def start(self):
         self.__logger.info('Starting PX4Wrapper Thread')

@@ -3,21 +3,28 @@ import subprocess
 import logging
 import signal
 from time import sleep
+from typing import Optional
 from ..Interfaces.Stoppable import Stoppable
+from ..Interfaces.StreamHandler import StreamHandler
 
 class SimulatorWrapper(threading.Thread):
 
-    def __init__(self, simulator_build_folder_location, logger=logging.getLogger(__name__)):
+    def __init__(self, simulator_build_folder_location, stream_handler: Optional[StreamHandler] = None, logger=logging.getLogger(__name__)):
         super().__init__()
         self.name = 'SimulatorWrapper'
         self.__should_stop = False
         self.__sim_folder = simulator_build_folder_location
         self.__process = None
         self.__logger = logger
+        self.__stream_handler = stream_handler
+        self.__streams = []
         self.daemon = False
 
     def __cleanup(self, timeout = 1):
         self.__logger.info('Cleaning up resources for Simulator Wrapper')
+        self.__logger.info(f'Invalidating streams for {__name__}')
+        for s in self.__streams:
+            self.__invalidate_stream(s)
         self.__logger.info(f'Waiting for Simulator process to exit...')
         if self.__process is not None:
             for t in range(timeout):
@@ -29,12 +36,22 @@ class SimulatorWrapper(threading.Thread):
             self.__logger.info(f'Poll timeout expired, killing {self.__process}')    
             self.__process.kill()
 
+    def __new_stream_available(self, stream_name, stream):
+        self.__streams.append(stream_name)
+        self.__stream_handler.new_stream_available(stream_name, stream)
+
+    def __invalidate_stream(self, stream_name):
+        self.__streams.remove(stream_name)
+        self.__stream_handler.invalidate_stream(stream_name)
+
     def run(self):
         try:
             self.__process = subprocess.Popen('./6dof',
                 cwd=self.__sim_folder,
-                shell=True
+                shell=True,
+                stdout=subprocess.PIPE
             )
+            self.__new_stream_available('sim_stdout', self.__process.stdout)
             while not self.__should_stop and self.__process.poll() is None:
                 sleep(1)
         except Exception as e:
