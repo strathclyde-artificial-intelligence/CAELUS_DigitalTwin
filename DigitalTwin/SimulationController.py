@@ -5,7 +5,9 @@ from .Wrappers.PX4Wrapper import PX4Wrapper
 from .Wrappers.SimulatorWrapper import SimulatorWrapper
 
 class SimulationController(Stoppable):
-    
+
+    PX4_FOLDER_ENVIRON = 'PX4_ROOT_FOLDER'
+
     def __init__(self, stream_handler=None, logger = logging.getLogger(__name__)):
         self.__logger = logger
         self.__px4_wrapper = None
@@ -14,6 +16,9 @@ class SimulationController(Stoppable):
         self.__initialise_simulator(stream_handler)
 
     def __initialise_px4(self, stream_handler):
+        if SimulationController.PX4_FOLDER_ENVIRON not in os.environ:
+            self.__logger.error(f'Environment variable for PX4\'s location not specified. Please export "{SimulationController.PX4_FOLDER_ENVIRON}".')
+            exit(-1)
         self.__logger.info('Initialising PX4 instance...')
         self.__px4_wrapper = PX4Wrapper('/Users/h3xept/Desktop/PX4-Autopilot', stream_handler=stream_handler)
 
@@ -23,7 +28,7 @@ class SimulationController(Stoppable):
 
     def start(self):
         self.__logger.info('Starting PX4Wrapper Thread')
-        self.__px4_wrapper.start()
+        self.__px4_wrapper.start()x
         self.__logger.info('Starting Simulator Thread')
         self.__simulator_wrapper.start()
 
