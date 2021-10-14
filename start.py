@@ -12,7 +12,7 @@ def cleanup(gui, sim_stack, signal, frame):
     exit(0)
 
 signal.signal(signal.SIGINT, lambda a,b: cleanup(gui, sstack, a, b))
-gui = GUI()
+gui = GUI(init_file=GUI.DEFAULT_GUI_INIT_FILE_NAME)
 sstack = SimulationStack(stream_handler=gui)
 sstack.start()
 gui.start()

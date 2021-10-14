@@ -12,12 +12,14 @@ class StreamWindow():
         self.__should_stop = False
         self.__initialised = False
         self.__stream_text = ''
+        self.__text_updated = False
         self.__logger = logging.getLogger(__name__)
 
     def __update_text(self):
         while not self.__should_stop:
             try:
                 new_line = self.__stream.readline()
+                self.__text_updated = True
                 self.__deque.append(new_line.decode('utf-8'))
                 curr_text = '\n'.join(self.__deque)
                 self.__stream_text = curr_text
@@ -39,6 +41,12 @@ class StreamWindow():
             self.__read_thread.daemon = True
             self.__read_thread.start()
             self.__initialised = True
-        self.__dpg.set_value(self.stream_text_tag, self.__stream_text)
+
+        if self.__text_updated:
+            self.__dpg.set_value(self.stream_text_tag, self.__stream_text)
+            self.__text_updated = False
+        y_max = self.__dpg.get_y_scroll_max(self.stream_window)
+        self.__dpg.set_y_scroll(self.stream_window, y_max)
+
     def exit(self):
         self.__should_stop = True

@@ -14,7 +14,6 @@ class ThreadMonitor():
         with self.__dpg.window(label=self.thread_monitor_window, tag=self.thread_monitor_window):
             with self.__dpg.table(header_row=True, tag=self.thread_monitor_table):
                 self.__dpg.add_table_column(label='Thread Name')
-                self.__dpg.add_table_column(label='PID')
 
     def update(self):
         current_threads = threading.enumerate()
@@ -30,4 +29,3 @@ class ThreadMonitor():
             row_name = f'{self.thread_monitor_table}.{t.name}'
             self.__dpg.add_table_row(parent=self.thread_monitor_table, tag=row_name)
             self.__dpg.add_text(t.name, parent=row_name)
-            self.__dpg.add_text(t.ident, parent=row_name)
