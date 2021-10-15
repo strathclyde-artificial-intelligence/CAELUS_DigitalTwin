@@ -1,0 +1,1 @@
+{"mass": 0.8, "jxx": 0.005, "jyy": 0.005, "jzz": 0.009, "vtol_komega": 0.04, "vtol_kv": 10.0, "vtol_klift": 3.8738, "vtol_tdrag": 0.005, "vtol_tau": 0.005, "vtol_lcog": 0.165, "thruster_komega": 0.0, "thruster_kv": 0.0, "thruster_klift": 0.0, "thruster_tdrag": 0.0, "thruster_tau": 0.0, "thruster_lcog": 0.0}
