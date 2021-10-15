@@ -32,8 +32,8 @@ class SimulationStack(threading.Thread, Stoppable, VehicleManager):
 
     def __start_stack(self):
         self.__sim_controller.start()
-        self.__logger.info('Waiting to acquire vehicle lock...')
-        self.__vehicle_connection_manager.connect_to_vehicle()
+        # self.__logger.info('Waiting to acquire vehicle lock...')
+        # self.__vehicle_connection_manager.connect_to_vehicle()
 
     def run(self):
         self.__start_stack()
