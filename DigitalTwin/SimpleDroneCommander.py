@@ -91,7 +91,7 @@ class SimpleDroneCommander():
         self.clear_vehicle_commands()
         SimpleDroneCommander.sample_mission_commands(self.__vehicle.location.global_relative_frame, self.__vehicle.commands)
         self.__vehicle.commands.upload()
-        time.sleep(3)
+        time.sleep(5)
         # Arm vehicle
         self.__vehicle.armed = True
 
