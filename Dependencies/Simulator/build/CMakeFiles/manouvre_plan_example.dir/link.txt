@@ -1,0 +1,1 @@
+/Library/Developer/CommandLineTools/usr/bin/c++ -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX11.3.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/manouvre_plan_example.dir/Examples/manouvre_plan_example.cc.o -o manouvre_plan_example  lib6dof_lib.a /usr/local/lib/libboost_thread-mt.dylib /usr/local/lib/libboost_chrono-mt.dylib -lcurl 
