@@ -1,0 +1,48 @@
+#!/bin/sh
+#
+# @name 3DR Iris Quadrotor SITL
+#
+# @type Quadrotor Wide
+#
+# @maintainer Julian Oes <julian@oes.ch>
+#
+
+. ${R}etc/init.d/rc.mc_defaults
+
+
+param set MC_ROLLRATE_K 0.5
+param set MC_ROLLRATE_D 0.0030 
+param set MC_ROLLRATE_I 0.200 
+
+param set MC_PITCHRATE_K 0.5
+param set MC_PITCHRATE_D 0.0030 
+param set MC_PITCHRATE_I 0.200 
+
+param set MC_YAWRATE_K 0.5
+param set MC_YAWRATE_I 0.10 
+
+param set THR_MDL_FAC 1.000
+param set MPC_USE_HTE 0.000
+param set MPC_THR_HOVER 0.4
+
+param set MC_AIRMODE 0.000
+
+param set IMU_GYRO_RATEMAX 0.000
+param set IMU_INTEG_RATE 250
+param set SDLOG_PROFILE 1
+
+param set IMU_GYRO_CUTOFF 30.000
+param set IMU_DGYRO_CUTOFF 30.000
+param set IMU_ACCEL_CUTOFF 30.000
+
+param set MPC_POS_MODE 3
+param set MPC_THR_MIN 0.01
+param set EKF2_BCOEF_X 0
+param set EKF2_BCOEF_Y 0
+param set EKF2_GND_EFF_DZ 0
+
+set MIXER quad_x
+set PWM_OUT 1234 
+
+
+
