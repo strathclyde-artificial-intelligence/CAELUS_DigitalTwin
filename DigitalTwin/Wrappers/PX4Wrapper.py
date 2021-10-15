@@ -1,3 +1,4 @@
+from sys import stdin
 import threading
 import subprocess
 import logging
@@ -17,15 +18,15 @@ class PX4Wrapper(threading.Thread):
         self.__process = None
         self.__logger = logger
         self.__stream_handler = stream_handler
-        self.__streams = []
+        self.termination_complete = threading.Condition()
+        self.__streams = set()
         self.daemon = False
 
     def __new_stream_available(self, stream_name, stream):
-        self.__streams.append(stream_name)
+        self.__streams.add(stream_name)
         self.__stream_handler.new_stream_available(stream_name, stream)
 
     def __invalidate_stream(self, stream_name):
-        self.__streams.remove(stream_name)
         self.__stream_handler.invalidate_stream(stream_name)
 
     def __cleanup(self, timeout = 1):
@@ -34,9 +35,9 @@ class PX4Wrapper(threading.Thread):
         self.__logger.info(f'Invalidating streams for {__name__}')
         for s in self.__streams:
             self.__invalidate_stream(s)
+        self.__streams = []
 
         self.__logger.info(f'Waiting for PX4 process to exit...')
-        
         if self.__process is not None:
             for t in range(timeout):
                 code = self.__process.poll()
@@ -48,6 +49,8 @@ class PX4Wrapper(threading.Thread):
             self.__process.kill()
 
     def run(self):
+        import os
+        self.termination_complete.acquire()
         try:
             self.__process = subprocess.Popen('make px4_sitl none_custom_quad',
                 cwd=self.__px4_folder,
@@ -62,9 +65,10 @@ class PX4Wrapper(threading.Thread):
         finally:
             self.__cleanup()
             self.__logger.info(f'{__name__} thread terminated')
+            self.termination_complete.release()
 
     def graceful_stop(self):
-        self.__should_stop = True
+        self.__should_stop = True  
 
     def halt(self):
         exit(-1)

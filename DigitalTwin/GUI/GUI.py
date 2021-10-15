@@ -31,7 +31,7 @@ class GUI(StreamHandler):
         self.__create_sub_windows()
         try:
             while dpg.is_dearpygui_running():
-                for w_name, w in self.__sub_windows.items():
+                for w_name, w in [a for a in self.__sub_windows.items()]:
                     w.update()
                 dpg.render_dearpygui_frame()
         except Exception as e:
@@ -42,9 +42,14 @@ class GUI(StreamHandler):
     
     def new_stream_available(self, stream_name, stream):
         self.__logger.info(f'GUI module has received a new stream: {stream_name}')
-        self.__sub_windows[f'stream_{stream_name}'] = StreamWindow(dpg, stream_name, stream)
+        name = f'stream_{stream_name}'
+        if name not in self.__sub_windows:
+            self.__sub_windows[name] = StreamWindow(dpg, stream_name, stream)
+        else:
+            self.__sub_windows[name].set_stream(stream)
 
     def invalidate_stream(self, stream_name):
         self.__logger.info(f'Stream invalidation request received for {stream_name}')
-        self.__sub_windows[f'stream_{stream_name}'].exit()
-        del self.__sub_windows[f'stream_{stream_name}']
+        name = f'stream_{stream_name}'
+        if name in self.__sub_windows:
+            self.__sub_windows[name].exit()

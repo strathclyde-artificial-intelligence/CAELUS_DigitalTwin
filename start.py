@@ -3,6 +3,7 @@ import signal
 import atexit 
 import logging 
 from DigitalTwin.GUI.GUI import GUI
+import threading
 
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)

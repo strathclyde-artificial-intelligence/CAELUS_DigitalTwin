@@ -5,15 +5,20 @@ from .Wrappers.PX4Wrapper import PX4Wrapper
 from .Wrappers.SimulatorWrapper import SimulatorWrapper
 
 class SimulationController(Stoppable):
-
+    
     PX4_FOLDER_ENVIRON = 'PX4_ROOT_FOLDER'
 
     def __init__(self, stream_handler=None, logger = logging.getLogger(__name__)):
         self.__logger = logger
         self.__px4_wrapper = None
         self.__simulator_wrapper = None
-        self.__initialise_px4(stream_handler)
-        self.__initialise_simulator(stream_handler)
+        self.__stream_handler = stream_handler
+
+    def __initialise_all(self):
+        if self.__px4_wrapper is None:
+            self.__initialise_px4(self.__stream_handler)
+        if self.__simulator_wrapper is None:
+            self.__initialise_simulator(self.__stream_handler)
 
     def __initialise_px4(self, stream_handler):
         if SimulationController.PX4_FOLDER_ENVIRON not in os.environ:
@@ -27,8 +32,9 @@ class SimulationController(Stoppable):
         self.__simulator_wrapper = SimulatorWrapper(f"{'/'.join(os.path.dirname(__file__).split('/')[:-1])}/Dependencies/Simulator/build/", stream_handler=stream_handler)
 
     def start(self):
+        self.__initialise_all()
         self.__logger.info('Starting PX4Wrapper Thread')
-        self.__px4_wrapper.start()x
+        self.__px4_wrapper.start()
         self.__logger.info('Starting Simulator Thread')
         self.__simulator_wrapper.start()
 
@@ -41,7 +47,23 @@ class SimulationController(Stoppable):
         self.__simulator_wrapper.halt()
     
     def reset(self):
+        res = True
+
+        self.__logger.info('Waiting for wrappers to free resources...')
         if self.__px4_wrapper is not None:
             self.__px4_wrapper.graceful_stop()
+            res = self.__px4_wrapper.termination_complete.acquire(timeout=2)
         if self.__simulator_wrapper is not None:
             self.__simulator_wrapper.graceful_stop()
+            res = res and self.__simulator_wrapper.termination_complete.acquire(timeout=2)
+
+        
+        # Wait for locks to acquire - if any fail occurs -- halt thread
+        if not res:
+            self.__logger.warn('Lock acquisition failed -- Halting threads.')
+            self.__px4_wrapper.halt()
+            self.__simulator_wrapper.halt()
+
+        self.__px4_wrapper = None
+        self.__simulator_wrapper = None
+

@@ -17,14 +17,19 @@ class SimulatorWrapper(threading.Thread):
         self.__process = None
         self.__logger = logger
         self.__stream_handler = stream_handler
-        self.__streams = []
+        self.__streams = set()
+        # Wait for this lock to properly destroy this wrapper
+        self.termination_complete = threading.Condition()
         self.daemon = False
 
     def __cleanup(self, timeout = 1):
         self.__logger.info('Cleaning up resources for Simulator Wrapper')
+        
         self.__logger.info(f'Invalidating streams for {__name__}')
         for s in self.__streams:
             self.__invalidate_stream(s)
+        self.__streams = []
+
         self.__logger.info(f'Waiting for Simulator process to exit...')
         if self.__process is not None:
             for t in range(timeout):
@@ -37,14 +42,14 @@ class SimulatorWrapper(threading.Thread):
             self.__process.kill()
 
     def __new_stream_available(self, stream_name, stream):
-        self.__streams.append(stream_name)
+        self.__streams.add(stream_name)
         self.__stream_handler.new_stream_available(stream_name, stream)
 
     def __invalidate_stream(self, stream_name):
-        self.__streams.remove(stream_name)
         self.__stream_handler.invalidate_stream(stream_name)
 
     def run(self):
+        self.termination_complete.acquire()
         try:
             self.__process = subprocess.Popen('./6dof',
                 cwd=self.__sim_folder,
@@ -59,6 +64,7 @@ class SimulatorWrapper(threading.Thread):
         finally:
             self.__cleanup()
             self.__logger.info(f'{__name__} thread terminated')
+            self.termination_complete.release()
 
     def graceful_stop(self):
         self.__should_stop = True

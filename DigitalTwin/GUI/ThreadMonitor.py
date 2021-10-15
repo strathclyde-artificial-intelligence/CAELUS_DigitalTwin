@@ -16,16 +16,16 @@ class ThreadMonitor():
                 self.__dpg.add_table_column(label='Thread Name')
 
     def update(self):
-        current_threads = threading.enumerate()
+        current_threads = [t.name for t in threading.enumerate()]
         to_delete = set(self.__threads).difference(set(current_threads))
         to_add =  set(current_threads).difference(set(self.__threads))
         self.__threads = current_threads
 
         for t in to_delete:
-            row_name = f'{self.thread_monitor_table}.{t.name}'
+            row_name = f'{self.thread_monitor_table}.{t}'
             self.__dpg.delete_item(row_name)
 
         for t in to_add:
-            row_name = f'{self.thread_monitor_table}.{t.name}'
+            row_name = f'{self.thread_monitor_table}.{t}'
             self.__dpg.add_table_row(parent=self.thread_monitor_table, tag=row_name)
-            self.__dpg.add_text(t.name, parent=row_name)
+            self.__dpg.add_text(t, parent=row_name)
