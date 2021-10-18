@@ -21,15 +21,12 @@ class Operation(JSONDeserialiser):
     def __process_volumes(self):
         self.operation_volumes = [FlightVolume(json) for json in self.operation_volumes]
 
-    def __explode_waypoint(self, wp_a, wp_b, max_d):
-        pass
-
     def __interpolate_with_max_distance(self, start, end, max_dist):
-        geod = Geod('WGS84')
-        az12,az21,dist = geod.inv(*start[::-1],*end[::-1])
-        r = geod.fwd_intermediate(start[1],start[0],az12,npts=ceil(dist / max_dist),del_s=max_dist)
-        print(r)
-        return None
+        geod = Geod(ellps='WGS84')
+        az12,az21,dist = geod.inv(start[1], start[0], end[1], end[0])
+        result = geod.fwd_intermediate(start[1],start[0],az12,npts=ceil(dist / max_dist),del_s=max_dist)
+        alt = start[-1]
+        return [(lat, lon, alt) for lat, lon in zip(result.lats, result.lons)]
 
     def get_waypoints(self, max_distance=900):
         waypoints = [volume.get_centre() for volume in self.operation_volumes]
