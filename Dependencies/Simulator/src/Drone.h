@@ -41,8 +41,11 @@ private:
     bool armed = false;
 
 // Glasgow LatLon Height
-#define INITIAL_LAT 55.8609825
-#define INITIAL_LON -4.2488787
+// #define INITIAL_LAT 55.8609825
+// #define INITIAL_LON -4.2488787
+// #define INITIAL_ALT 2600 // mm
+#define INITIAL_LAT 55.573712
+#define INITIAL_LON -5.1303470010000005
 #define INITIAL_ALT 2600 // mm
 
     DroneSensors sensors{(DynamicObject&)*this,

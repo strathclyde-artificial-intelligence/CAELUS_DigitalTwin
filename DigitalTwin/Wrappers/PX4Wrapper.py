@@ -49,7 +49,6 @@ class PX4Wrapper(threading.Thread):
             self.__process.kill()
 
     def run(self):
-        import os
         self.termination_complete.acquire()
         try:
             self.__process = subprocess.Popen('make px4_sitl none_custom_quad',

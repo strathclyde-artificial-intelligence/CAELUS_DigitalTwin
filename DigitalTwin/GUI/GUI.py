@@ -1,8 +1,16 @@
+from DigitalTwin.Interfaces.MissionManager import MissionManager
+from DigitalTwin.Interfaces.SimulationStack import SimulationStack
 from .ThreadMonitor import ThreadMonitor
+from .MissionWindow import MissionWindow
 from .StreamWindow import StreamWindow
 from ..Interfaces.StreamHandler import StreamHandler
+from ..Interfaces.SimulationStack import SimulationStack
 import dearpygui.dearpygui as dpg
 import logging 
+import os
+
+from dotenv import load_dotenv
+load_dotenv()
 
 class GUI(StreamHandler):
     DEFAULT_GUI_INIT_FILE_NAME = 'gui_layout.ini'
@@ -13,6 +21,8 @@ class GUI(StreamHandler):
         self.__setup_gui()
         self.__sub_windows = {}
         self.__logger = logger
+        self.__mission_manager = None
+        self.__sim_stack = None
 
     def __setup_gui(self):
         dpg.create_context()
@@ -24,6 +34,9 @@ class GUI(StreamHandler):
 
     def __create_sub_windows(self):
         self.__sub_windows['thread_monitor'] = ThreadMonitor(dpg)
+        self.__sub_windows['mission_window'] = MissionWindow(dpg)
+        self.__sub_windows['mission_window'].set_sim_stack(self.__sim_stack)
+        self.__sub_windows['mission_window'].set_mission_manager(self.__mission_manager)
 
     def start(self):
         self.__logger.info('Initialising GUI')
@@ -53,3 +66,11 @@ class GUI(StreamHandler):
         name = f'stream_{stream_name}'
         if name in self.__sub_windows:
             self.__sub_windows[name].exit()
+
+    def set_mission_manager(self, mission_manager:MissionManager):
+        self.__mission_manager = mission_manager
+
+
+    def set_simulation_stack(self, sim_stack: SimulationStack):
+        self.__sim_stack = sim_stack
+        

@@ -24,7 +24,7 @@ class Operation(JSONDeserialiser):
     def __interpolate_with_max_distance(self, start, end, max_dist):
         geod = Geod(ellps='WGS84')
         az12,az21,dist = geod.inv(start[1], start[0], end[1], end[0])
-        result = geod.fwd_intermediate(start[1],start[0],az12,npts=ceil(dist / max_dist),del_s=max_dist)
+        result = geod.fwd_intermediate(start[1],start[0],az12,npts=ceil(dist / max_dist),del_s=max_dist, initial_idx=0, terminus_idx=0)
         alt = start[-1]
         return [(lat, lon, alt) for lat, lon in zip(result.lats, result.lons)]
 

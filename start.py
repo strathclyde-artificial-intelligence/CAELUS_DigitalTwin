@@ -1,4 +1,5 @@
-from DigitalTwin.SimulationStack import SimulationStack
+from DigitalTwin.CAELUSSimulationStack import CAELUSSimulationStack
+from DigitalTwin.DroneController import DroneController
 import signal
 import atexit 
 import logging 
@@ -14,7 +15,10 @@ def cleanup(gui, sim_stack, signal, frame):
 
 signal.signal(signal.SIGINT, lambda a,b: cleanup(gui, sstack, a, b))
 gui = GUI(init_file=GUI.DEFAULT_GUI_INIT_FILE_NAME)
-sstack = SimulationStack(stream_handler=gui)
+drone_controller = DroneController()
+sstack = CAELUSSimulationStack(stream_handler=gui)
+gui.set_mission_manager(drone_controller)
+gui.set_simulation_stack(sstack)
 sstack.start()
 gui.start()
     
