@@ -19,8 +19,13 @@ class Operation(JSONDeserialiser):
     def __process_volumes(self):
         self.operation_volumes = [FlightVolume(json) for json in self.operation_volumes]
 
-    def get_waypoints(self):
-        return [volume.get_centre() for volume in self.operation_volumes]
+    def __interpolate_if_distance_is_greater_than(self, volumes, max_dist):
+        
+
+    def get_waypoints(self, max_distance=900):
+        volumes = [volume.get_centre() for volume in self.operation_volumes]
+        if max_distance is not None:
+            self.__interpolate_if_distance_is_greater_than(volumes, max_distance)
         
     def __repr__(self):
         return f'<Operation|reference={self.reference_number}>'
