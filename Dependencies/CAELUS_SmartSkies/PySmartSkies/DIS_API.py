@@ -1,3 +1,4 @@
+from typing import List, Tuple
 import datetime
 from .Logger import Logger
 from .Request import GET_Request, POST_Request, BodyType
@@ -87,7 +88,7 @@ class DIS_API():
         bearer = response['access_token']
         self._session.store_dis_bearer(f'Bearer {bearer}')
 
-    def get_requested_deliveries(self) -> [[Delivery], [Pilot], [Drone], [ControlArea]]:
+    def get_requested_deliveries(self) -> Tuple[List[Delivery], List[Pilot], List[Drone], List[ControlArea]]:
         response = self.__get_requested_deliveries(self._session).send()['data']
         if response is None:
             self._logger.fatal('Error while getting requested deliveries for authenticated DIS user.')
@@ -102,9 +103,9 @@ class DIS_API():
         drones = map(lambda json: Drone(json), drone_list_json)
         control_areas = map(lambda json: ControlArea(json), control_area_list_json)
         
-        return deliveries, pilots, drones, control_areas
+        return list(deliveries), list(pilots), list(drones), list(control_areas)
 
-    def create_operation(self, delivery, drone, control_area, effective_time_begin=None) -> [Operation]:
+    def create_operation(self, delivery, drone, control_area, effective_time_begin=None) -> List[Operation]:
         if delivery is None or drone is None or control_area is None:
             self._logger.fatal(f'Tried to create an operation with invalid parameters.')
         request = self.__create_operation(self._session, delivery, drone, control_area, effective_time_begin)
@@ -112,15 +113,15 @@ class DIS_API():
         if response is None:
             self._logger.fatal(f'Error while creating an operation for delivery {delivery.id}')
         operations = map(lambda json: Operation(json), response)
-        return operations
+        return list(operations)
 
-    def get_accepted_deliveries(self) -> [(Delivery, [FlightVolume])]:
+    def get_accepted_deliveries(self) -> List[Tuple[Delivery, List[FlightVolume]]]:
         response = self.__get_accepted_deliveries(self._session).send()
         deliveries = map(lambda json: Delivery(json['delivery']), response['data'])
         flight_volumes = map(lambda json: [FlightVolume(volume) for volume in json['operation_volumes']], response['data'])
         return list(zip(deliveries, flight_volumes))
 
-    def get_operation_details_with_delivery_id(self, delivery_id) -> [Operation]:
+    def get_operation_details_with_delivery_id(self, delivery_id) -> Operation:
         response = self.__get_operation_details_with_delivery_id(self._session, delivery_id).send()
         operation = Operation(response['data'])
         return operation
