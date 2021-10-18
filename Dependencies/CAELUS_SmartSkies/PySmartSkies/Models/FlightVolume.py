@@ -6,7 +6,7 @@ class FlightVolume(JSONDeserialiser):
 
     @staticmethod
     def feet_to_meters(feet):
-        return feet * 3.281
+        return feet / 3.281
 
     def __init__(self, json, logger=Logger()):
         super().__init__(json, logger=logger)
@@ -29,8 +29,8 @@ class FlightVolume(JSONDeserialiser):
         xs = [latitude for latitude,_ in self.coordinates]
         ys = [longitude for _,longitude in self.coordinates]
         return [
-            (max(xs) - min(xs)) / 2,
-            (max(ys) - min(ys)) / 2,
+            max(xs) - ((max(xs) - min(xs)) / 2),
+            max(ys) - ((max(ys) - min(ys)) / 2),
             self.altitude_agl / 2
         ]
 
