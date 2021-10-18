@@ -1,6 +1,8 @@
+from math import ceil
 from ..Logger import Logger
 from .JSONDeserialiser import JSONDeserialiser
 from .FlightVolume import FlightVolume
+from pyproj import Geod
 
 class Operation(JSONDeserialiser):
 
@@ -19,13 +21,20 @@ class Operation(JSONDeserialiser):
     def __process_volumes(self):
         self.operation_volumes = [FlightVolume(json) for json in self.operation_volumes]
 
-    def __interpolate_if_distance_is_greater_than(self, volumes, max_dist):
-        
+    def __explode_waypoint(self, wp_a, wp_b, max_d):
+        pass
+
+    def __interpolate_with_max_distance(self, start, end, max_dist):
+        geod = Geod('WGS84')
+        az12,az21,dist = geod.inv(*start[::-1],*end[::-1])
+        r = geod.fwd_intermediate(start[1],start[0],az12,npts=ceil(dist / max_dist),del_s=max_dist)
+        print(r)
+        return None
 
     def get_waypoints(self, max_distance=900):
-        volumes = [volume.get_centre() for volume in self.operation_volumes]
-        if max_distance is not None:
-            self.__interpolate_if_distance_is_greater_than(volumes, max_distance)
-        
+        waypoints = [volume.get_centre() for volume in self.operation_volumes]
+        start, end = waypoints[0], waypoints[-1]
+        return self.__interpolate_with_max_distance(start, end, max_distance)
+
     def __repr__(self):
         return f'<Operation|reference={self.reference_number}>'
