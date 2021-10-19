@@ -139,7 +139,6 @@ void Drone::_process_command_long_message(mavlink_message_t m) {
 void Drone::_process_hil_actuator_controls(mavlink_message_t m) {
     
     this->should_reply_lockstep = true;
-    printf("Setting to true!\n");
     this->hil_actuator_controls_msg_n++;
 
     mavlink_hil_actuator_controls_t controls;

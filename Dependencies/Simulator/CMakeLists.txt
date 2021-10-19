@@ -51,3 +51,5 @@ file(GLOB_RECURSE rpy_maneuvers Examples/rpy_maneuvers.cc)
 add_executable(rpy_maneuvers ${rpy_maneuvers})
 target_include_directories(rpy_maneuvers PUBLIC ${CMAKE_SOURCE_DIR}/mavlink/standard/)
 target_link_libraries(rpy_maneuvers PUBLIC 6dof_lib Eigen3::Eigen ${Boost_LIBRARIES} curl)
+
+file(COPY "Resources/WMM.COF" DESTINATION ${CMAKE_BINARY_DIR})

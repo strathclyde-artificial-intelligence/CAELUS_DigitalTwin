@@ -9,7 +9,7 @@
 #include "../DataStructures/LatLonAlt.h"
 #include "../DataStructures/GPSData.h"
 #include "../DataStructures/GroundSpeed.h"
-
+#include <random>
 #include <algorithm>
 #include <assert.h> 
 #include <cmath>
@@ -20,16 +20,15 @@
 // #define HIL_STATE_QUATERNION_VERBOSE
 // #define HIL_SENSOR_VERBOSE
 // #define HIL_GPS_VERBOSE
-#define SENSOR_RANDOM_NOISE
-#define ASSERT_NOT_NAN
+// #define ASSERT_NOT_NAN
 
 class DroneStateEncoder {
 private:
     // Standard deviations for sensor noise
-    float noise_Acc = 0.0001f;
+    float noise_Acc = 0.01f;
     float noise_Gps = 10.0f;
-    float noise_Gyo = 0.0001f;
-    float noise_Mag = 0.005f;
+    float noise_Gyo = 0.01f;
+    float noise_Mag = 0.000001f;
     float noise_Prs = 0.01f;
 
     double random_walk_gps_x = 0;
@@ -37,23 +36,21 @@ private:
     double random_walk_gps_z = 0;
     double gps_correlation_time = 30.0;
 
-    std::default_random_engine noise_generator;
-    double randomNoise(float stdDev) {
-#ifdef SENSOR_RANDOM_NOISE
-        std::normal_distribution<double> dist(0, stdDev);
-        double n = dist(noise_generator);
-        return n;
-#else
-        return 0.0;
-#endif
-    }
+    std::random_device rd; 
+    std::mt19937 gen{rd()}; 
+
+    std::normal_distribution<double> nd_acc{0, noise_Acc};
+    std::normal_distribution<double> nd_gyo{0, noise_Gyo};
+    std::normal_distribution<double> nd_mag{0, noise_Mag};
+    std::normal_distribution<double> nd_prs{0, noise_Prs};
+    std::normal_distribution<double> nd_gps{0, noise_Gps};
 
     void update_random_walk_gps(boost::chrono::microseconds us) {
         double dt = (us.count() / 1000000.0);
         double sqrtDt = sqrt(dt);
-        double noiseX = sqrtDt * randomNoise(this->noise_Gps);
-        double noiseY = sqrtDt * randomNoise(this->noise_Gps);
-        double noiseZ = sqrtDt * randomNoise(this->noise_Gps);
+        double noiseX = sqrtDt * this->nd_gps(this->gen);
+        double noiseY = sqrtDt * this->nd_gps(this->gen);
+        double noiseZ = sqrtDt * this->nd_gps(this->gen);
 
         this->random_walk_gps_x += noiseX * dt - this->random_walk_gps_x / gps_correlation_time;
         this->random_walk_gps_y += noiseY * dt - this->random_walk_gps_y / gps_correlation_time;
@@ -290,20 +287,20 @@ public:
         return this->_hil_sensor_msg(
             system_id,
             component_id, 
-            body_frame_acc[0] + randomNoise(this->noise_Acc),
-            body_frame_acc[1] + randomNoise(this->noise_Acc),
-            body_frame_acc[2] + randomNoise(this->noise_Acc),
-            gyro_xyz[0] + randomNoise(this->noise_Gyo),
-            gyro_xyz[1] + randomNoise(this->noise_Gyo),
-            gyro_xyz[2] + randomNoise(this->noise_Gyo),
-            magfield[0] + randomNoise(this->noise_Mag),
-            magfield[1] + randomNoise(this->noise_Mag),
-            magfield[2] + randomNoise(this->noise_Mag),
-            abs_pressure + randomNoise(this->noise_Prs) / 100,
-            diff_pressure + randomNoise(this->noise_Prs) / 100,
+            body_frame_acc[0] + this->nd_acc(this->gen),
+            body_frame_acc[1] + this->nd_acc(this->gen),
+            body_frame_acc[2] + this->nd_acc(this->gen),
+            gyro_xyz[0] + this->nd_gyo(this->gen),
+            gyro_xyz[1] + this->nd_gyo(this->gen),
+            gyro_xyz[2] + this->nd_gyo(this->gen),
+            magfield[0] + this->nd_mag(this->gen),
+            magfield[1] + this->nd_mag(this->gen),
+            magfield[2] + this->nd_mag(this->gen),
+            abs_pressure + this->nd_prs(this->gen) / 100,
+            diff_pressure + this->nd_prs(this->gen) / 100,
             // ENU to NED
-            lat_lon_alt.altitude_mm / 1000 + randomNoise(this->noise_Prs) / 1000 , 
-            temperature + randomNoise(this->noise_Prs)
+            lat_lon_alt.altitude_mm / 1000 + this->nd_prs(this->gen) / 1000 , 
+            temperature + this->nd_prs(this->gen)
         );
     }
 
@@ -358,10 +355,10 @@ assert(gps_data.vehicle_yaw == gps_data.vehicle_yaw);
             lat_lon_alt.altitude_mm,
             gps_data.eph,
             gps_data.epv,
-            gps_data.gps_ground_speed,
-            gs.north_speed,
-            gs.east_speed,
-            gs.down_speed,
+            gps_data.gps_ground_speed + this->nd_acc(this->gen),
+            gs.north_speed + this->nd_acc(this->gen),
+            gs.east_speed + this->nd_acc(this->gen),
+            gs.down_speed + this->nd_acc(this->gen),
             gps_data.course_over_ground,
             gps_data.satellites_visible,
             0, // ID
