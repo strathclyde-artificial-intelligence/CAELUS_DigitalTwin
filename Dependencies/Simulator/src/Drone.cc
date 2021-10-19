@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "Drone.h"
 #include "DroneSensors.h"
 #include "Logging/ConsoleLogger.h"
@@ -44,10 +45,13 @@ void Drone::fake_ground_transform(boost::chrono::microseconds us) {
     }
 }
 void Drone::update(boost::chrono::microseconds us) {
+
+    this->_process_mavlink_messages();
+
+    if (this->hil_actuator_controls_msg_n > 300 && !this->should_reply_lockstep) return;
     MAVLinkSystem::update(us);
     DynamicObject::update(us);
     this->fake_ground_transform(us);
-    this->_process_mavlink_messages();
     this->_publish_state(us);
 
     if (this->drone_state_processor != NULL) {
@@ -135,6 +139,7 @@ void Drone::_process_command_long_message(mavlink_message_t m) {
 void Drone::_process_hil_actuator_controls(mavlink_message_t m) {
     
     this->should_reply_lockstep = true;
+    printf("Setting to true!\n");
     this->hil_actuator_controls_msg_n++;
 
     mavlink_hil_actuator_controls_t controls;

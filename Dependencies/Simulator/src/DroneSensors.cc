@@ -94,8 +94,9 @@ GPSData DroneSensors::get_gps_data() {
 
 uint16_t DroneSensors::get_yaw_wrt_earth_north() {
     Eigen::Vector3d attitude = this->get_earth_frame_attitude();
-    double offset = fmod(RAD_TO_DEG*attitude[2], 360) < 0 ? 360.0 : 0.0;
-    return (static_cast<uint16_t>(fmod(RAD_TO_DEG*attitude[2], 360) + offset) + 1) % 361;
+    double yaw_deg = RAD_TO_DEG*attitude[2];
+    double offset = fmod(yaw_deg, 360) < 0 ? 360.0 : 0.0;
+    return (static_cast<uint16_t>(fmod(yaw_deg, 360) + offset) + 1) % 361;
 }
 
 uint16_t DroneSensors::get_course_over_ground() {

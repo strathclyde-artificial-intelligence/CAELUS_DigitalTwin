@@ -54,7 +54,7 @@ protected:
     bool compute_fixed_wing_dynamics = false;
     bool compute_aero_dynamics = false;
     bool compute_weight_dynamics = true;
-    bool compute_drag_dynamics = false;
+    bool compute_drag_dynamics = true;
 
     Eigen::Matrix3d moment_of_inertia;
      

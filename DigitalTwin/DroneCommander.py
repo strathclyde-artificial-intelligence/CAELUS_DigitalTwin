@@ -22,6 +22,18 @@ class DroneCommander():
         commands.append(Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 1, 0, 0, 0, 0, waypoints[-1][1], waypoints[-1][0], altitude))
         return commands
 
+    def set_roi(self, location):
+        # create the MAV_CMD_DO_SET_ROI command
+        msg = self.__vehicle.message_factory.command_long_encode(
+            0, 0,    # target system, target component
+            mavutil.mavlink.MAV_CMD_DO_SET_ROI, #command
+            0, #confirmation
+            0, 0, 0, 0, #params 1-4
+            *location
+            )
+        # send command to vehicle
+        self.__vehicle.send_mavlink(msg)
+
     def __init__(self):
         self.__vehicle: Vehicle = None
         self.__logger = logging.getLogger(__name__)
@@ -57,6 +69,8 @@ class DroneCommander():
         self.__logger.info('Waiting for vehicle commands acquisition')
         self.__vehicle.commands.wait_ready()
         time.sleep(2)
+
+        self.__end_waypoint = [*waypoints[-1], altitude]
 
     def __wait_for_home_lock(self):
         while self.__vehicle.home_location is None:

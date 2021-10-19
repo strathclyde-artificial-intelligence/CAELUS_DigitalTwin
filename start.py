@@ -17,8 +17,10 @@ signal.signal(signal.SIGINT, lambda a,b: cleanup(gui, sstack, a, b))
 gui = GUI(init_file=GUI.DEFAULT_GUI_INIT_FILE_NAME)
 drone_controller = DroneController()
 sstack = CAELUSSimulationStack(stream_handler=gui)
+
 gui.set_mission_manager(drone_controller)
 gui.set_simulation_stack(sstack)
+
 sstack.start()
 gui.start()
     

@@ -1,6 +1,7 @@
 #include <boost/format.hpp>
 #include <boost/thread/thread.hpp>
 #include "Simulator.h"
+#include <assert.h>
 #include "Logging/ConsoleLogger.h"
 
 Simulator::Simulator(SimulatorConfig c) : 
