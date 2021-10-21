@@ -26,7 +26,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
 
     def __setup_probes(self):
         self.__logger.info('Setting up probes')
-        anra_probe = AnraTelemetryPush()
+        anra_probe = AnraTelemetryPush('','','','')
         for stream_id in anra_probe.subscribes_to_streams():
             self.__state_aggregator.subscribe(stream_id, anra_probe)
         self.__state_aggregator.report_subscribers()
