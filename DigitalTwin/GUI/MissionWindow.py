@@ -37,9 +37,8 @@ class MissionWindow():
         self.__mission_manager = mission_manager
 
     def execute_sample_mission(self):
-        waypoints = self.__mission_helper.example_mission_waypoints()
-        print(f'First wp: {waypoints[0]}')
-        self.__mission_manager.add_mission(waypoints)
+        operation, operation_id, drone, dis_token = self.__mission_helper.example_mission_waypoints()
+        self.__mission_manager.add_mission((operation, operation_id, drone, dis_token))
 
     def update(self):
         pass

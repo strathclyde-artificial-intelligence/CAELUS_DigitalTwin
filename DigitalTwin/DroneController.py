@@ -26,9 +26,9 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
 
     def __setup_probes(self):
         self.__logger.info('Setting up probes')
-        anra_probe = AnraTelemetryPush('','','','')
-        for stream_id in anra_probe.subscribes_to_streams():
-            self.__state_aggregator.subscribe(stream_id, anra_probe)
+        self.__anra_probe = AnraTelemetryPush()
+        for stream_id in self.__anra_probe.subscribes_to_streams():
+            self.__state_aggregator.subscribe(stream_id, self.__anra_probe)
         self.__state_aggregator.report_subscribers()
         
     def vehicle_available(self, vehicle):
@@ -53,13 +53,22 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         while not self.__should_stop:
             if not self.__executing_mission:
                 try:
-                    waypoints_alt = self.__mission_queue.get(block=False)
+                    operation, operation_id, drone, dis_token = self.__mission_queue.get(block=False)
+                    waypoints_alt = operation.get_waypoints()
                     self.__executing_mission = True
                     waypoints, alt = [[a[0], a[1]] for a in waypoints_alt], waypoints_alt[0][-1]
 
                     self.__logger.info('Received new mission')
                     self.__commander.set_mission(waypoints, altitude=alt)
                     self.__commander.start_mission()
+                    self.__anra_probe.start_sending_telemetry(
+                        drone_registration=drone.registration_number,
+                        operation_id=operation_id,
+                        control_area_id=operation.control_area_id,
+                        reference_number=operation.reference_number,
+                        dis_token=dis_token
+                    )
+
                 except Empty as e:
                     pass
                 except Exception as e:

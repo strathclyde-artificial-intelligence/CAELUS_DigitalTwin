@@ -98,7 +98,7 @@ class DIS_API():
         drone_list_json = response['drone_list']
         control_area_list_json = response['control_area_list']
 
-        deliveries = map(lambda json: Delivery(json), requested_deliveries_json)
+        deliveries = map(lambda json: Delivery({**json, 'operation_id': None}), requested_deliveries_json)
         pilots = map(lambda json: Pilot(json), pilot_list_json)
         drones = map(lambda json: Drone(json), drone_list_json)
         control_areas = map(lambda json: ControlArea(json), control_area_list_json)
@@ -117,7 +117,7 @@ class DIS_API():
 
     def get_accepted_deliveries(self) -> List[Tuple[Delivery, List[FlightVolume]]]:
         response = self.__get_accepted_deliveries(self._session).send()
-        deliveries = map(lambda json: Delivery(json['delivery']), response['data'])
+        deliveries = map(lambda json: Delivery({**json['delivery'], 'operation_id': json['operation_id']}), response['data'])
         flight_volumes = map(lambda json: [FlightVolume(volume) for volume in json['operation_volumes']], response['data'])
         return list(zip(deliveries, flight_volumes))
 

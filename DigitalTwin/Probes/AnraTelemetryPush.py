@@ -61,12 +61,10 @@ class AnraTelemetryPacket():
 
 class AnraTelemetryPush(Subscriber):
 
-    def __init__(self, drone_registration, operation_id, control_aread_id, reference_number):
+    def __init__(self):
+
         super().__init__()
-        self.drone_registration = drone_registration
-        self.operation_id = operation_id
-        self.control_aread_id = control_aread_id
-        self.reference_number = reference_number
+        self.__should_stop = False
 
         self.data = {
             'roll': 0,
@@ -81,8 +79,31 @@ class AnraTelemetryPush(Subscriber):
 
         self.__remote_ip = 'usdev-ssctr.flyanra.net'
         self.__remote_port = 41001
-        self.__dis_token = ''
+        self.__send_thread = None
+
+    def start_sending_telemetry(self,
+        drone_registration,
+        operation_id,
+        control_area_id,
+        reference_number,
+        dis_token):
+
+        self.drone_registration = drone_registration
+        self.operation_id = operation_id
+        self.control_aread_id = control_area_id
+        self.reference_number = reference_number
+        self.__dis_token = dis_token
+
         self.__send_thread = self.setup_send_thread()
+
+    def stop_sending_telemetry(self):
+        self.__should_stop = True
+        self.drone_registration = None
+        self.operation_id = None
+        self.control_aread_id = None
+        self.reference_number = None
+        self.__dis_token = None
+
 
     def setup_send_thread(self):
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -168,7 +189,7 @@ class AnraTelemetryPush(Subscriber):
         )
 
     def send_packet(self):
-        while True:
+        while not self.__should_stop:
             js_obj = self.pack_telemetry().serialise()
             packet = json.dumps({
                 'Token': self.__dis_token,
