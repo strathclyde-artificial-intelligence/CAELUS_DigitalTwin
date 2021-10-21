@@ -25,11 +25,11 @@
 class DroneStateEncoder {
 private:
     // Standard deviations for sensor noise
-    float noise_Acc = 0.01f;
+    float noise_Acc = 0.001f;
     float noise_Gps = 10.0f;
-    float noise_Gyo = 0.01f;
+    float noise_Gyo = 0.001f;
     float noise_Mag = 0.000001f;
-    float noise_Prs = 0.01f;
+    float noise_Prs = 0.001f;
 
     double random_walk_gps_x = 0;
     double random_walk_gps_y = 0;
@@ -298,8 +298,7 @@ public:
             magfield[2] + this->nd_mag(this->gen),
             abs_pressure + this->nd_prs(this->gen) / 100,
             diff_pressure + this->nd_prs(this->gen) / 100,
-            // ENU to NED
-            lat_lon_alt.altitude_mm / 1000 + this->nd_prs(this->gen) / 1000 , 
+            -lat_lon_alt.altitude_mm / 1000 + this->nd_prs(this->gen) / 1000 , 
             temperature + this->nd_prs(this->gen)
         );
     }

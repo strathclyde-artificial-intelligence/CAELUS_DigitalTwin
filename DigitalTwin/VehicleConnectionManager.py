@@ -15,6 +15,8 @@ class VehicleConnectionManager(VehicleManager):
 
     def stop_connecting(self):
         self.__should_connect = False
+        if self.__vehicle is not None:
+            self.__vehicle.close()
 
     def set_vehicle_manager(self, vm):
         self.__vehicle_manager = vm
@@ -27,7 +29,6 @@ class VehicleConnectionManager(VehicleManager):
             if self.__should_connect:
                 self.__logger.warn(e)
                 self.__logger.warn(f'Vehicle connection timeout. Retrying...')
-                self.vehicle_timeout(None)
         finally:
             if self.__should_connect:
                 if self.__vehicle is not None:

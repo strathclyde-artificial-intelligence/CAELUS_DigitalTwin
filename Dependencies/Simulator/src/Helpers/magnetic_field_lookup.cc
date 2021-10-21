@@ -20,8 +20,8 @@ Eigen::VectorXd magnetic_field_for_latlonalt(LatLonAlt lat_lon_alt) {
     timeinfo = localtime (&my_time);
     WorldMagneticModel(&now, lat_lon_alt.latitude_deg, lat_lon_alt.longitude_deg, lat_lon_alt.altitude_mm / 1000000.0, timeinfo->tm_year+1900);// Lat, Lon, Alt, Time
     Eigen::VectorXd ret{3};
-    ret[0] = now.X * 1e-8;
-    ret[1] = now.Y * 1e-8;
-    ret[2] = now.Z * 1e-8;
+    ret[0] = now.X * 1e-5;
+    ret[1] = now.Y * 1e-5;
+    ret[2] = now.Z * 1e-5;
     return ret;
 }

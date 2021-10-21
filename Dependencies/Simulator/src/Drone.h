@@ -25,13 +25,17 @@ class Drone : public DynamicObject,
               public MAVLinkSystem,
               public MAVLinkMessageHandler,
               public DroneStateEncoder {
-private:
-
+protected:
     // Lockstep fix
     bool should_reply_lockstep = false;
     uint32_t hil_actuator_controls_msg_n = 0;
     uint32_t sys_time_throttle_counter = 0;
+
     DroneStateProcessor* drone_state_processor = NULL;
+    void _publish_state(boost::chrono::microseconds dt);
+    void _process_mavlink_messages();
+    void fake_ground_transform(boost::chrono::microseconds us);
+private:
 
     uint8_t mav_mode = 0;
     boost::chrono::microseconds time{0};
@@ -62,17 +66,14 @@ private:
     void _setup_drone();
 
     void _process_mavlink_message(mavlink_message_t m);
-    void _process_mavlink_messages();
     void _process_command_long_message(mavlink_message_t m);
     void _process_hil_actuator_controls(mavlink_message_t m);
 
     void _publish_hil_gps();
     void _publish_hil_state_quaternion();
     void _publish_hil_sensor();
-    void _publish_state(boost::chrono::microseconds dt);
     void _publish_system_time();
-    
-    void fake_ground_transform(boost::chrono::microseconds us);
+
 public:
 
     Drone(const char* config_file, MAVLinkMessageRelay& connection, Clock& clock);

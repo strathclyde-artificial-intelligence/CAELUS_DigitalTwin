@@ -32,7 +32,7 @@ void Drone::fake_ground_transform(boost::chrono::microseconds us) {
     Eigen::Vector3d velocity = this->get_sensors().get_earth_frame_velocity(); // NED
     Eigen::Vector3d acceleration = caelus_fdm::body2earth(this->state) * this->get_sensors().get_body_frame_acceleration();
 
-    if (position[2] >= this->ground_height) {
+    if (position[2] >= this->ground_height && acceleration[2] * dt + velocity[2] >= 0) {
         this->state[2] = 0;
         // Body frame velocity
         this->state.segment(3, 3) = Eigen::VectorXd::Zero(3);

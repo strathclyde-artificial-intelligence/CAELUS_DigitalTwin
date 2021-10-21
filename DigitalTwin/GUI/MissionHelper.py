@@ -42,5 +42,5 @@ class MissionHelper():
         self.cvms_api.checkout_orders(orders)
 
         deliveries, pilots, drones, control_areas = self.dis_api.get_requested_deliveries()
-        operations = self.dis_api.create_operation(deliveries[-1], drones[1], control_areas[0])
+        operations = self.dis_api.create_operation(deliveries[-1], drones[0], control_areas[0])
         return operations[0].get_waypoints()

@@ -27,6 +27,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
     def vehicle_timeout(self, vehicle):
         self.__logger.info(f'Vehicle timed out!')
         self.__should_stop = True
+        self.__connection_manager.stop_connecting()
+        self.__connection_manager.connect_to_vehicle()
 
     def poll_mission(self):
         while not self.__should_stop:
