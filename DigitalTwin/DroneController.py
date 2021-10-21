@@ -1,27 +1,46 @@
 from queue import Empty, Queue
 import logging
 import threading
+from ProbeSystem.state_aggregator.state_aggregator import StateAggregator
 from typing import Tuple, List
 from .VehicleConnectionManager import VehicleConnectionManager
 from .DroneCommander import DroneCommander
 from .Interfaces.VehicleManager import VehicleManager
 from .Interfaces.MissionManager import MissionManager
 from .Interfaces.Stoppable import Stoppable
+from .Probes.AnraTelemetryPush import AnraTelemetryPush
 
 class DroneController(VehicleManager, MissionManager, Stoppable):
     def __init__(self):
         self.__connection_manager = VehicleConnectionManager(self)
         self.__commander = DroneCommander()
+        self.__state_aggregator = StateAggregator('test_drone', should_manage_vehicle=False)
         self.__logger = logging.getLogger(__name__)
         self.__should_stop = False
         self.__mission_queue = Queue()
         self.__mission_poll_thread = None
+        self.__state_aggregator_thread = None
         self.__executing_mission = False
+        self.__setup_probes()
         self.__connection_manager.connect_to_vehicle()
 
+    def __setup_probes(self):
+        self.__logger.info('Setting up probes')
+        anra_probe = AnraTelemetryPush()
+        for stream_id in anra_probe.subscribes_to_streams():
+            self.__state_aggregator.subscribe(stream_id, anra_probe)
+        self.__state_aggregator.report_subscribers()
+        
     def vehicle_available(self, vehicle):
         self.__logger.info(f'New vehicle available {vehicle}')
         self.__commander.set_vehicle(vehicle)
+        
+        self.__state_aggregator.set_vehicle(vehicle)
+        self.__state_aggregator_thread = threading.Thread(target=self.__state_aggregator.idle, args=())
+        self.__state_aggregator_thread.name = 'StateAggregator Main-Thread'
+        self.__state_aggregator_thread.daemon = True
+        self.__state_aggregator_thread.start()
+
         self.mission_poll_thread_start()
     
     def vehicle_timeout(self, vehicle):

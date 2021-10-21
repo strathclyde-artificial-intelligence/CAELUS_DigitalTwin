@@ -10,30 +10,33 @@ DataPoint = NewType('DataPoint', Tuple[object, str])
 META_MESSAGE_N = 'message_n'
 
 class StateAggregator():
-    def __init__(self, drone_instance_id):
+    def __init__(self, drone_instance_id, should_manage_vehicle = True):
         
         self.streams: Dict[str, DataPoint] = {}
         self.stream_metadata: Dict[str, Dict[str, object]] = {}
         self.subscribers: Dict[str, List[Subscriber]] = {}
 
+        self.__should_manage_vehicle = should_manage_vehicle
         self.drone_instance_id = drone_instance_id
         self.should_shutdown = Condition()
-        self.simulation_bridge = SimulationBridge(self, self.should_shutdown)
+        self.simulation_bridge = SimulationBridge(self, self.should_shutdown, should_manage_vehicle)
         self.bridge_thread = self.__setup_bridge()
 
     def __setup_bridge(self):
-        # The bridge needs to acquire a connection with the drone
-        # hence I'm setting up a lock to notify the connected state
-        # and continue with the context initialisation 
-        done_setting_up = Condition()
-        thread = Thread(target=self.simulation_bridge.initialise, args=(done_setting_up,))
-        thread.start()
+        if self.__should_manage_vehicle:
+            # The bridge needs to acquire a connection with the drone
+            # hence I'm setting up a lock to notify the connected state
+            # and continue with the context initialisation 
+            done_setting_up = Condition()
+            thread = Thread(target=self.simulation_bridge.initialise, args=(done_setting_up,))
+            thread.start()
 
-        done_setting_up.acquire()
-        done_setting_up.wait()
-        done_setting_up.release()
+            done_setting_up.acquire()
+            done_setting_up.wait()
+            done_setting_up.release()
 
-        return thread
+            return thread
+        return None
 
     def __increase_message_count(self, stream_id):
         if META_MESSAGE_N not in self.stream_metadata[stream_id]:
@@ -88,3 +91,7 @@ class StateAggregator():
     def idle(self):
         self.should_shutdown.acquire()
         self.should_shutdown.wait()
+
+    # To be called from a third party when the probe system does not manage the vehicle connection
+    def set_vehicle(self, vehicle):
+        self.simulation_bridge.vehicle_acquired(None, vehicle)
