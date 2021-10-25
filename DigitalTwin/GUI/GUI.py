@@ -3,7 +3,9 @@ from DigitalTwin.Interfaces.SimulationStack import SimulationStack
 from .ThreadMonitor import ThreadMonitor
 from .MissionWindow import MissionWindow
 from .StreamWindow import StreamWindow
+from .SeriesPlotsWindow import SeriesPlotsWindow
 from ..Interfaces.StreamHandler import StreamHandler
+from ..Interfaces.TimeSeriesHandler import TimeSeriesHandler
 from ..Interfaces.SimulationStack import SimulationStack
 import dearpygui.dearpygui as dpg
 import logging 
@@ -12,7 +14,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-class GUI(StreamHandler):
+class GUI(StreamHandler, TimeSeriesHandler):
     DEFAULT_GUI_INIT_FILE_NAME = 'gui_layout.ini'
 
     def __init__(self, init_file=None, logger=logging.getLogger(__name__)):
@@ -35,6 +37,7 @@ class GUI(StreamHandler):
     def __create_sub_windows(self):
         self.__sub_windows['thread_monitor'] = ThreadMonitor(dpg)
         self.__sub_windows['mission_window'] = MissionWindow(dpg)
+        self.__sub_windows['series_plot_window'] = SeriesPlotsWindow(dpg)
         self.__sub_windows['mission_window'].set_sim_stack(self.__sim_stack)
         self.__sub_windows['mission_window'].set_mission_manager(self.__mission_manager)
 
@@ -70,7 +73,12 @@ class GUI(StreamHandler):
     def set_mission_manager(self, mission_manager:MissionManager):
         self.__mission_manager = mission_manager
 
-
     def set_simulation_stack(self, sim_stack: SimulationStack):
         self.__sim_stack = sim_stack
+
+    def new_time_series_stream_available(self, name, stream):
+        if 'series_plot_window' not in self.__sub_windows:
+            self.__logger.warn('Tried to add a time series plot but no window is present to display it.')
+        else:
+            self.__sub_windows['series_plot_window'].add_time_series(name, stream)
         

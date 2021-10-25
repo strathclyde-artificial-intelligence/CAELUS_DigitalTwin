@@ -3,12 +3,16 @@ import logging
 import threading
 from ProbeSystem.state_aggregator.state_aggregator import StateAggregator
 from typing import Tuple, List
+
+from DigitalTwin.Interfaces.TimeSeriesHandler import TimeSeriesHandler
 from .VehicleConnectionManager import VehicleConnectionManager
 from .DroneCommander import DroneCommander
 from .Interfaces.VehicleManager import VehicleManager
 from .Interfaces.MissionManager import MissionManager
 from .Interfaces.Stoppable import Stoppable
 from .Probes.AnraTelemetryPush import AnraTelemetryPush
+from .Probes.TelemetryDisplay import TelemetryDisplay
+from .Interfaces.TimeSeriesHandler import TimeSeriesHandler
 
 class DroneController(VehicleManager, MissionManager, Stoppable):
     def __init__(self):
@@ -27,8 +31,10 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
     def __setup_probes(self):
         self.__logger.info('Setting up probes')
         self.__anra_probe = AnraTelemetryPush()
-        for stream_id in self.__anra_probe.subscribes_to_streams():
-            self.__state_aggregator.subscribe(stream_id, self.__anra_probe)
+        self.__telemetry_display_probe = TelemetryDisplay()
+        for probe in [self.__anra_probe, self.__telemetry_display_probe]:
+            for stream_id in probe.subscribes_to_streams():
+                self.__state_aggregator.subscribe(stream_id, probe)
         self.__state_aggregator.report_subscribers()
         
     def vehicle_available(self, vehicle):
@@ -95,3 +101,6 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
 
     def halt(self):
         exit(-1)
+
+    def set_time_series_handler(self, ts_handler: TimeSeriesHandler):
+        self.__telemetry_display_probe.set_time_series_handler(ts_handler)
