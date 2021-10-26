@@ -57,6 +57,45 @@ private:
         this->random_walk_gps_z += noiseZ * dt - this->random_walk_gps_z / gps_correlation_time;
     }
 
+    mavlink_message_t _battery_status_msg(
+            uint8_t system_id,
+            uint8_t component_id,
+            uint8_t battery_id,
+            uint8_t  battery_function,
+            uint8_t battery_type,
+            int16_t battery_temperature,
+            uint16_t battery_voltage,
+            int16_t current,
+            int32_t current_consumed,
+            int32_t energy_consumed,
+            int8_t battery_remaining_percent
+        ) {
+            mavlink_message_t msg;
+            const uint16_t voltages[10] = {battery_voltage, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX};
+            const uint16_t additional_voltages[4] = {0, 0, 0, 0};
+
+            mavlink_msg_battery_status_pack(
+                system_id,
+                component_id, 
+                &msg,
+                battery_id, 
+                battery_function,
+                battery_type,
+                battery_temperature,
+                voltages,
+                current,
+                current_consumed,
+                energy_consumed,
+                battery_remaining_percent,
+                0,
+                0, // MAV_BATTERY_CHARGE_STATE_UNDEFINED
+                additional_voltages,
+                0,
+                0 // no fault
+            );
+            return msg;
+        }
+
     mavlink_message_t _hil_sensor_msg(
         uint8_t system_id,
         uint8_t component_id,
@@ -219,6 +258,29 @@ public:
     
     virtual Eigen::VectorXd get_state() { }
     virtual Eigen::VectorXd get_dx_state() { };
+
+    mavlink_message_t battery_status_msg(uint8_t system_id, uint8_t component_id) {
+        uint8_t battery_id = 0;
+        uint8_t battery_function = 1; // MAV_BATTERY_FUNCTION_ALL
+        uint8_t battery_type = 3; // MAV_BATTERY_TYPE_LION
+        int16_t battery_temperature = 25; // cDegC
+        uint16_t battery_voltage = 5000; // mV
+        uint8_t battery_remaining_percent = 100;
+
+        return this->_battery_status_msg(
+            system_id,
+            component_id,
+            battery_id,
+            battery_function,
+            battery_type,
+            battery_temperature,
+            battery_voltage,
+            -1,
+            -1, 
+            -1,
+            battery_remaining_percent
+        );
+    }
 
     mavlink_message_t hil_state_quaternion_msg(uint8_t system_id, uint8_t component_id) {
         Sensors& sensors = this->get_sensors();

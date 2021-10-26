@@ -73,6 +73,7 @@ private:
     void _publish_hil_state_quaternion();
     void _publish_hil_sensor();
     void _publish_system_time();
+    void _publish_battery_status_msg();
 
 public:
 

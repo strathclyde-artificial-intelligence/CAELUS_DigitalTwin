@@ -85,6 +85,11 @@ void Drone::_publish_hil_state_quaternion() {
     this->connection.enqueue_message(msg);
 }
 
+void Drone::_publish_battery_status_msg() {
+    mavlink_message_t msg = this->battery_status_msg(this->system_id, this->component_id);
+    this->connection.enqueue_message(msg);
+}
+
 void Drone::_publish_state(boost::chrono::microseconds us)
  {
     if (!this->connection.connection_open()) return;
@@ -98,6 +103,8 @@ void Drone::_publish_state(boost::chrono::microseconds us)
 
     this->_publish_hil_gps();
     this->_publish_hil_sensor();
+    this->_publish_battery_status_msg();
+    
     this->should_reply_lockstep = false;
 
     bool should_send_autopilot_telemetry = 
