@@ -15,10 +15,10 @@ from cmath import sqrt as csqrt
 #
 #   OUTPUTS
 #   w:          The motor speed value provided from Px4 to an ESC
+#   thrust:     The thrust produced under current conditions
 #   mod:        The current state of Modulation Index to store in a database
 #   Qcon:       Energy Capacity (Ah) consumed, to be sent to battery model
 #   Idis:       The current demand from the system
-#   thrust:     The thrust produced under current conditions
 #   
 #   ASSUMPTIONS   
 #   tau_electrical << tau_mechanical << tau_aerodynamics
@@ -54,17 +54,13 @@ def powertrain_ESC_Motor(w_ref, m_init, v_batt, dT) -> [float, float, float, flo
     tol = 1                # Tolerance value to allow convergence: rad/s
     mod = m_init
 
-    print("\n".join([f'{k}:{v}'for k,v in sorted(locals().items(), key=lambda kv: kv[0])]))
-
-    while (w > abs(w_ref_r)+tol or w < abs(w_ref_r)-tol):
+    while w.real > abs(w_ref_r)+tol or w.real < abs(w_ref_r)-tol:
         dm = (abs(w_ref_r) - w)/w_max
         mod = mod + dm
         Vm = mod*v_batt
         w = ((-Mt * Me / Rs) + np*csqrt(pow((Mt * Me / Rs), 2) - 4.0 * km * -kt / Rs * Vm)) / (2.0 * km)
-        w = w.real
         
-    
-    #w = real(w)
+    w = w.real
     thrust = kt * pow(w, 2)
     Torque = km * pow(w, 2)
 
@@ -73,5 +69,5 @@ def powertrain_ESC_Motor(w_ref, m_init, v_batt, dT) -> [float, float, float, flo
 
     Qcon = (Idis*dT)*(n_conv/100)
 
-    return (w, thrust, mod, Qcon, Idis)
+    return (w, thrust, mod.real, Qcon, Idis)
 

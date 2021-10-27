@@ -17,7 +17,7 @@ class Battery():
         controls = [max(v, 0) for v in controls]
         mod_idxs, capacities_extracted, current_demands = [], [], []
         for i in range(self.__motors_n):
-            _, new_mod_idx, capacity_extracted, current_demand, _ = powertrain_ESC_Motor(
+            _, _, new_mod_idx, capacity_extracted, current_demand = powertrain_ESC_Motor(
                     controls[i],
                     self.__current_modulation_idxs[i],
                     self.__current_voltage,
