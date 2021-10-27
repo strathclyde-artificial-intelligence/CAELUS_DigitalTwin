@@ -1,4 +1,5 @@
-from math import sqrt, pi
+from math import sqrt, pi, inf
+from cmath import sqrt as csqrt
 
 #   This function is designed to represent the Electronic speed controller
 #   and motor for each motor on the Avy Aera Drone. 
@@ -35,31 +36,37 @@ def powertrain_ESC_Motor(w_ref, m_init, v_batt, dT) -> [float, float, float, flo
 
     # Motor Config Parameters
     kt = 6.2e-5            # Thrust Factor: Thrust = kt*omega^2 (N)
-    km = kt/42             # Motor Coefficient: Torque = km*omega^2   (Nm)
-    np = 6                # Number of poles on the motor       (Ask Avy?)   
-    Me = 1/(490*np*(pi/30)) # back EMF constant: (V / rad/s)
+    km = kt/42.0             # Motor Coefficient: Torque = km*omega^2   (Nm)
+    np = 6.0                # Number of poles on the motor       (Ask Avy?)   
+    Me = 1.0/(490*np*(pi/30)) # back EMF constant: (V / rad/s)
     Mt = Me                # Torque constant: (Nm/Amp)
     Rs = 0.10              # Motor resistance: (ohm)
 
     # Maximum motor speed
-    w_max = ((-Mt * Me / Rs) + np*sqrt((Mt * Me / Rs)**2 - 4 * km * -kt / Rs * Vmax)) / (2 * km)
-
+    w_max = ((-Mt * Me / Rs) + np*csqrt((Mt * Me / Rs)**2 - 4 * km * -kt / Rs * Vmax)) / (2 * km)
+    w_max = w_max.real
+    
     Vm = m_init*v_batt      # Voltage applied to motor
-    w = (  (-Mt*Me/Rs) + np*sqrt( (Mt*Me/Rs)**2 - (4*km*(-Mt/Rs)*Vm) ) )/(2*km)
+    w = (  (-Mt*Me/Rs) + np*csqrt( pow((Mt*Me/Rs),2) - (4*km*(-Mt/Rs)*Vm) ) )/(2.0*km)
+    w = w.real
     w_ref_r = w_ref * w_max    # motor reference speed in rad/s
 
     tol = 1                # Tolerance value to allow convergence: rad/s
     mod = m_init
 
+    print("\n".join([f'{k}:{v}'for k,v in sorted(locals().items(), key=lambda kv: kv[0])]))
+
     while (w > abs(w_ref_r)+tol or w < abs(w_ref_r)-tol):
         dm = (abs(w_ref_r) - w)/w_max
         mod = mod + dm
         Vm = mod*v_batt
-        w = ((-Mt * Me / Rs) + np*sqrt((Mt * Me / Rs)**2 - 4 * km * -kt / Rs * Vm)) / (2 * km)
+        w = ((-Mt * Me / Rs) + np*csqrt(pow((Mt * Me / Rs), 2) - 4.0 * km * -kt / Rs * Vm)) / (2.0 * km)
+        w = w.real
+        
     
     #w = real(w)
-    thrust = kt * w**2
-    Torque = km * w**2
+    thrust = kt * pow(w, 2)
+    Torque = km * pow(w, 2)
 
     Idis = Torque/Mt
     # Idis = Torque*w/Vm
