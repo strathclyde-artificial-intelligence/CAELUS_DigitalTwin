@@ -117,6 +117,7 @@ set(debuggers
 
 set(models
 	none
+	custom_quad
 	believer
 	boat
 	cloudship
