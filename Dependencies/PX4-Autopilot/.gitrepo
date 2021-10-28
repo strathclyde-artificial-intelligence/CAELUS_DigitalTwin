@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/strathclyde-artificial-intelligence/PX4-Autopilot
 	branch = master
-	commit = c9b89ee8690ad4e1c45a3b78f385947a29a30f23
-	parent = d77627b6711e105e1b8a1258dc6587132541076b
+	commit = 59ed741d898cd7de69fe7d50d146b2ee331e204e
+	parent = 95b5b72120fd59c20f0bdcc229b30dee7f810493
 	method = merge
 	cmdver = 0.4.3
