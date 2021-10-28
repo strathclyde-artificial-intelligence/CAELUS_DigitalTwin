@@ -10,7 +10,7 @@ from PySmartSkies.Models.Pilot import Pilot
 from PySmartSkies.Models.ControlArea import ControlArea
 from PySmartSkies.Models.Operation import Operation
 from PySmartSkies.Models.FlightVolume import FlightVolume
-
+from PySmartSkies.DeliveryStatus import STATUS_READY_FOR_DELIVERY
 
 authenticated_api = None
 viable_delivery = None
@@ -45,7 +45,7 @@ def test_get_requested_deliveries():
     for i,drone in enumerate(drones):
             assert drone is not None
             assert isinstance(drone, Drone)
-            if viable_drone is None and i >= 1:
+            if viable_drone is None and i >= 3:
                 viable_drone = drone
     for control_area in control_areas:
             assert control_area is not None
@@ -94,3 +94,9 @@ def test_get_delivery_eta():
     eta = authenticated_api.get_delivery_eta(viable_delivery.id)
     assert isinstance(eta, float)
     assert eta >= 0
+
+def test_provide_clearance_update():
+    assert authenticated_api.provide_clearance_update(viable_delivery.id)
+
+def test_delivery_status_update():
+    assert authenticated_api.delivery_status_update(viable_delivery.id, STATUS_READY_FOR_DELIVERY)

@@ -8,6 +8,7 @@ from .Models.Drone import Drone
 from .Models.ControlArea import ControlArea
 from .Models.Operation import Operation
 from .Models.FlightVolume import FlightVolume
+from .DeliveryStatus import *
 
 class DIS_API():
 
@@ -19,6 +20,8 @@ class DIS_API():
     get_accepted_deliveries_endpoint = f'{base_endpoint}/telemetry_list'
     get_operation_details_with_delivery_id_endpoint = f'{base_endpoint}/operations/'
     get_delivery_eta_endpoint = lambda delivery_id: f'{DIS_API.base_endpoint}/delivery/{delivery_id}/eta'
+    provide_clearance_update_endpoint = f'https://dms-api-dev.flyanra.net/updatedronestatus' # why is this different than all others?
+    delivery_status_update_endpoint = f'{base_endpoint}/delivery/status'
 
     @staticmethod
     def __auth_request(session):
@@ -62,6 +65,21 @@ class DIS_API():
     @staticmethod
     def __get_accepted_deliveries(session):
         return GET_Request(DIS_API.get_accepted_deliveries_endpoint, {}, bearer_token=session.get_dis_token())
+
+    @staticmethod
+    def __provide_clearance_update(session, delivery_id):
+        return POST_Request(DIS_API.provide_clearance_update_endpoint, {
+            'delivery_id': delivery_id,
+            'status': 'CLEAR_FOR_TAKEOFF_CUSTOMER'
+            }, bearer_token=session.get_dis_token())
+
+    @staticmethod
+    def __delivery_status_update(session, delivery_id, new_status):
+        return POST_Request(DIS_API.delivery_status_update_endpoint, {
+            "delivery_id": delivery_id,
+            "delivery_status": new_status,
+            "notes": "delivery status update"
+        }, bearer_token=session.get_dis_token())
 
     @staticmethod
     def __get_operation_details_with_delivery_id(session, delivery_id):
@@ -130,3 +148,12 @@ class DIS_API():
         response = self.__get_delivery_eta(self._session, delivery_id).send()
         eta = float(response['data']['eta'])
         return eta
+
+    def provide_clearance_update(self, delivery_id) -> bool:
+        response = self.__provide_clearance_update(self._session, delivery_id).send()
+        return response['result'] or False
+
+    # Status values can be found in DeliveryStatus.py
+    def delivery_status_update(self, delivery_id, new_status) -> bool:
+        response = self.__delivery_status_update(self._session, delivery_id, new_status).send()
+        return response['status_code'] == 200
