@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/strathclyde-artificial-intelligence/PX4-Autopilot
+	branch = master
+	commit = c9b89ee8690ad4e1c45a3b78f385947a29a30f23
+	parent = d77627b6711e105e1b8a1258dc6587132541076b
+	method = merge
+	cmdver = 0.4.3
