@@ -5,6 +5,7 @@ import atexit
 import logging 
 from DigitalTwin.GUI.GUI import GUI
 import threading
+from os.path import exists
 
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
@@ -12,6 +13,11 @@ logging.basicConfig(level=logging.INFO)
 def cleanup(gui, sim_stack, signal, frame):
     sim_stack.graceful_stop()
     exit(0)
+
+def check_smartskies_env():
+    if not exists('./env'):
+        print(f'.env file contianing SmartSkies credentials not found. Please create a .env file in the root directory of the digital twin architecture following the format specified in https://github.com/H3xept/CAELUS_SmartSkies')
+        exit(-1)
 
 signal.signal(signal.SIGINT, lambda a,b: cleanup(gui, sstack, a, b))
 gui = GUI(init_file=GUI.DEFAULT_GUI_INIT_FILE_NAME)

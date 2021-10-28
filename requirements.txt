@@ -1,1 +1,1 @@
-PySimpleGUI==4.49.0
+dearpygui==1.0.0
