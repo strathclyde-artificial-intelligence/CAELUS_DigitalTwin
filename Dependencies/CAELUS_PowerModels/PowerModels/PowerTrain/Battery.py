@@ -15,8 +15,15 @@ class Battery():
     def new_control(self, controls: List[float]) -> Tuple[float, float]:
 
         controls = [max(v, 0) for v in controls]
-        mod_idxs, capacities_extracted, current_demands = [], [], []
+        # HOTFIX FOR FUNCTION THAT HANGS -- MAZHE SHOULD PROVIDE A FIX
+        # DELETE WHEN FIXED!!
+        controls = [c if c > 0.05 else 0 for c in controls]
+        ##
+        mod_idxs, capacities_extracted, current_demands = [m for m in self.__current_modulation_idxs], [], []
         for i in range(self.__motors_n):
+            motor_pwm = controls[i]
+            if motor_pwm == 0:
+                continue
             _, _, new_mod_idx, capacity_extracted, current_demand = powertrain_ESC_Motor(
                     controls[i],
                     self.__current_modulation_idxs[i],
@@ -29,7 +36,7 @@ class Battery():
             
 
         new_discharge, new_voltage = batt_disc(self.__depth_of_discharge, sum(capacities_extracted), sum(current_demands))
-        
+
         self.__current_modulation_idxs = mod_idxs
         self.__current_voltage = new_voltage
         self.__depth_of_discharge = new_discharge

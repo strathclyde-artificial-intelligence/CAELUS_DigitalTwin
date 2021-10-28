@@ -1,7 +1,8 @@
 from threading import Thread, Condition
 import logging
 from .Interfaces.VehicleManager import VehicleManager
-from dronekit import connect, Vehicle
+from .Vehicle import Vehicle
+from dronekit import connect
 
 class VehicleConnectionManager(VehicleManager):
     def __init__(self, vehicle_manager: VehicleManager = None, vehicle_addr = '127.0.0.1:14540', connection_timeout=20):
@@ -23,7 +24,7 @@ class VehicleConnectionManager(VehicleManager):
 
     def __connect_to_vehicle(self):
         try:
-            vehicle = connect(self.__vehicle_addr, wait_ready=True, timeout=self.__connection_timeout, heartbeat_timeout=self.__connection_timeout)
+            vehicle = connect(self.__vehicle_addr, wait_ready=True, timeout=self.__connection_timeout, heartbeat_timeout=self.__connection_timeout, vehicle_class=Vehicle, source_system=1)
             self.__vehicle = vehicle
         except Exception as e:
             if self.__should_connect:

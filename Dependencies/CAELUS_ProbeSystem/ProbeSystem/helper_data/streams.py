@@ -74,3 +74,8 @@ VEHICLE_MODE = 'mode.name'
 
 # Armed state of the vehicle.
 ARMED = 'armed'
+
+# https://mavlink.io/en/messages/common.html#HIL_ACTUATOR_CONTROLS
+# list of 16 actuation signals (-1 to 1 for reversable motors)
+# WARNING - this requires the CAELUS PX4 fork!
+HIL_ACTUATOR_CONTROLS = 'hil_actuator_controls'

@@ -26,11 +26,10 @@ class HilActuatorControls(object):
    
 class Vehicle(DronekitVehicle):
     def __init__(self, *args):
-        super(Vehicle, self).__init__(*args)
+        super().__init__(*args)
 
         # Create an Vehicle.raw_imu object with initial values set to None.
         self._hil_actuator_controls = HilActuatorControls()
-
         # Create a message listener using the decorator.   
         @self.on_message('HIL_ACTUATOR_CONTROLS')
         def listener(self, name, message):
@@ -39,6 +38,7 @@ class Vehicle(DronekitVehicle):
             self._hil_actuator_controls.mode=message.mode
             self._hil_actuator_controls.flags=message.flags
             self.notify_attribute_listeners('hil_actuator_controls', self._hil_actuator_controls) 
+
 
     @property
     def hil_actuator_controls(self):

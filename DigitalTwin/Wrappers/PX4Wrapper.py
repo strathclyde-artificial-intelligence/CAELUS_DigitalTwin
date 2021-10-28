@@ -51,7 +51,7 @@ class PX4Wrapper(threading.Thread):
     def run(self):
         self.termination_complete.acquire()
         try:
-            self.__process = subprocess.Popen('export PX4_SIM_SPEED_FACTOR=5; HEADLESS=1 make px4_sitl jmavsim',
+            self.__process = subprocess.Popen('export PX4_SIM_SPEED_FACTOR=5; HEADLESS=1 make px4_sitl jmavsim_custom_quad',
                 cwd=self.__px4_folder,
                 shell=True,
                 stdout=subprocess.PIPE

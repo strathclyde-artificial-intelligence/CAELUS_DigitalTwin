@@ -12,6 +12,7 @@ from .Interfaces.MissionManager import MissionManager
 from .Interfaces.Stoppable import Stoppable
 from .Probes.AnraTelemetryPush import AnraTelemetryPush
 from .Probes.TelemetryDisplay import TelemetryDisplay
+from .Probes.QuadrotorBatteryDischarge import QuadrotorBatteryDischarge
 from .Interfaces.TimeSeriesHandler import TimeSeriesHandler
 
 class DroneController(VehicleManager, MissionManager, Stoppable):
@@ -32,7 +33,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__logger.info('Setting up probes')
         self.__anra_probe = AnraTelemetryPush()
         self.__telemetry_display_probe = TelemetryDisplay()
-        for probe in [self.__anra_probe, self.__telemetry_display_probe]:
+        self.__battery_discharge_probe = QuadrotorBatteryDischarge()
+        for probe in [self.__anra_probe, self.__telemetry_display_probe, self.__battery_discharge_probe]:
             for stream_id in probe.subscribes_to_streams():
                 self.__state_aggregator.subscribe(stream_id, probe)
         self.__state_aggregator.report_subscribers()
@@ -47,6 +49,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__state_aggregator_thread.daemon = True
         self.__state_aggregator_thread.start()
 
+        self.__battery_discharge_probe.set_vehicle(vehicle)
+        
         self.mission_poll_thread_start()
     
     def vehicle_timeout(self, vehicle):

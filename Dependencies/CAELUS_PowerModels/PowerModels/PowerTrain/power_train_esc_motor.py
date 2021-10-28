@@ -54,6 +54,7 @@ def powertrain_ESC_Motor(w_ref, m_init, v_batt, dT) -> [float, float, float, flo
     tol = 1                # Tolerance value to allow convergence: rad/s
     mod = m_init
 
+    ii = 0
     while w.real > abs(w_ref_r)+tol or w.real < abs(w_ref_r)-tol:
         dm = (abs(w_ref_r) - w)/w_max
         mod = mod + dm
