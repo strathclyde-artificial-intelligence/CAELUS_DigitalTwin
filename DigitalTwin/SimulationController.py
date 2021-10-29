@@ -25,7 +25,7 @@ class SimulationController(Stoppable):
             self.__logger.error(f'Environment variable for PX4\'s location not specified. Please export "{SimulationController.PX4_FOLDER_ENVIRON}".')
             exit(-1)
         self.__logger.info('Initialising PX4 instance...')
-        self.__px4_wrapper = PX4Wrapper('/Users/h3xept/Desktop/PX4-Autopilot', stream_handler=stream_handler)
+        self.__px4_wrapper = PX4Wrapper(os.environ[SimulationController.PX4_FOLDER_ENVIRON], stream_handler=stream_handler)
 
     def __initialise_simulator(self, stream_handler):
         self.__logger.info('Initialising simulator instance...')
