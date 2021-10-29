@@ -23,7 +23,7 @@ def check_smartskies_env():
 
 def check_exported_px4():
     if not 'PX4_ROOT_FOLDER' in environ:
-        print(f'You must export your local copy of the CAELUS px4 fork folder (`export PX4_ROOT_FOLDER=<px4 folder>`)')
+        print(f'You must export your local copy of the CAELUS px4 fork folder (export PX4_ROOT_FOLDER=<px4 folder>)')
         exit(-1)
 
 check_exported_px4()
