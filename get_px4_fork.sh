@@ -14,4 +14,4 @@ echo "[🚚] Installing PX4-Autpilot python dependencies"
 pip3 install -r px4_python_requirements.txt
 (cd $PX4_DIR; make)
 
-echo -e "Make sure to issue `${RED}export PX4_ROOT_FOLDER=$PX4_DIR${NC}` before starting the digital twin."
+echo -e "Make sure to issue '${RED}export PX4_ROOT_FOLDER=$PX4_DIR${NC}' before starting the digital twin."
