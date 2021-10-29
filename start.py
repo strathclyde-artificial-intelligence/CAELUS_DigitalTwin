@@ -16,7 +16,7 @@ def cleanup(gui, sim_stack, signal, frame):
     exit(0)
 
 def check_smartskies_env():
-    if not exists('./env'):
+    if not exists('./.env'):
         print(f'.env file contianing SmartSkies credentials not found.')
         print(f'Please create a .env file in the root directory of the digital twin architecture following the format specified in https://github.com/H3xept/CAELUS_SmartSkies')
         exit(-1)
