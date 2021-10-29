@@ -26,6 +26,9 @@ def check_exported_px4():
         print(f'You must export your local copy of the CAELUS px4 fork folder (`export PX4_ROOT_FOLDER=<px4 folder>`)')
         exit(-1)
 
+check_exported_px4()
+check_smartskies_env()
+
 signal.signal(signal.SIGINT, lambda a,b: cleanup(gui, sstack, a, b))
 gui = GUI(init_file=GUI.DEFAULT_GUI_INIT_FILE_NAME)
 drone_controller = DroneController()
