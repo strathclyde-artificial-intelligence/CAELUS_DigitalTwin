@@ -1,3 +1,4 @@
+kconfiglib
 pyserial
 empy
 toml
