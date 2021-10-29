@@ -1,3 +1,4 @@
+from os import environ
 from DigitalTwin.CAELUSSimulationStack import CAELUSSimulationStack
 from DigitalTwin.DroneController import DroneController
 import signal
@@ -16,7 +17,13 @@ def cleanup(gui, sim_stack, signal, frame):
 
 def check_smartskies_env():
     if not exists('./env'):
-        print(f'.env file contianing SmartSkies credentials not found. Please create a .env file in the root directory of the digital twin architecture following the format specified in https://github.com/H3xept/CAELUS_SmartSkies')
+        print(f'.env file contianing SmartSkies credentials not found.')
+        print(f'Please create a .env file in the root directory of the digital twin architecture following the format specified in https://github.com/H3xept/CAELUS_SmartSkies')
+        exit(-1)
+
+def check_exported_px4():
+    if not 'PX4_ROOT_FOLDER' in environ:
+        print(f'You must export your local copy of the CAELUS px4 fork folder (`export PX4_ROOT_FOLDER=<px4 folder>`)')
         exit(-1)
 
 signal.signal(signal.SIGINT, lambda a,b: cleanup(gui, sstack, a, b))
