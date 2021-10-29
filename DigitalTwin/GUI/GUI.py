@@ -12,7 +12,7 @@ import logging
 import os
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv('../.env')
 
 class GUI(StreamHandler, TimeSeriesHandler):
     DEFAULT_GUI_INIT_FILE_NAME = 'gui_layout.ini'
