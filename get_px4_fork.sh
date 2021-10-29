@@ -1,7 +1,7 @@
 RED='\033[0;31m'
 NC='\033[0m'
 PX4_DIR=./Dependencies/PX4-Autopilot
-read -e -p "Insert the folder containing the CAELUS fork for px4: (default $PX4_DIR [downloaded from repo if not present])" input
+read -e -p "Specify the PX4-Autopilot fork to use: (default is $PX4_DIR [downloaded from the CAELUS repo if not present])" input
 PX4_DIR="${input:-$PX4_DIR}"
 echo $PX4_DIR
 
