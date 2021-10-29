@@ -5,8 +5,10 @@ import signal
 import atexit 
 import logging 
 from DigitalTwin.GUI.GUI import GUI
-import threading
 from os.path import exists
+
+from dotenv import load_dotenv
+load_dotenv()
 
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)

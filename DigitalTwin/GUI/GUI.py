@@ -9,10 +9,6 @@ from ..Interfaces.TimeSeriesHandler import TimeSeriesHandler
 from ..Interfaces.SimulationStack import SimulationStack
 import dearpygui.dearpygui as dpg
 import logging 
-import os
-
-from dotenv import load_dotenv
-load_dotenv('../.env')
 
 class GUI(StreamHandler, TimeSeriesHandler):
     DEFAULT_GUI_INIT_FILE_NAME = 'gui_layout.ini'
