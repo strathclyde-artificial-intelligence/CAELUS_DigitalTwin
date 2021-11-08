@@ -61,6 +61,11 @@ def powertrain_ESC_Motor(w_ref, m_init, v_batt, dT) -> [float, float, float, flo
         mod = mod + dm
         Vm = mod*v_batt
         w = ((-Mt * Me / Rs) + np*csqrt(pow((Mt * Me / Rs), 2) - 4.0 * km * -Mt / Rs * Vm)) / (2.0 * km)
+        ii+=1
+        if ii > 1000:
+            print("[BATTERY POWER TRAIN ERROR] Max loop count reached with initial params:")
+            print(w_ref, m_init, v_batt, dT)
+            break
         
     w = w.real
     thrust = kt * pow(w, 2)
@@ -72,4 +77,3 @@ def powertrain_ESC_Motor(w_ref, m_init, v_batt, dT) -> [float, float, float, flo
     Qcon = (Idis*dT)*(n_conv/100)
 
     return (w, thrust, mod.real, Qcon, Idis)
-

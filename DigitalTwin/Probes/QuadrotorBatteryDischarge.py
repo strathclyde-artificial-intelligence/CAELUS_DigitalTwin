@@ -2,11 +2,12 @@ from ProbeSystem.helper_data.subscriber import Subscriber
 from ProbeSystem.helper_data.streams import *
 from PowerModels.PowerTrain.Battery import Battery
 from ..Vehicle import Vehicle
+from time import time
 
 class QuadrotorBatteryDischarge(Subscriber):
     
-    def __init__(self):
-        self.__battery = Battery(0.5, 0.3, 0.004)
+    def __init__(self, integration_timestep=1.11111e-6):
+        self.__battery = Battery(25.2, 0.0, integration_timestep)
         self.__vehicle = None
 
     def set_vehicle(self, vehicle):
@@ -14,6 +15,8 @@ class QuadrotorBatteryDischarge(Subscriber):
 
     def new_datapoint(self, drone_id, stream_id, datapoint):
         if self.__vehicle is None:
+            return
+        if self.__battery.get_battery_level() == 0:
             return
         curr_voltage, depth_of_discharge = self.__battery.new_control(datapoint.controls)
         self.__vehicle.message_factory.battery_status_send(
