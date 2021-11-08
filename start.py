@@ -1,4 +1,4 @@
-from os import environ
+from os import environ, path
 from DigitalTwin.CAELUSSimulationStack import CAELUSSimulationStack
 from DigitalTwin.DroneController import DroneController
 import signal
@@ -24,9 +24,13 @@ def check_smartskies_env():
         exit(-1)
 
 def check_exported_px4():
+    local_px4 = 'Dependencies/PX4-Autopilot'
     if not 'PX4_ROOT_FOLDER' in environ:
-        print(f'You must export your local copy of the CAELUS px4 fork folder (export PX4_ROOT_FOLDER=<px4 folder>)')
-        exit(-1)
+        if path.exists(local_px4):
+            environ['PX4_ROOT_FOLDER'] = local_px4
+        else:
+            print(f'You must export your local copy of the CAELUS px4 fork folder (export PX4_ROOT_FOLDER=<px4 folder>)')
+            exit(-1)
 
 check_exported_px4()
 check_smartskies_env()
