@@ -3,6 +3,7 @@ import logging
 import threading
 from ProbeSystem.state_aggregator.state_aggregator import StateAggregator
 from typing import Tuple, List
+from dataclasses import dataclass
 
 from DigitalTwin.Interfaces.TimeSeriesHandler import TimeSeriesHandler
 from .VehicleConnectionManager import VehicleConnectionManager
@@ -14,12 +15,24 @@ from .Probes.AnraTelemetryPush import AnraTelemetryPush
 from .Probes.TelemetryDisplay import TelemetryDisplay
 from .Probes.QuadrotorBatteryDischarge import QuadrotorBatteryDischarge
 from .Interfaces.TimeSeriesHandler import TimeSeriesHandler
+from .PayloadModels import ControllerPayload
+
+@dataclass
+class Mission():
+    waypoints: List[Tuple[float, float, float]]
+    operation_id: str
+    control_area_id: str
+    reference_number: str
+    drone_registration_number: str
+    drone_id: str
+    dis_token: str
 
 class DroneController(VehicleManager, MissionManager, Stoppable):
-    def __init__(self):
+    def __init__(self, controller_payload: ControllerPayload):
+        self.__controller_payload = controller_payload
         self.__connection_manager = VehicleConnectionManager(self)
         self.__commander = DroneCommander()
-        self.__state_aggregator = StateAggregator('test_drone', should_manage_vehicle=False)
+        self.__state_aggregator = StateAggregator(controller_payload.drone_id, should_manage_vehicle=False)
         self.__logger = logging.getLogger(__name__)
         self.__should_stop = False
         self.__mission_queue = Queue()
@@ -52,7 +65,20 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__battery_discharge_probe.set_vehicle(vehicle)
         
         self.mission_poll_thread_start()
-    
+        self.__load_mission_from_payload()
+
+    def __load_mission_from_payload(self):
+        self.__logger.info(f'Loading mission from configuration payload')
+        self.add_mission(Mission(
+            self.__controller_payload.waypoints,
+            self.__controller_payload.operation_id,
+            self.__controller_payload.control_area_id,
+            self.__controller_payload.operation_reference_number,
+            self.__controller_payload.drone_id,
+            self.__controller_payload.drone_registration_number,
+            self.__controller_payload.dis_auth_token
+        ))
+
     def vehicle_timeout(self, vehicle):
         self.__logger.info(f'Vehicle timed out!')
         self.__should_stop = True
@@ -63,8 +89,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         while not self.__should_stop:
             if not self.__executing_mission:
                 try:
-                    operation, operation_id, drone, dis_token = self.__mission_queue.get(block=False)
-                    waypoints_alt = operation.get_waypoints()
+                    mission: Mission = self.__mission_queue.get(block=False)
+                    waypoints_alt = mission.waypoints
                     self.__executing_mission = True
                     waypoints, alt = [[a[0], a[1]] for a in waypoints_alt], waypoints_alt[0][-1]
 
@@ -72,11 +98,11 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
                     self.__commander.set_mission(waypoints, altitude=alt)
                     self.__commander.start_mission()
                     self.__anra_probe.start_sending_telemetry(
-                        drone_registration=drone.registration_number,
-                        operation_id=operation_id,
-                        control_area_id=operation.control_area_id,
-                        reference_number=operation.reference_number,
-                        dis_token=dis_token
+                        drone_registration=mission.drone_registration_number,
+                        operation_id=mission.operation_id,
+                        control_area_id=mission.control_area_id,
+                        reference_number=mission.reference_number,
+                        dis_token=mission.dis_token
                     )
 
                 except Empty as e:
@@ -95,7 +121,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         except Exception as e:
             self.__logger.warn(e) 
 
-    def add_mission(self, mission: Tuple[List[float], float]):
+    def add_mission(self, mission: Mission):
         self.__logger.info(f'Received new mission! Enqueueing...')
         self.__mission_queue.put(mission)
 
@@ -107,4 +133,5 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         exit(-1)
 
     def set_time_series_handler(self, ts_handler: TimeSeriesHandler):
+        assert ts_handler is not None
         self.__telemetry_display_probe.set_time_series_handler(ts_handler)

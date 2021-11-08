@@ -10,10 +10,11 @@ from ..Interfaces.StreamHandler import StreamHandler
 
 class PX4Wrapper(threading.Thread):
 
-    def __init__(self, px4_root_folder_location, stream_handler: Optional[StreamHandler] = None, logger=logging.getLogger(__name__)):
+    def __init__(self, px4_root_folder_location, initial_lon_lat_alt, stream_handler: Optional[StreamHandler] = None, logger=logging.getLogger(__name__)):
         super().__init__()
         self.name = 'PX4Wrapper'
         self.__should_stop = False
+        self.__initial_lon_lat_alt = initial_lon_lat_alt
         self.__px4_folder = px4_root_folder_location
         self.__process = None
         self.__logger = logger
@@ -51,7 +52,14 @@ class PX4Wrapper(threading.Thread):
     def run(self):
         self.termination_complete.acquire()
         try:
-            self.__process = subprocess.Popen('export PX4_SIM_SPEED_FACTOR=5; HEADLESS=1 make px4_sitl jmavsim_custom_quad',
+            lon, lat, alt = self.__initial_lon_lat_alt
+            self.__process = subprocess.Popen(
+                'export PX4_SIM_SPEED_FACTOR=5; '
+                f'export PX4_HOME_LAT={lat};'
+                f'export PX4_HOME_LON={lon};'
+                f'export PX4_HOME_ALT={alt};'
+                'HEADLESS=1 '
+                'make px4_sitl jmavsim_custom_quad',
                 cwd=self.__px4_folder,
                 shell=True,
                 stdout=subprocess.PIPE

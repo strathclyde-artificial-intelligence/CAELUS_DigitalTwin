@@ -29,27 +29,28 @@ from cmath import sqrt as csqrt
 
 def powertrain_ESC_Motor(w_ref, m_init, v_batt, dT) -> [float, float, float, float, float]:
     # ESC Config Parameters
-    n_conv = 90    #   ESC Converter Efficiency
-    Nseries = 7    #   Number of battery cells in series
-    Vcell_max = 4.2 #   #   Maximum cell voltage
-    Vmax = Nseries*Vcell_max  #   Maximum battery voltage
+    n_conv = 90
+    Nseries = 7    
+    Vcell_max = 4.2 
+    Vmax = Nseries*Vcell_max  
 
     # Motor Config Parameters
-    kt = 6.2e-5            # Thrust Factor: Thrust = kt*omega^2 (N)
-    km = kt/42.0             # Motor Coefficient: Torque = km*omega^2   (Nm)
-    np = 6.0                # Number of poles on the motor       (Ask Avy?)   
-    Me = 1.0/(490*np*(pi/30)) # back EMF constant: (V / rad/s)
-    Mt = Me                # Torque constant: (Nm/Amp)
-    Rs = 0.10              # Motor resistance: (ohm)
+    kt = 6.2e-5            
+    km = kt/42             
+    np = 6                
+    Me = 1/(490*np*(pi/30))
+    Mt = Me                
+    Rs = 0.10              
+    
 
     # Maximum motor speed
-    w_max = ((-Mt * Me / Rs) + np*csqrt((Mt * Me / Rs)**2 - 4 * km * -kt / Rs * Vmax)) / (2 * km)
+    w_max = ((-Mt * Me / Rs) + np*csqrt((Mt * Me / Rs)**2 - 4 * km * -Mt / Rs * Vmax)) / (2 * km)
     w_max = w_max.real
     
-    Vm = m_init*v_batt      # Voltage applied to motor
-    w = (  (-Mt*Me/Rs) + np*csqrt( pow((Mt*Me/Rs),2) - (4*km*(-Mt/Rs)*Vm) ) )/(2.0*km)
+    Vm = m_init*v_batt     
+    w = (  (-Mt*Me/Rs) + np*csqrt( (Mt*Me/Rs)**2 - 4*km*(-Mt/Rs)*Vm ) )/(2*km)
     w = w.real
-    w_ref_r = w_ref * w_max    # motor reference speed in rad/s
+    w_ref_r = w_ref * w_max   
 
     tol = 1                # Tolerance value to allow convergence: rad/s
     mod = m_init
@@ -59,7 +60,7 @@ def powertrain_ESC_Motor(w_ref, m_init, v_batt, dT) -> [float, float, float, flo
         dm = (abs(w_ref_r) - w)/w_max
         mod = mod + dm
         Vm = mod*v_batt
-        w = ((-Mt * Me / Rs) + np*csqrt(pow((Mt * Me / Rs), 2) - 4.0 * km * -kt / Rs * Vm)) / (2.0 * km)
+        w = ((-Mt * Me / Rs) + np*csqrt(pow((Mt * Me / Rs), 2) - 4.0 * km * -Mt / Rs * Vm)) / (2.0 * km)
         
     w = w.real
     thrust = kt * pow(w, 2)

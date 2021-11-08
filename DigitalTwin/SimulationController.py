@@ -8,8 +8,9 @@ class SimulationController(Stoppable):
     
     PX4_FOLDER_ENVIRON = 'PX4_ROOT_FOLDER'
 
-    def __init__(self, stream_handler=None, logger = logging.getLogger(__name__)):
+    def __init__(self, initial_lon_lat_alt, stream_handler=None, logger = logging.getLogger(__name__)):
         self.__logger = logger
+        self.__initial_lon_lat_alt = initial_lon_lat_alt
         self.__px4_wrapper = None
         self.__simulator_wrapper = None
         self.__stream_handler = stream_handler
@@ -25,7 +26,11 @@ class SimulationController(Stoppable):
             self.__logger.error(f'Environment variable for PX4\'s location not specified. Please export "{SimulationController.PX4_FOLDER_ENVIRON}".')
             exit(-1)
         self.__logger.info('Initialising PX4 instance...')
-        self.__px4_wrapper = PX4Wrapper(os.environ[SimulationController.PX4_FOLDER_ENVIRON], stream_handler=stream_handler)
+        self.__px4_wrapper = PX4Wrapper(
+            os.environ[SimulationController.PX4_FOLDER_ENVIRON],
+            self.__initial_lon_lat_alt,
+            stream_handler=stream_handler
+        )
 
     def __initialise_simulator(self, stream_handler):
         self.__logger.info('Initialising simulator instance...')

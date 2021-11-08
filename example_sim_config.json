@@ -1,0 +1,14 @@
+{
+    "waypoints": [[-5.130347001, 55.573712, 30.478512648582747], [-5.126808347206886, 55.566402296603336, 30.478512648582747], [-5.1232696094686, 55.55909267367773, 30.478512648582747], [-5.119730787844276, 55.55178313116838, 30.478512648582747], [-5.11619188239305, 55.54447366902043, 30.478512648582747]],
+    "operation_id": "some_id",
+    "control_area_id": "some_control_area_id",
+    "operation_reference_number": "some_reference",
+    "drone_id": "some_id",
+    "drone_registration_number": "some_drone_registration_number",
+    "dis_auth_token": "some_auth_token",
+    "thermal_model_timestep": 0.004,
+    "aeroacoustic_model_timestep": 0.004,
+    "drone_config":{},
+    "g_acceleration": 9.81,
+    "initial_lon_lat_alt": [-5.1303470010000005, 55.573712, 2.6]
+}

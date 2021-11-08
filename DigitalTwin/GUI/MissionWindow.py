@@ -4,6 +4,7 @@ import dearpygui.dearpygui as dpg
 from ..Interfaces.SimulationStack import SimulationStack
 from ..Interfaces.MissionManager import MissionManager
 from .MissionHelper import MissionHelper
+from ..DroneController import Mission
 
 class MissionWindow():
     def __init__(self, dpg):
@@ -38,7 +39,14 @@ class MissionWindow():
 
     def execute_sample_mission(self):
         operation, operation_id, drone, dis_token = self.__mission_helper.example_mission_waypoints()
-        self.__mission_manager.add_mission((operation, operation_id, drone, dis_token))
+        self.__mission_manager.add_mission(Mission(
+            operation.get_waypoints(),
+            operation_id,
+            operation.control_area_id,
+            operation.reference_number,
+            drone,
+            dis_token
+        ))
 
     def update(self):
         pass
