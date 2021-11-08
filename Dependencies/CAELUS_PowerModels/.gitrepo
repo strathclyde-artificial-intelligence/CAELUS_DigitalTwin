@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/strathclyde-artificial-intelligence/CAELUS_PowerModels
 	branch = main
-	commit = e1a2a221fc32198116e149563ea075d9910acea4
-	parent = e0b5ab99b8c31b9fea81df4db9ce9d9549bd757d
+	commit = 3adccc7356adb17b3729a3776c08da8761431c05
+	parent = bfc70cde6805c0e93f45441aed460e18148fff40
 	method = merge
 	cmdver = 0.4.3
