@@ -28,7 +28,7 @@ class QuadrotorBatteryDischarge(Subscriber):
             -1, # current battery
             -1, # current consumed
             -1, # energy consumed
-            int(100 - depth_of_discharge), # battery remaining
+            int(self.__battery.get_battery_level()), # battery remaining
         )
 
     def subscribes_to_streams(self):

@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from .batt_disc import batt_disc
 from .power_train_esc_motor import powertrain_ESC_Motor
-
+from time import time
 
 class Battery():
     def __init__(self, initial_voltage, initial_modulation_idx, timestep_h, motors_n = 4):
@@ -13,7 +13,6 @@ class Battery():
         self.__motors_n = motors_n
 
     def new_control(self, controls: List[float]) -> Tuple[float, float]:
-
         controls = [max(v, 0) for v in controls]
         # HOTFIX FOR FUNCTION THAT HANGS -- MAZHE SHOULD PROVIDE A FIX
         # DELETE WHEN FIXED!!
