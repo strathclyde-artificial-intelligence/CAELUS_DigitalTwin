@@ -11,7 +11,7 @@ from .DroneCommander import DroneCommander
 from .Interfaces.VehicleManager import VehicleManager
 from .Interfaces.MissionManager import MissionManager
 from .Interfaces.Stoppable import Stoppable
-from .Probes.AnraTelemetryPushGRPC import AnraTelemetryPushGRPC
+from .Probes.AnraTelemetryPush import AnraTelemetryPush
 from .Probes.TelemetryDisplay import TelemetryDisplay
 from .Probes.QuadrotorBatteryDischarge import QuadrotorBatteryDischarge
 from .Interfaces.TimeSeriesHandler import TimeSeriesHandler
@@ -44,7 +44,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
 
     def __setup_probes(self):
         self.__logger.info('Setting up probes')
-        self.__anra_probe = AnraTelemetryPushGRPC()
+        self.__anra_probe = AnraTelemetryPush()
         self.__telemetry_display_probe = TelemetryDisplay()
         self.__battery_discharge_probe = QuadrotorBatteryDischarge()
         for probe in [self.__anra_probe, self.__telemetry_display_probe, self.__battery_discharge_probe]:
@@ -98,7 +98,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
                     self.__commander.set_mission(waypoints, altitude=alt)
                     self.__commander.start_mission()
 
-                    self.__anra_probe.set_mission_details(
+                    self.__anra_probe.start_sending_telemetry(
                         drone_registration=mission.drone_registration_number,
                         operation_id=mission.operation_id,
                         control_area_id=mission.control_area_id,
