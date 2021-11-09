@@ -7,12 +7,18 @@ import socket
 import threading
 import time
 import json
+import uuid
+from math import pi
+
+M_TO_FT = 3.281
+RAD_TO_DEG = 180 / pi
+M_PER_SEC_TO_KNOTS = 1.944
 
 @dataclass(frozen=True)
 class AltitudeModel():
     altitude_value: float # is this AMSL?
     vertical_reference: str # use "W84"
-    units_of_measure: str # can use "FT", ask for meters, probably "MT"
+    units_of_measure: str # can use "FT", ask for meters, probably "FT"
     source: str # "ONBOARD_SENSOR"
     
     def serialise(self):
@@ -33,10 +39,10 @@ class AnraTelemetryPacket():
     yaw: float
     climbrate: float # m/s
     heading: float # DDeg
-    battery_remaining: float
+    battery_remaining: int # CHANGE!!
     mode: str # quadrotor mode - fixed wing mode
     registration: str # drone registration id (registration_number from SmartSkies.Drone)
-    enroute_positions_id: str # uuidv4 of positions?
+    enroute_positions_id: str # uuidv4 of positions? (Generate UUID)
     altitude_gps: AltitudeModel
     altitude_num_gps_satellites: int # number of satellites
     operation_id: str # uuidv4 of the operation (operation_id)
@@ -49,7 +55,7 @@ class AnraTelemetryPacket():
     time_sent: str # yyy-MM-ddTHH:mm:ssZ time of sending data
     track_bearning: float # yaw wrt north
     track_bearning_reference: str # TRUE_NORTH of MAGNETIC_NORTH
-    track_bearing_uom: str # ??? Unknown
+    track_bearing_uom: str # "DEG"
     track_ground_speed: float # horizontal ground speed
     track_ground_speed_units: str # use "KT" or ask for meters/s
     payload_temperature: float # in C°
@@ -77,8 +83,8 @@ class AnraTelemetryPush(Subscriber):
             'ground_speed':0
         }
 
-        self.__remote_ip = 'usdev-ssctr.flyanra.net'
-        self.__remote_port = 41001
+        self.__remote_ip = '54.243.221.198'
+        self.__remote_port = 21001
         self.__send_thread = None
 
     def start_sending_telemetry(self,
@@ -135,13 +141,13 @@ class AnraTelemetryPush(Subscriber):
             return AltitudeModel(
             0,
             'W84',
-            'MT',
+            'FT',
             'ONBOARD_SENSOR'
         )
         return AltitudeModel(
-            self.data['global_frame'].alt,
+            self.data['global_frame'].alt * M_TO_FT,
             'W84',
-            'MT',
+            'FT',
             'ONBOARD_SENSOR'
         )
 
@@ -161,15 +167,15 @@ class AnraTelemetryPush(Subscriber):
 
     def pack_telemetry(self):
         return AnraTelemetryPacket(
-            self.data['roll'],
-            self.data['pitch'],
-            self.data['yaw'],
+            self.data['roll'] * RAD_TO_DEG,
+            self.data['pitch'] * RAD_TO_DEG,
+            self.data['yaw'] * RAD_TO_DEG,
             self.get_climbrate(),
             self.data['heading'],
             100,
             'quadrotor',
             self.drone_registration,
-            "unknown",
+            str(uuid.uuid4()),
             self.pack_altitude(),
             self.get_sat_number(),
             self.operation_id,
@@ -180,11 +186,11 @@ class AnraTelemetryPush(Subscriber):
             self.pack_location(),
             self.get_timestamp(),
             self.get_timestamp(),
-            self.data['yaw'], # why duplicate?
+            self.data['heading'], # why duplicate?
             'TRUE_NORTH',
-            '',
-            self.data['ground_speed'],
-            'MT',
+            'DEG',
+            self.data['ground_speed'] * M_PER_SEC_TO_KNOTS,
+            'KT',
             25
         )
 
@@ -194,7 +200,7 @@ class AnraTelemetryPush(Subscriber):
             packet = json.dumps({
                 'Token': self.__dis_token,
                 'DataType': 'Telemetry',
-                'Data':js_obj
+                'Data':json.dumps(js_obj)
             })
             self.__socket.sendto(bytes(packet, "utf-8"), (self.__remote_ip, self.__remote_port))
             time.sleep(0.2)
