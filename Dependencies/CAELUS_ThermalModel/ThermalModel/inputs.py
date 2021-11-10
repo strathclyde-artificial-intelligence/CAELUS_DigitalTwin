@@ -6,9 +6,7 @@ Created on Sat Oct  9 16:40:24 2021
 @author: Gianluca Filippi
 """
 
-from .ODEMatrices import ODEMatrices
-
-
+import numpy as np
 """
 define parameters
 """
@@ -19,6 +17,12 @@ def input_geometry():
     # ------------------------------
     # DEFINE INPUTS
     # ------------------------------
+
+    incidence_matrix = [[1, 0, 0, 0, 0, 0, 0],
+                        [-1, 1, 0, 1, 0, 1, 0],
+                        [0, -1, 1, 0, 0, 0, 1],
+                        [0, 0, -1, -1, 1, 0, 0],
+                        [0, 0, 0, 0, -1, -1, -1]]
 
     Dx_container = .02
 
@@ -148,19 +152,9 @@ def input_geometry():
       "air_rho": air_rho,
       "air_hn": air_hn,
       "air_hf": air_hf,
+
+      "incidence_matrix": np.array(incidence_matrix)
       }
-
-    # ------------------------------   
-    # add ODE MATRICES
-    # ------------------------------   
-    
-    ode_matrices = ODEMatrices(inputs)
-
-    inputs['matrix_C'] = ode_matrices.get_C()
-    inputs['matrix_K'] = ode_matrices.get_K()
-    inputs['matrix_H'] = ode_matrices.get_H()
-    inputs['matrix_R'] = ode_matrices.get_R()
-    inputs['matrix_Q'] = ode_matrices.get_Q()
 
     return inputs
 
