@@ -191,7 +191,7 @@ class AnraTelemetryPush(Subscriber):
             'DEG',
             self.data['ground_speed'] * M_PER_SEC_TO_KNOTS,
             'KT',
-            25
+            self.__payload_handler.get_payload_temperature() if self.__payload_handler is not None else 25
         )
 
     def send_packet(self):
@@ -203,7 +203,6 @@ class AnraTelemetryPush(Subscriber):
                 'Data':json.dumps(js_obj)
             })
             self.__socket.sendto(bytes(packet, "utf-8"), (self.__remote_ip, self.__remote_port))
-            time.sleep(0.2)
 
     def new_datapoint(self, drone_id, stream_id, datapoint):
         if stream_id == ATTITUDE:
@@ -220,6 +219,9 @@ class AnraTelemetryPush(Subscriber):
             self.data['heading'] = datapoint
         elif stream_id == GROUND_SPEED:
             self.data['ground_speed'] = datapoint
+
+    def set_payload_handler(self, pl):
+        self.__payload_handler = pl
 
     def subscribes_to_streams(self):
         return [ATTITUDE, GPS, GLOBAL_FRAME, VELOCITY, HEADING, GROUND_SPEED]

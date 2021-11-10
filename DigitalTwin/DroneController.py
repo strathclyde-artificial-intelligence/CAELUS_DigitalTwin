@@ -48,7 +48,13 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__anra_probe = AnraTelemetryPush()
         self.__telemetry_display_probe = TelemetryDisplay()
         self.__battery_discharge_probe = QuadrotorBatteryDischarge()
-        self.__thermal_model_probe = ThermalModelProbe(self.__controller_payload.thermal_model_timestep)
+        self.__thermal_model_probe = ThermalModelProbe(integrate_every_us=self.__controller_payload.thermal_model_timestep * 1000000)
+        
+        # Coupled but only instance that requires cross probe communication
+        # THIS MUST NOT BE DELETED
+        self.__anra_probe.set_payload_handler(self.__thermal_model_probe)
+        # ----
+        
         for probe in [
             self.__anra_probe,
             self.__telemetry_display_probe,

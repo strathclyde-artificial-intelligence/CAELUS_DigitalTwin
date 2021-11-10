@@ -30,6 +30,9 @@ class ThermalModelProbe(Subscriber):
             self.__state = new_state
             self.__time_usec += elapsed_time_us
         
+    # Used ONLY by the anra telemetry probe -- DO NOT DELETE nor REFACTOR
+    def get_payload_temperature(self):
+        return self.__state[2]
 
     def subscribes_to_streams(self):
         return [SYSTEM_TIME]
