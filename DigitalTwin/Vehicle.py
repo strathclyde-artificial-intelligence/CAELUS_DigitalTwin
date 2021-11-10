@@ -59,7 +59,6 @@ class Vehicle(DronekitVehicle):
         # Create a message listener using the decorator.   
         @self.on_message('SYSTEM_TIME')
         def listener(self, name, message):
-            print(message)
             self._system_time.time_boot_ms=message.time_boot_ms
             self._system_time.time_unix_usec=message.time_unix_usec
             self.notify_attribute_listeners('system_time', self._system_time) 

@@ -81,4 +81,4 @@ ARMED = 'armed'
 HIL_ACTUATOR_CONTROLS = 'hil_actuator_controls'
 
 # The system time is the time of the master clock, typically the computer clock of the main onboard computer.
-SYSTEM_TIME = 'SYSTEM_TIME'
+SYSTEM_TIME = 'system_time'
