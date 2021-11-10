@@ -1,12 +1,9 @@
 import asyncio
-from queue import Queue
 from threading import Thread, Condition
-import threading
-from typing import NewType, Dict, Tuple, List
+from typing import NewType, Dict, Tuple
 
 from .simulation_bridge import SimulationBridge
 from ..helper_data.subscriber import Subscriber
-from ..helper_data.producer import Producer
 
 DataPoint = NewType('DataPoint', Tuple[object, str])
 
@@ -18,19 +15,12 @@ class StateAggregator():
         self.streams: Dict[str, DataPoint] = {}
         self.stream_metadata: Dict[str, Dict[str, object]] = {}
         self.subscribers: Dict[str, List[Subscriber]] = {}
-        self.producer_queues: Dict[str, List[Queue]] = {}
+
         self.__should_manage_vehicle = should_manage_vehicle
         self.drone_instance_id = drone_instance_id
         self.should_shutdown = Condition()
         self.simulation_bridge = SimulationBridge(self, self.should_shutdown, should_manage_vehicle)
         self.bridge_thread = self.__setup_bridge()
-        self.__setup_producer_fetch_thread()
-
-    def __setup_producer_fetch_thread(self):
-        self.__producer_fetch_thread = threading.Thread(target=self.producer_fetch_thread)
-        self.__producer_fetch_thread.daemon = True
-        self.__producer_fetch_thread.name = 'Producer fetch thread'
-        self.__producer_fetch_thread.start()
 
     def __setup_bridge(self):
         if self.__should_manage_vehicle:
@@ -47,19 +37,6 @@ class StateAggregator():
 
             return thread
         return None
-
-    # Periodically check producer queues and dispatch new events if present
-    def producer_fetch_thread(self):
-        try:
-            while True:
-                for s, qs in self.producer_queues.items():
-                    for q in qs:
-                        if q.empty():
-                            continue
-                        self.new_datapoint_for_stream(s, q.get())
-        except Exception as e:
-            print("THIS SHOULD NEVER HAPPEN")
-            raise e
 
     def __increase_message_count(self, stream_id):
         if META_MESSAGE_N not in self.stream_metadata[stream_id]:
@@ -85,12 +62,6 @@ class StateAggregator():
         self.__process_raw_datapoint(stream_id, datapoint)
         self.__aggregate_datapoint_metadata(stream_id, datapoint)
 
-    def add_producer(self, producer: Producer):
-        for s in producer.produces_to_streams():
-            if s not in self.producer_queues:
-                self.producer_queues[s] = []
-            self.producer_queues[s].append(producer.get_message_queue_for_stream(s))
-
     def subscribe(self, stream_id, subscriber):
         if stream_id not in self.simulation_bridge.get_available_streams():
             print(f'[WARNING] The requested stream is not available ({stream_id})')
@@ -109,17 +80,13 @@ class StateAggregator():
 
     def report_subscribers(self):
         available_streams = self.simulation_bridge.get_available_streams()
+        print(self.subscribers)
         for stream_id, subs in self.subscribers.items():
             print(f'[STREAM] "{stream_id}" has {len(subs)} {"subscribers" if len(subs) > 1 else "subscriber"}')
             if stream_id not in available_streams:
                 print('[WARNING] This stream is not published by the state aggregator!')
             for sub in subs:
                 print(f'\t{sub}')
-
-    def report_producers(self):
-        print('Producer queues:')
-        for stream, qs in self.producer_queues.items():
-            print(f'{stream} has {len(qs)} producers.')
 
     def idle(self):
         self.should_shutdown.acquire()
