@@ -6,6 +6,7 @@ from typing import Tuple, List
 from dataclasses import dataclass
 
 from DigitalTwin.Interfaces.TimeSeriesHandler import TimeSeriesHandler
+from DigitalTwin.Probes.ThermalModelProbe import ThermalModelProbe
 from .VehicleConnectionManager import VehicleConnectionManager
 from .DroneCommander import DroneCommander
 from .Interfaces.VehicleManager import VehicleManager
@@ -47,7 +48,13 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__anra_probe = AnraTelemetryPush()
         self.__telemetry_display_probe = TelemetryDisplay()
         self.__battery_discharge_probe = QuadrotorBatteryDischarge()
-        for probe in [self.__anra_probe, self.__telemetry_display_probe, self.__battery_discharge_probe]:
+        self.__thermal_model_probe = ThermalModelProbe()
+        for probe in [
+            self.__anra_probe,
+            self.__telemetry_display_probe,
+            self.__battery_discharge_probe,
+            self.__thermal_model_probe
+        ]:
             for stream_id in probe.subscribes_to_streams():
                 self.__state_aggregator.subscribe(stream_id, probe)
         self.__state_aggregator.report_subscribers()

@@ -79,3 +79,6 @@ ARMED = 'armed'
 # list of 16 actuation signals (-1 to 1 for reversable motors)
 # WARNING - this requires the CAELUS PX4 fork!
 HIL_ACTUATOR_CONTROLS = 'hil_actuator_controls'
+
+# The system time is the time of the master clock, typically the computer clock of the main onboard computer.
+SYSTEM_TIME = 'SYSTEM_TIME'

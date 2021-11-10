@@ -24,8 +24,8 @@ class QuadrotorBatteryDischarge(Subscriber):
             return
         
         # UORb messages are not guaranteed to arrive once per timestep - we must interpolate integration steps
-        ts = datapoint.time_boot_us 
-        dt = datapoint.time_boot_us - self.__last_timestamp
+        ts = datapoint.time_usec 
+        dt = ts - self.__last_timestamp
         self.__last_timestamp = ts
 
         curr_voltage, depth_of_discharge = self.__battery.new_control(datapoint.controls, dt * US_TO_HR)
