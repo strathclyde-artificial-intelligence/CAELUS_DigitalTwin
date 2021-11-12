@@ -48,27 +48,46 @@ class DroneCommander():
         pass
 
     def __upload_vehicle_commands(self, commands):
-        for c in commands:
-            self.__vehicle.commands.add(c)
-        self.__vehicle.commands.upload()
+        self.__logger.info('Waiting for vehicle to be ready for upload')
+        
+        self.__logger.info('Uploading commands')
+        cmd_n = len(commands)
+        self.__vehicle._master.first_byte = True
+        for i,c in enumerate(commands):
+            c.seq = i+1
+            self.__vehicle._wploader.add(c)
+        
+        self.__vehicle._master.waypoint_clear_all_send()
+        self.__vehicle._master.waypoint_count_send(cmd_n)
 
+        for i in range(cmd_n):
+            while True:
+                try:
+                    msg = self.__vehicle._master.recv_match(type=['MISSION_REQUEST'],blocking=True) 
+                    self.__vehicle._master.mav.send(self.__vehicle._wploader.wp(msg.seq))
+                    break
+                except:
+                    pass
+            print(f"Uploaded {i}")
+        self.__logger.info('Done uploading')
+        self.__vehicle._wp_uploaded = None
+        self.__vehicle._wpts_dirty = False
+        self.__vehicle.wait_ready()
+        
     def set_vehicle(self, vehicle):
         self.__vehicle = vehicle
 
     def set_mission(self, waypoints, altitude=30):
-        self.__logger.info('Clearing vehicle remote mission')
-        self.__vehicle.commands.clear()
-        self.__vehicle.commands.upload()
-
+        
         self.__logger.info('Constructing new missions from waypoints')
         self.__logger.info('\n'+DroneCommander.waypoints_to_string(waypoints, altitude))
         commands = DroneCommander.mission_from_waypoints(waypoints, altitude)
         
+        self.__vehicle.commands.clear()
         self.__upload_vehicle_commands(commands)
+        self.__vehicle.commands.wait_ready()
 
         self.__logger.info('Waiting for vehicle commands acquisition')
-        self.__vehicle.commands.wait_ready()
-        time.sleep(2)
 
         self.__end_waypoint = [*waypoints[-1], altitude]
 

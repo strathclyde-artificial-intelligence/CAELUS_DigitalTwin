@@ -107,6 +107,8 @@ class CVMS_API():
         self._logger.info(f'Getting products for vendor {shop_id}')
         request = self.__get_product_list_from_vendor(self._session, shop_id, page_number, items_per_page)
         response_data = request.send()['data']
+        if response_data is None:
+            return []
         return list(map(lambda json: Product(json), response_data))
 
     def place_order(self, seller: Vendor, products: [Product]):

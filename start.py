@@ -29,7 +29,8 @@ def check_exported_px4():
 check_exported_px4()
 check_smartskies_env()
 
-config_file = 'example_sim_config.json'
+
+config_file = 'config_2.json'
 sim_payload = SimulatorPayload.from_json_file(config_file)
 controller_payload = ControllerPayload.from_json_file(config_file)
 gui, controller, sstack = new_simulation(sim_payload, controller_payload)

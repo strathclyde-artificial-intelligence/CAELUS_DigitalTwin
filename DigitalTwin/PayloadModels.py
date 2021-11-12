@@ -32,8 +32,6 @@ class ControllerPayload(Unpackable):
         self.drone_id: str = get(config_dict, 'drone_id')
         self.drone_registration_number: str = get(config_dict, 'drone_registration_number')
         self.dis_auth_token: str = get(config_dict, 'dis_auth_token')
-        self.thermal_model_timestep: float = get(config_dict, 'thermal_model_timestep')
-        self.aeroacoustic_model_timestep: float = get(config_dict, 'aeroacoustic_model_timestep')
 
 class SimulatorPayload(Unpackable):
 
@@ -41,3 +39,5 @@ class SimulatorPayload(Unpackable):
         self.drone_config: Dict[str, float] = get(config_dict, 'drone_config')
         self.g_acceleration: float = get(config_dict, 'g_acceleration')
         self.initial_lon_lat_alt: Tuple[float, float, float] = get(config_dict, 'initial_lon_lat_alt')
+        self.thermal_model_timestep: float = get(config_dict, 'thermal_model_timestep')
+        self.aeroacoustic_model_timestep: float = get(config_dict, 'aeroacoustic_model_timestep')

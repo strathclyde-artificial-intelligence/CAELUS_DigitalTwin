@@ -28,7 +28,7 @@ class Operation(JSONDeserialiser):
         alt = start[-1]
         return [(lat, lon, alt) for lat, lon in zip(result.lats, result.lons)]
 
-    def get_waypoints(self, max_distance=900):
+    def get_waypoints(self, max_distance=850):
         waypoints = [volume.get_centre() for volume in self.operation_volumes]
         start, end = waypoints[0], waypoints[-1]
         return self.__interpolate_with_max_distance(start, end, max_distance)

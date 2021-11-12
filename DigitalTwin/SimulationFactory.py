@@ -18,4 +18,3 @@ def new_simulation(simulator_payload: SimulatorPayload, controller_payload: Cont
     signal.signal(signal.SIGINT, lambda a,b: cleanup(gui, sstack, a, b))
     
     return gui, drone_controller, sstack
-

@@ -33,7 +33,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__controller_payload = controller_payload
         self.__connection_manager = VehicleConnectionManager(self)
         self.__commander = DroneCommander()
-        self.__state_aggregator = StateAggregator(controller_payload.drone_id, should_manage_vehicle=False)
+        self.__state_aggregator = StateAggregator(controller_payload.drone_id if controller_payload is not None else "unknown_id", should_manage_vehicle=False)
         self.__logger = logging.getLogger(__name__)
         self.__should_stop = False
         self.__mission_queue = Queue()
@@ -48,7 +48,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__anra_probe = AnraTelemetryPush()
         self.__telemetry_display_probe = TelemetryDisplay()
         self.__battery_discharge_probe = QuadrotorBatteryDischarge()
-        self.__thermal_model_probe = ThermalModelProbe(integrate_every_us=self.__controller_payload.thermal_model_timestep * 1000000)
+        # TEMPORARY -- THIS SHOULD GO IN THE SIMULATOR
+        self.__thermal_model_probe = ThermalModelProbe(integrate_every_us= 0.004 / 3600 )
         
         # Coupled but only instance that requires cross probe communication
         # THIS MUST NOT BE DELETED
@@ -81,16 +82,17 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__load_mission_from_payload()
 
     def __load_mission_from_payload(self):
-        self.__logger.info(f'Loading mission from configuration payload')
-        self.add_mission(Mission(
-            self.__controller_payload.waypoints,
-            self.__controller_payload.operation_id,
-            self.__controller_payload.control_area_id,
-            self.__controller_payload.operation_reference_number,
-            self.__controller_payload.drone_id,
-            self.__controller_payload.drone_registration_number,
-            self.__controller_payload.dis_auth_token
-        ))
+        if self.__controller_payload is not None:
+            self.__logger.info(f'Loading mission from configuration payload')
+            self.add_mission(Mission(
+                self.__controller_payload.waypoints,
+                self.__controller_payload.operation_id,
+                self.__controller_payload.control_area_id,
+                self.__controller_payload.operation_reference_number,
+                self.__controller_payload.drone_id,
+                self.__controller_payload.drone_registration_number,
+                self.__controller_payload.dis_auth_token
+            ))
 
     def vehicle_timeout(self, vehicle):
         self.__logger.info(f'Vehicle timed out!')
@@ -99,6 +101,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__connection_manager.connect_to_vehicle()
 
     def poll_mission(self):
+        import traceback
         while not self.__should_stop:
             if not self.__executing_mission:
                 try:
@@ -123,6 +126,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
                     pass
                 except Exception as e:
                     self.__logger.warn(e)
+                    print(traceback.format_exc())
         self.__logger.info('Mission poll thread complete.')
 
     def mission_poll_thread_start(self):
