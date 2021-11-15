@@ -25,12 +25,13 @@ class ThermalModelProbe(Subscriber):
 
     def new_datapoint(self, drone_id, stream_id, datapoint):
         elapsed_time_us = (datapoint.time_boot_ms * 1000) - self.__time_usec
+        print(datapoint)
         if elapsed_time_us > self.__integrate_every_us:
             new_state = self.step_state(elapsed_time_us)
             self.__state = new_state
             self.__time_usec += elapsed_time_us
         
-    # Used ONLY by the anra telemetry probe -- DO NOT DELETE nor REFACTOR
+    # Used ONLY by the anra telemetry probe -- DO NOT DELETE nor REFACTOR (unless you really know what you are doing)
     def get_payload_temperature(self):
         return self.__state[2]
 
