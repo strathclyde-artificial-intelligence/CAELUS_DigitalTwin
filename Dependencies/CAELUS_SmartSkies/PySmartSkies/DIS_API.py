@@ -22,6 +22,7 @@ class DIS_API():
     get_delivery_eta_endpoint = lambda delivery_id: f'{DIS_API.base_endpoint}/delivery/{delivery_id}/eta'
     provide_clearance_update_endpoint = f'https://dms-api-dev.flyanra.net/updatedronestatus' # why is this different than all others?
     delivery_status_update_endpoint = f'{base_endpoint}/delivery/status'
+    end_or_close_delivery_endpoint = lambda delivery_id: f'{base_endpoint}/{delivery_id}/status'
 
     @staticmethod
     def __auth_request(session):
@@ -62,6 +63,10 @@ class DIS_API():
             'facility': "DIS"
         }, bearer_token=session.get_dis_token())
     
+    @staticmethod
+    def __end_or_close_delivery(session, delivery_id):
+        return POST_Request(DIS_API.end_or_close_delivery_endpoint(delivery_id), { "status_type":"End" }, bearer_token=session.get_dis_token())
+
     @staticmethod
     def __get_accepted_deliveries(session):
         return GET_Request(DIS_API.get_accepted_deliveries_endpoint, {}, bearer_token=session.get_dis_token())
@@ -157,3 +162,8 @@ class DIS_API():
     def delivery_status_update(self, delivery_id, new_status) -> bool:
         response = self.__delivery_status_update(self._session, delivery_id, new_status).send()
         return response['status_code'] == 200
+
+    def end_or_close_delivery(self, delivery_id):
+        response = self.__end_or_close_delivery(delivery_id)
+        if 'status_code' in response and response['status_code'] == 200:
+            return response

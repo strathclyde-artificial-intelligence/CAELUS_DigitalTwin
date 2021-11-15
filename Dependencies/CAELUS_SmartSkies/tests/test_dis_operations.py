@@ -100,3 +100,6 @@ def test_provide_clearance_update():
 
 def test_delivery_status_update():
     assert authenticated_api.delivery_status_update(viable_delivery.id, STATUS_READY_FOR_DELIVERY)
+
+def test_end_or_close_delivery():
+    assert authenticated_api.end_or_close_delivery(viable_delivery.id)
