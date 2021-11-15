@@ -22,7 +22,7 @@ class DIS_API():
     get_delivery_eta_endpoint = lambda delivery_id: f'{DIS_API.base_endpoint}/delivery/{delivery_id}/eta'
     provide_clearance_update_endpoint = f'https://dms-api-dev.flyanra.net/updatedronestatus' # why is this different than all others?
     delivery_status_update_endpoint = f'{base_endpoint}/delivery/status'
-    end_or_close_delivery_endpoint = lambda delivery_id: f'{base_endpoint}/{delivery_id}/status'
+    end_or_close_delivery_endpoint = lambda delivery_id: f'{DIS_API.base_endpoint}/{delivery_id}/status'
 
     @staticmethod
     def __auth_request(session):
@@ -146,7 +146,9 @@ class DIS_API():
 
     def get_operation_details_with_delivery_id(self, delivery_id) -> Operation:
         response = self.__get_operation_details_with_delivery_id(self._session, delivery_id).send()
-        operation = Operation(response['data'])
+        operation = None
+        if response is not None and 'data' in response:
+            operation = Operation(response['data'])
         return operation
 
     def get_delivery_eta(self, delivery_id) -> float:
