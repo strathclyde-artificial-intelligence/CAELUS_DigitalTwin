@@ -15,6 +15,7 @@ class DroneState():
 class DatabaseSubscriber(Subscriber):
     
     def __init__(self):
+        super().__init__()
         self.last_stream_data = {}
         self.db = TinyDB('./db.json')
 

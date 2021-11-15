@@ -9,6 +9,7 @@ from ThermalModel.model_ode import model_ode
 class ThermalModelProbe(Subscriber):
     
     def __init__(self, initial_state=None, integrate_every_us = (5 * 60 * 1000000)): # 5 min (5 * 60 * 1000000) integration default
+        super().__init__()
         if initial_state is None:
             initial_state = [20, 20, 5, 0, 20]
 

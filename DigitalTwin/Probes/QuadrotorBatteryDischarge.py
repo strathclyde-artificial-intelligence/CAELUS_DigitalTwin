@@ -9,6 +9,7 @@ US_TO_HR = 1 / 3.6e9
 class QuadrotorBatteryDischarge(Subscriber):
     
     def __init__(self):
+        super().__init__()
         self.__battery = Battery(25.2, 0.0)
         self.__vehicle = None
         self.__last_timestamp = 0

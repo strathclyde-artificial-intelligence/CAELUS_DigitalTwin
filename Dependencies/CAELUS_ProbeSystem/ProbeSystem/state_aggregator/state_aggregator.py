@@ -17,6 +17,7 @@ class StateAggregator():
         self.subscribers: Dict[str, List[Subscriber]] = {}
 
         self.__should_manage_vehicle = should_manage_vehicle
+        self.__subscriber_threads = []
         self.drone_instance_id = drone_instance_id
         self.should_shutdown = Condition()
         self.simulation_bridge = SimulationBridge(self, self.should_shutdown, should_manage_vehicle)
@@ -52,7 +53,8 @@ class StateAggregator():
         if stream_id not in self.subscribers:
             return
         for sub in self.subscribers[stream_id]:
-            sub.new_datapoint('test_id', stream_id, datapoint)
+            sub.add_to_queue('test_id', stream_id, datapoint)
+            # sub.new_datapoint('test_id', stream_id, datapoint)
 
     def __process_raw_datapoint(self, stream_id: str, datapoint: DataPoint):
         self.streams[stream_id] = datapoint
@@ -63,11 +65,18 @@ class StateAggregator():
         self.__aggregate_datapoint_metadata(stream_id, datapoint)
 
     def subscribe(self, stream_id, subscriber):
+
         if stream_id not in self.simulation_bridge.get_available_streams():
             print(f'[WARNING] The requested stream is not available ({stream_id})')
         if stream_id not in self.subscribers:
             self.subscribers[stream_id] = []
         self.subscribers[stream_id].append(subscriber)
+        
+        if subscriber.ident is None:
+            print(f'Started thread for probe {subscriber}')
+            subscriber.start()
+
+        self.__subscriber_threads.append(subscriber)
 
     def unsubscribe(self, stream_id, subscriber):
         if stream_id not in self.subscribers[stream_id]:
