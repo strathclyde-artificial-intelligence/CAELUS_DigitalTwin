@@ -166,6 +166,6 @@ class DIS_API():
         return response['status_code'] == 200
 
     def end_or_close_delivery(self, delivery_id):
-        response = self.__end_or_close_delivery(self._session, delivery_id)
-        if 'status_code' in response and response['status_code'] == 200:
+        response = self.__end_or_close_delivery(self._session, delivery_id).send()
+        if response is not None and 'status_code' in response and response['status_code'] == 200:
             return response

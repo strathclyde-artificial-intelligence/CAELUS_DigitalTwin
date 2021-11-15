@@ -45,7 +45,7 @@ def test_get_requested_deliveries():
     for i,drone in enumerate(drones):
             assert drone is not None
             assert isinstance(drone, Drone)
-            if viable_drone is None and i >= 1:
+            if viable_drone is None and i >= 2:
                 viable_drone = drone
     for control_area in control_areas:
             assert control_area is not None
