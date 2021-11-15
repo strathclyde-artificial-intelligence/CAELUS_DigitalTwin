@@ -149,6 +149,8 @@ class DIS_API():
         operation = None
         if response is not None and 'data' in response:
             operation = Operation(response['data'])
+            # Needs to be specific to this response because of https://github.com/H3xept/CAELUS_SmartSkies/issues/5
+            operation.operation_id = response['data']['operation_id']
         return operation
 
     def get_delivery_eta(self, delivery_id) -> float:

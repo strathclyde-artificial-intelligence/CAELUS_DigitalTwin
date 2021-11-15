@@ -17,6 +17,7 @@ viable_delivery = None
 viable_drone = None
 viable_control_area = None
 viable_operation = None
+operation_id = None
 
 @pytest.fixture(autouse=True)
 def authenticate_cvms():
@@ -86,7 +87,9 @@ def test_get_accepted_deliveries():
         assert isinstance(flight_volumes[0], FlightVolume)
 
 def test_get_operation_details():
+    global operation_id
     operation = authenticated_api.get_operation_details_with_delivery_id(viable_delivery.id)
+    operation_id = operation.operation_id
     assert operation is not None
     assert isinstance(operation, Operation)
 
@@ -102,4 +105,4 @@ def test_delivery_status_update():
     assert authenticated_api.delivery_status_update(viable_delivery.id, STATUS_READY_FOR_DELIVERY)
 
 def test_end_or_close_delivery():
-    assert authenticated_api.end_or_close_delivery(viable_delivery.id) is not None
+    assert authenticated_api.end_or_close_delivery(operation_id) is not None
