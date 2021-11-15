@@ -36,3 +36,7 @@ def start_with_payload(payload):
 
     sstack.start()
     gui.start()
+
+import json
+with open('example_sim_config.json', 'r') as f:
+    start_with_payload(json.loads(f.read()))
