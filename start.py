@@ -26,14 +26,13 @@ def check_exported_px4():
             logger.error(f'You must export your local copy of the CAELUS px4 fork folder (export PX4_ROOT_FOLDER=<px4 folder>)')
             exit(-1)
 
-check_exported_px4()
-check_smartskies_env()
+def start_with_payload(payload):
+    check_exported_px4()
+    check_smartskies_env()
 
+    sim_payload = SimulatorPayload(payload)
+    controller_payload = ControllerPayload(payload)
+    gui, controller, sstack = new_simulation(sim_payload, controller_payload)
 
-config_file = 'config_2.json'
-sim_payload = SimulatorPayload.from_json_file(config_file)
-controller_payload = ControllerPayload.from_json_file(config_file)
-gui, controller, sstack = new_simulation(sim_payload, controller_payload)
-
-sstack.start()
-gui.start()
+    sstack.start()
+    gui.start()
