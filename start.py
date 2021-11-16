@@ -38,5 +38,5 @@ def start_with_payload(payload):
     gui.start()
 
 import json
-with open('example_sim_config.json', 'r') as f:
+with open('mission.json', 'r') as f:
     start_with_payload(json.loads(f.read()))

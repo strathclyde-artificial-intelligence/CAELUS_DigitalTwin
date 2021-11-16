@@ -1,6 +1,7 @@
 from ProbeSystem.helper_data.subscriber import Subscriber
 from ProbeSystem.helper_data.streams import *
 from PowerModels.PowerTrain.Battery import Battery
+from .LinearBattery import LinearBattery
 from ..Vehicle import Vehicle
 from time import time
 
@@ -10,7 +11,9 @@ class QuadrotorBatteryDischarge(Subscriber):
     
     def __init__(self):
         super().__init__()
-        self.__battery = Battery(25.2, 0.0)
+        # REMOVED until MAZE will fix the model
+        # self.__battery = Battery(25.2, 0.0)
+        self.__battery = LinearBattery()
         self.__vehicle = None
         self.__last_timestamp = 0
         self.__temp_depth_of_discharge = 0
@@ -30,12 +33,11 @@ class QuadrotorBatteryDischarge(Subscriber):
         dt = ts - self.__last_timestamp
         self.__last_timestamp = ts
 
-        ## TEMPORARY -- WAIT FOR THE POWERMODEL TO BE FIXED!!
-        # curr_voltage, depth_of_discharge = self.__battery.new_control(datapoint.controls, dt * US_TO_HR)
-        curr_voltage, batt_time = 25, self.__battery.get_battery_time()
+        curr_voltage, depth_of_discharge = self.__battery.new_control(datapoint.controls, dt * US_TO_HR)
+        curr_voltage = 25
         self.__temp_depth_of_discharge += 0.001
         depth_of_discharge = self.__temp_depth_of_discharge
-        ## -------
+
         battery_level = int(100 - depth_of_discharge)
 
         self.__vehicle.message_factory.battery_status_send(

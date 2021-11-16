@@ -55,20 +55,26 @@ def make_order(cvms_api: CVMS_API, product, vendor):
     o = cvms_api.checkout_orders(res)
     return o
 
+import datetime
 def make_operation(dis_api: DIS_API):
     deliveries, pilots, drones, control_areas = dis_api.get_requested_deliveries()
-    print(deliveries, drones, control_areas)
-    ops = dis_api.create_operation(deliveries[-1], drones[-1], control_areas[-1])
+    drone = drones[-2]
+    print(deliveries)
+    effective_time_begin = datetime.datetime.utcnow()
+    effective_time_begin += datetime.timedelta(minutes=2)
+    ops = dis_api.create_operation(deliveries[-1], drone, control_areas[-1], effective_time_begin.isoformat())
+    op_details = dis_api.get_operation_details_with_delivery_id(deliveries[-1].id)
+    
     op: Operation = ops[0]
     wps = op.get_waypoints()
     payload = {
         'waypoints': wps,
-        "operation_id": "some_id",
-        "control_area_id": "some_control_area_id",
-        "operation_reference_number": "some_reference",
-        "drone_id": "some_id",
-        "drone_registration_number": "some_drone_registration_number",
-        "dis_auth_token": "some_auth_token",
+        "operation_id": op_details.operation_id,
+        "control_area_id": control_areas[-1].control_area_id,
+        "operation_reference_number": ops[-1].reference_number,
+        "drone_id": drone.drone_id,
+        "drone_registration_number": drone.registration_number,
+        "dis_auth_token": dis_api._session.get_dis_token(),
         "thermal_model_timestep": 1,
         "aeroacoustic_model_timestep": 0.004,
         "drone_config":{},
@@ -93,4 +99,4 @@ if order is not None and order['result']:
     print(f"Order successful ({order})")
     payload = make_operation(dis)
     print(payload)
-    start_with_payload(payload)
+#     start_with_payload(payload)

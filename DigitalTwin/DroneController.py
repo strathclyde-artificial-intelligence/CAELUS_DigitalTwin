@@ -19,6 +19,7 @@ from .Probes.TelemetryDisplay import TelemetryDisplay
 from .Probes.QuadrotorBatteryDischarge import QuadrotorBatteryDischarge
 from .Interfaces.TimeSeriesHandler import TimeSeriesHandler
 from .PayloadModels import ControllerPayload
+from .TelemetryFeedback import TelemetryFeedback
 
 @dataclass
 class Mission():
@@ -45,11 +46,12 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__mission_writer = MissionWriter(controller_payload.operation_id)
         self.__setup_probes()
         self.__connection_manager.connect_to_vehicle()
+        self.__telemetry_feedback = TelemetryFeedback()
 
     def __setup_probes(self):
         self.__logger.info('Setting up probes')
         self.__anra_probe = AnraTelemetryPush()
-        self.__telemetry_display_probe = TelemetryDisplay()
+        
         self.__battery_discharge_probe = QuadrotorBatteryDischarge()
         # TEMPORARY -- THIS SHOULD GO IN THE SIMULATOR
         self.__thermal_model_probe = ThermalModelProbe(integrate_every_us= 0.004 / 3600 )
@@ -61,7 +63,6 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
 
         for probe in [
             self.__anra_probe,
-            self.__telemetry_display_probe,
             self.__battery_discharge_probe,
             self.__thermal_model_probe
         ]:
@@ -101,14 +102,18 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
                 self.__controller_payload.operation_id,
                 self.__controller_payload.control_area_id,
                 self.__controller_payload.operation_reference_number,
-                self.__controller_payload.drone_id,
                 self.__controller_payload.drone_registration_number,
+                self.__controller_payload.drone_id,
                 self.__controller_payload.dis_auth_token
             ))
 
             self.__mission_writer.set_battery(self.__battery_discharge_probe.get_battery())
             self.__mission_writer.set_thermal_model(self.__thermal_model_probe)
             self.__mission_writer.start()
+
+            self.__telemetry_feedback.set_battery(self.__battery_discharge_probe.get_battery())
+            self.__telemetry_feedback.set_thermal_model(self.__thermal_model_probe)
+            self.__telemetry_feedback.start()
 
     def vehicle_timeout(self, vehicle):
         self.__logger.info(f'Vehicle timed out!')
@@ -188,4 +193,5 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
 
     def set_time_series_handler(self, ts_handler: TimeSeriesHandler):
         assert ts_handler is not None
-        self.__telemetry_display_probe.set_time_series_handler(ts_handler)
+        # self.__telemetry_display_probe.set_time_series_handler(ts_handler)
+        self.__telemetry_feedback.set_time_series_handler(ts_handler)

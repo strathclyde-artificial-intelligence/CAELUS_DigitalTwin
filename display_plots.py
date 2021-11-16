@@ -12,7 +12,7 @@ def plot_battery(temp_data):
 def plot_temp(temp_data):
     plt.plot([i for i in range(len(temp_data))], temp_data, 'r-', label='payload temperature')
 
-plot_temp(load_file('mission_some_id.txt')['payload_temp'])
-plot_battery(load_file('mission_some_id.txt')['battery_level'])
+plot_temp(load_file('mission_6b00f6e5-aefd-4238-ab13-77e0060982f0.txt')['payload_temp'])
+plot_battery(load_file('mission_6b00f6e5-aefd-4238-ab13-77e0060982f0.txt')['battery_level'])
 plt.legend()
 plt.show()
