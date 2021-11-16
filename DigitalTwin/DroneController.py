@@ -15,6 +15,7 @@ from .Interfaces.VehicleManager import VehicleManager
 from .Interfaces.MissionManager import MissionManager
 from .Interfaces.Stoppable import Stoppable
 from .Probes.AnraTelemetryPush import AnraTelemetryPush
+from .Probes.Aeroacoustic import Aeroacoustic
 from .Probes.TelemetryDisplay import TelemetryDisplay
 from .Probes.QuadrotorBatteryDischarge import QuadrotorBatteryDischarge
 from .Interfaces.TimeSeriesHandler import TimeSeriesHandler
@@ -61,10 +62,13 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__anra_probe.set_payload_handler(self.__thermal_model_probe)
         # ----
 
+        self.__aeroacoustic_probe = Aeroacoustic()
+
         for probe in [
             self.__anra_probe,
             self.__battery_discharge_probe,
-            self.__thermal_model_probe
+            self.__thermal_model_probe,
+            self.__aeroacoustic_probe
         ]:
             for stream_id in probe.subscribes_to_streams():
                 self.__state_aggregator.subscribe(stream_id, probe)
