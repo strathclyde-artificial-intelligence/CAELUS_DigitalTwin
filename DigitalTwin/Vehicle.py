@@ -1,3 +1,4 @@
+import logging
 from dronekit import Vehicle as DronekitVehicle
 
 
@@ -43,9 +44,11 @@ class Vehicle(DronekitVehicle):
     def __init__(self, *args):
         super().__init__(*args)
 
-        # Create an Vehicle.raw_imu object with initial values set to None.
+        self.__mission_ended = False
+        self.__logger = logging.getLogger()
+        self.__controller = None
+
         self._hil_actuator_controls = HilActuatorControls()
-        # Create a message listener using the decorator.   
         @self.on_message('HIL_ACTUATOR_CONTROLS')
         def listener(self, name, message):
             self._hil_actuator_controls.time_usec =message.time_usec
@@ -54,21 +57,39 @@ class Vehicle(DronekitVehicle):
             self._hil_actuator_controls.flags=message.flags
             self.notify_attribute_listeners('hil_actuator_controls', self._hil_actuator_controls) 
 
-        # Create an Vehicle.raw_imu object with initial values set to None.
+        @self.on_message('MISSION_ITEM_REACHED')
+        def on_waypoint(self, name, message):
+            self.__mission_ended = message.seq == (self.__mission_items_n+1) # There's an extra completion item
+            self.__logger.info(f'Mission item {message.seq} completed.')
+            if self.__mission_ended:
+                if self.__controller is None:
+                    self.__logger.warm('Mission complete, but no handler to notify!')
+                else:
+                    self.__controller.mission_complete()
+                
+
         self._system_time = SystemTime()
-        # Create a message listener using the decorator.   
         @self.on_message('SYSTEM_TIME')
         def listener(self, name, message):
             self._system_time.time_boot_ms=message.time_boot_ms
             self._system_time.time_unix_usec=message.time_unix_usec
             self.notify_attribute_listeners('system_time', self._system_time) 
+    
+    def prepare_for_mission(self, mission_items_n):
+        self.__mission_items_n = mission_items_n
+        self.__mission_ended = False
 
-
+    def set_controller(self, c):
+        self.__controller = c
+        
     @property
     def hil_actuator_controls(self):
         return self._hil_actuator_controls
 
-
     @property
     def system_time(self):
         return self._system_time
+
+    @property
+    def mission_ended(self):
+        return self.__mission_ended

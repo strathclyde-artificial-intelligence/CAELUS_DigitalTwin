@@ -68,8 +68,9 @@ class DroneCommander():
                     break
                 except:
                     pass
-            print(f"Uploaded {i}")
-        self.__logger.info('Done uploading')
+            print(f"Uploaded mission item {i}")
+
+        self.__logger.info(f'Done uploading mission ({cmd_n} items)')
         self.__vehicle._wp_uploaded = None
         self.__vehicle._wpts_dirty = False
         self.__vehicle.wait_ready()
@@ -78,6 +79,8 @@ class DroneCommander():
         self.__vehicle = vehicle
 
     def set_mission(self, waypoints, altitude=30):
+        
+        self.__mission_waypoints = waypoints
         
         self.__logger.info('Constructing new missions from waypoints')
         self.__logger.info('\n'+DroneCommander.waypoints_to_string(waypoints, altitude))
@@ -100,13 +103,12 @@ class DroneCommander():
         self.__wait_for_home_lock()
         self.__logger.info('Waiting for vehicle to be armable (CHECK SKIPPED!)')
         time.sleep(2)
-        # while not self.__vehicle.is_armable:
-        #     time.sleep(0.5)
 
     def start_mission(self):
         self.__wait_for_vehicle_armable()
         self.__logger.info('Starting vehicle mission')
         self.__px4_set_mode(DroneCommander.MAV_MODE_AUTO)
         self.__vehicle.armed = True
+        self.__vehicle.prepare_for_mission(len(self.__mission_waypoints))
         time.sleep(1)
 

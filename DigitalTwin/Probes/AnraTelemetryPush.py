@@ -203,6 +203,7 @@ class AnraTelemetryPush(Subscriber):
                 'Data':json.dumps(js_obj)
             })
             self.__socket.sendto(bytes(packet, "utf-8"), (self.__remote_ip, self.__remote_port))
+            time.sleep(0.1)
 
     def new_datapoint(self, drone_id, stream_id, datapoint):
         if stream_id == ATTITUDE:

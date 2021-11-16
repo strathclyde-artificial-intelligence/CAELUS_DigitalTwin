@@ -1,3 +1,4 @@
+from threading import current_thread
 from ProbeSystem.helper_data.subscriber import Subscriber
 from ProbeSystem.helper_data.streams import *
 from ThermalModel.ThermalSim import ThermalSim
@@ -23,10 +24,9 @@ class ThermalModelProbe(Subscriber):
         last_time_s = self.__time_usec / 1000000
         _, solution = self.__thermal_sim.solve(last_time_s, last_time_s+dt_s, self.__state)
         return solution[-1]
-
+    
     def new_datapoint(self, drone_id, stream_id, datapoint):
         elapsed_time_us = (datapoint.time_boot_ms * 1000) - self.__time_usec
-        print(datapoint)
         if elapsed_time_us > self.__integrate_every_us:
             new_state = self.step_state(elapsed_time_us)
             self.__state = new_state

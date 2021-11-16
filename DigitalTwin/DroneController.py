@@ -4,6 +4,7 @@ import threading
 from ProbeSystem.state_aggregator.state_aggregator import StateAggregator
 from typing import Tuple, List
 from dataclasses import dataclass
+import os,signal
 
 from DigitalTwin.Interfaces.TimeSeriesHandler import TimeSeriesHandler
 from DigitalTwin.Probes.ThermalModelProbe import ThermalModelProbe
@@ -65,8 +66,15 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
             for stream_id in probe.subscribes_to_streams():
                 self.__state_aggregator.subscribe(stream_id, probe)
         self.__state_aggregator.report_subscribers()
-        
+    
+    # Called by vehicle when the mission has been completed
+    def mission_complete(self):
+        os.kill(os.getpid(), signal.SIGINT)
+
     def vehicle_available(self, vehicle):
+
+        vehicle.set_controller(self)
+
         self.__logger.info(f'New vehicle available {vehicle}')
         self.__commander.set_vehicle(vehicle)
         
@@ -109,11 +117,10 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
                     waypoints_alt = mission.waypoints
                     self.__executing_mission = True
                     waypoints, alt = [[a[0], a[1]] for a in waypoints_alt], waypoints_alt[0][-1]
-
+                    
                     self.__logger.info('Received new mission')
                     self.__commander.set_mission(waypoints, altitude=alt)
                     self.__commander.start_mission()
-
                     self.__anra_probe.start_sending_telemetry(
                         drone_registration=mission.drone_registration_number,
                         operation_id=mission.operation_id,

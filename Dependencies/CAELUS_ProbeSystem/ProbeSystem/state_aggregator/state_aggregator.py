@@ -89,7 +89,6 @@ class StateAggregator():
 
     def report_subscribers(self):
         available_streams = self.simulation_bridge.get_available_streams()
-        print(self.subscribers)
         for stream_id, subs in self.subscribers.items():
             print(f'[STREAM] "{stream_id}" has {len(subs)} {"subscribers" if len(subs) > 1 else "subscriber"}')
             if stream_id not in available_streams:
