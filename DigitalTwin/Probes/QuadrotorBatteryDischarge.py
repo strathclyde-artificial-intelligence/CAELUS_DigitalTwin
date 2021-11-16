@@ -19,7 +19,7 @@ class QuadrotorBatteryDischarge(Subscriber):
         self.__vehicle: Vehicle = vehicle
 
     def new_datapoint(self, drone_id, stream_id, datapoint):
-
+        
         if self.__vehicle is None:
             return
         if self.__battery.get_battery_level() == 0:
@@ -52,3 +52,6 @@ class QuadrotorBatteryDischarge(Subscriber):
 
     def subscribes_to_streams(self):
         return [HIL_ACTUATOR_CONTROLS]
+
+    def get_battery(self):
+        return self.__battery

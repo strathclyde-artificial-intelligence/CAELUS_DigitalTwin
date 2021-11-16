@@ -49,7 +49,7 @@ class DroneCommander():
 
     def __upload_vehicle_commands(self, commands):
         self.__logger.info('Waiting for vehicle to be ready for upload')
-        
+        self.__vehicle.wait_ready()
         self.__logger.info('Uploading commands')
         cmd_n = len(commands)
         self.__vehicle._master.first_byte = True

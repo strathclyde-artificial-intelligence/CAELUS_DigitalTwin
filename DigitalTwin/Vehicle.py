@@ -1,18 +1,19 @@
 import logging
 from dronekit import Vehicle as DronekitVehicle
-
+from threading import Thread
+import time
 
 class HilActuatorControls(object):
     """
     The message definition is here: https://mavlink.io/en/messages/common.html#HIL_ACTUATOR_CONTROLS
     
-    :param time_boot_us: Timestamp (microseconds since system boot).
+    :param time_usec: Timestamp (microseconds since system boot).
     :param controls: Control outputs -1 .. 1. Channel assignment depends on the simulated hardware.
     :param mode: System mode. Includes arming state. (https://mavlink.io/en/messages/common.html#MAV_MODE_FLAG)
     :param flags: Flags as bitfield, 1: indicate simulation using lockstep.
     """
-    def __init__(self, time_boot_us=None, controls=None, mode=None, flags=None):
-        self.time_boot_us = time_boot_us
+    def __init__(self, time_usec=None, controls=None, mode=None, flags=None):
+        self.time_usec = time_usec
         self.controls = controls
         self.mode = mode
         self.flags = flags
@@ -21,7 +22,7 @@ class HilActuatorControls(object):
         """
         String representation used to print the RawIMU object. 
         """
-        return f"HIL_ACTUATOR_CONTROLS: time_boot_us={self.time_boot_us}, controls={self.controls}"
+        return f"HIL_ACTUATOR_CONTROLS: time_boot_us={self.time_usec}, controls={self.controls}"
    
 class SystemTime(object):
     """
@@ -47,6 +48,7 @@ class Vehicle(DronekitVehicle):
         self.__mission_ended = False
         self.__logger = logging.getLogger()
         self.__controller = None
+        self.__last_wp = 0
 
         self._hil_actuator_controls = HilActuatorControls()
         @self.on_message('HIL_ACTUATOR_CONTROLS')
@@ -55,18 +57,7 @@ class Vehicle(DronekitVehicle):
             self._hil_actuator_controls.controls=message.controls
             self._hil_actuator_controls.mode=message.mode
             self._hil_actuator_controls.flags=message.flags
-            self.notify_attribute_listeners('hil_actuator_controls', self._hil_actuator_controls) 
-
-        @self.on_message('MISSION_ITEM_REACHED')
-        def on_waypoint(self, name, message):
-            self.__mission_ended = message.seq == (self.__mission_items_n+1) # There's an extra completion item
-            self.__logger.info(f'Mission item {message.seq} completed.')
-            if self.__mission_ended:
-                if self.__controller is None:
-                    self.__logger.warm('Mission complete, but no handler to notify!')
-                else:
-                    self.__controller.mission_complete()
-                
+            self.notify_attribute_listeners('hil_actuator_controls', self._hil_actuator_controls)         
 
         self._system_time = SystemTime()
         @self.on_message('SYSTEM_TIME')
@@ -75,9 +66,31 @@ class Vehicle(DronekitVehicle):
             self._system_time.time_unix_usec=message.time_unix_usec
             self.notify_attribute_listeners('system_time', self._system_time) 
     
+    def mission_status_update(self):
+        while True:
+            current_wp = self.commands.next
+            if current_wp > self.__last_wp:
+                self.__last_wp = current_wp
+                self.__logger.info(f'Mission item {current_wp} completed.')
+            self.__mission_ended = current_wp == (self.__mission_items_n+1) # There's an extra completion item
+            if self.__mission_ended:
+                if self.__controller is None:
+                    self.__logger.warm('Mission complete, but no handler to notify!')
+                else:
+                    self.__controller.mission_complete()
+            time.sleep(2)
+                
+
+
     def prepare_for_mission(self, mission_items_n):
         self.__mission_items_n = mission_items_n
         self.__mission_ended = False
+        
+        self.__mission_completion_thread = Thread(target=self.mission_status_update)
+        self.__mission_completion_thread.name = 'Mission Completion Checker'
+        self.__mission_completion_thread.daemon = True
+        self.__mission_completion_thread.start()
+        
 
     def set_controller(self, c):
         self.__controller = c

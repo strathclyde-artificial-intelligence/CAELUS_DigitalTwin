@@ -6,6 +6,7 @@ from typing import Tuple, List
 from dataclasses import dataclass
 import os,signal
 
+from .MissionWriter import MissionWriter
 from DigitalTwin.Interfaces.TimeSeriesHandler import TimeSeriesHandler
 from DigitalTwin.Probes.ThermalModelProbe import ThermalModelProbe
 from .VehicleConnectionManager import VehicleConnectionManager
@@ -41,6 +42,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__mission_poll_thread = None
         self.__state_aggregator_thread = None
         self.__executing_mission = False
+        self.__mission_writer = MissionWriter(controller_payload.operation_id)
         self.__setup_probes()
         self.__connection_manager.connect_to_vehicle()
 
@@ -56,7 +58,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         # THIS MUST NOT BE DELETED
         self.__anra_probe.set_payload_handler(self.__thermal_model_probe)
         # ----
-        
+
         for probe in [
             self.__anra_probe,
             self.__telemetry_display_probe,
@@ -69,10 +71,11 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
     
     # Called by vehicle when the mission has been completed
     def mission_complete(self):
+        self.__mission_writer.save()
         os.kill(os.getpid(), signal.SIGINT)
 
     def vehicle_available(self, vehicle):
-
+        
         vehicle.set_controller(self)
 
         self.__logger.info(f'New vehicle available {vehicle}')
@@ -86,7 +89,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
 
         self.__battery_discharge_probe.set_vehicle(vehicle)
         
-        self.mission_poll_thread_start()
+        # Not needed anymore -- mission loaded from payload
+        # self.mission_poll_thread_start()
         self.__load_mission_from_payload()
 
     def __load_mission_from_payload(self):
@@ -102,12 +106,17 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
                 self.__controller_payload.dis_auth_token
             ))
 
+            self.__mission_writer.set_battery(self.__battery_discharge_probe.get_battery())
+            self.__mission_writer.set_thermal_model(self.__thermal_model_probe)
+            self.__mission_writer.start()
+
     def vehicle_timeout(self, vehicle):
         self.__logger.info(f'Vehicle timed out!')
         self.__should_stop = True
         self.__connection_manager.stop_connecting()
         self.__connection_manager.connect_to_vehicle()
 
+    # Unused
     def poll_mission(self):
         import traceback
         while not self.__should_stop:
@@ -147,8 +156,28 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
             self.__logger.warn(e) 
 
     def add_mission(self, mission: Mission):
-        self.__logger.info(f'Received new mission! Enqueueing...')
-        self.__mission_queue.put(mission)
+        self.__logger.info(f'Received new mission!')
+        try:
+            waypoints_alt = mission.waypoints
+            self.__executing_mission = True
+            waypoints, alt = [[a[0], a[1]] for a in waypoints_alt], waypoints_alt[0][-1]
+        
+            self.__commander.set_mission(waypoints, altitude=alt)
+            self.__commander.start_mission()
+            self.__anra_probe.start_sending_telemetry(
+                drone_registration=mission.drone_registration_number,
+                operation_id=mission.operation_id,
+                control_area_id=mission.control_area_id,
+                reference_number=mission.reference_number,
+                dis_token=mission.dis_token
+            )
+
+        except Empty as e:
+            pass
+        except Exception as e:
+            self.__logger.warn(e)
+
+        # self.__mission_queue.put(mission)
 
     def graceful_stop(self):
         self.__connection_manager.stop_connecting()
