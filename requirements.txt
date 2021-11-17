@@ -1,2 +1,2 @@
 dearpygui==1.0.0
-convertbng==0.6.25
+bng-latlon==1.0.3
