@@ -11,7 +11,6 @@ class MissionWriter(threading.Thread):
         self.data = {
             'payload_temp':[],
             'battery_level':[],
-            'rps':[]
         }
 
         self.__mission_id = mission_id
@@ -27,7 +26,6 @@ class MissionWriter(threading.Thread):
                 self.data['payload_temp'].append(new_temp)
             if len(self.data['battery_level']) == 0 or new_batt != self.data['battery_level'][-1]:
                 self.data['battery_level'].append(new_batt)
-            self.data['rps'].append(100)
 
     def set_thermal_model(self, tm):
         self.__thermal_model = tm
