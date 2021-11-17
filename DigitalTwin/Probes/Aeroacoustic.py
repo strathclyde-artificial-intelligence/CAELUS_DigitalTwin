@@ -59,8 +59,10 @@ class Aeroacoustic(Subscriber):
 
     def save(self):
         t = datetime.utcnow()
+        header = f'{len(self.rows)} {t}'
         rows = self.convert_lon_lat_to_easting_northing(self.rows)
         rows = self.stringify_rows(rows)
+        rows = [header] + rows
         with open(f'aeroacoustic_{self.__drone_id}_{t}.ost', 'w') as f:
             f.write('\n'.join(rows))
         
