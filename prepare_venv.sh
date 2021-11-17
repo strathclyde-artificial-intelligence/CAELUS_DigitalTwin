@@ -1,3 +1,5 @@
+#!/bin/bash 
+
 VENV_LOCATION="./venv";
 
 if ! [[ -d $VENV_LOCATION ]]; then
