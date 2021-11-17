@@ -38,6 +38,6 @@ class MissionWriter(threading.Thread):
 
     def save(self, filename=None):
         if filename is None:
-            filename = f'mission_{self.__mission_id}.txt'
+            filename = f'mission_{self.__mission_id}.simout'
         with open(filename, 'w') as f:
             f.write(json.dumps(self.data))

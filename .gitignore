@@ -5,3 +5,5 @@ venv/
 .env
 .vscode/
 Dependencies/PX4-Autopilot
+*.simout
+*.ost
