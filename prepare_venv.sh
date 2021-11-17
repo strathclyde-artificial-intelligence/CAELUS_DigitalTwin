@@ -1,7 +1,4 @@
 VENV_LOCATION="./venv";
-# read -e -p "Preferred python virtual environment location: (default $VENV_LOCATION)" input
-# VENV_LOCATION="${input:-$VENV_LOCATION}"
-
 
 if ! [[ -d $VENV_LOCATION ]]; then
     echo "Virtual environment not present. Creating virtual environment named 'venv' at $VENV_LOCATION.";
