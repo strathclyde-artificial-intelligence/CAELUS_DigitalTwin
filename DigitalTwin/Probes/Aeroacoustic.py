@@ -50,7 +50,7 @@ class Aeroacoustic(Subscriber):
     
     def convert_lon_lat_to_easting_northing(self, rows):
         def latlon_to_bng(lat, lon):
-            return [*WGS84toOSGB36(lat, lon)][::-1]
+            return [*WGS84toOSGB36(lat, lon)]
 
         return [latlon_to_bng(*row[:2]) + row[2:] for row in rows]
 
@@ -59,7 +59,7 @@ class Aeroacoustic(Subscriber):
 
     def save(self):
         t = datetime.utcnow()
-        header = f'{len(self.rows)} {t}'
+        header = f'{len(self.rows)} {datetime.now().isoformat()}'
         rows = self.convert_lon_lat_to_easting_northing(self.rows)
         rows = self.stringify_rows(rows)
         rows = [header] + rows
