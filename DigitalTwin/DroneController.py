@@ -76,7 +76,10 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
     
     # Called by vehicle when the mission has been completed
     def mission_complete(self):
+        self.__logger.info('Writing mission log file...')
         self.__mission_writer.save()
+        self.__logger.info('Writing aeroacoustic input file (OST) ...')
+        self.__aeroacoustic_probe.save()
         os.kill(os.getpid(), signal.SIGINT)
 
     def vehicle_available(self, vehicle):
