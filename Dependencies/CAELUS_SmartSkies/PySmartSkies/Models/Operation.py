@@ -25,13 +25,14 @@ class Operation(JSONDeserialiser):
         geod = Geod(ellps='WGS84')
         az12,az21,dist = geod.inv(start[1], start[0], end[1], end[0])
         result = geod.fwd_intermediate(start[1],start[0],az12,npts=ceil(dist / max_dist),del_s=max_dist, initial_idx=0, terminus_idx=0)
-        alt = start[-1]
-        return [(lat, lon, alt) for lat, lon in zip(result.lats, result.lons)]
+        return [(lat, lon) for lat, lon in zip(result.lats, result.lons)]
 
     def get_waypoints(self, max_distance=850):
         waypoints = [volume.get_centre() for volume in self.operation_volumes]
         start, end = waypoints[0], waypoints[-1]
-        return self.__interpolate_with_max_distance(start, end, max_distance)
+        lats_lons = self.__interpolate_with_max_distance(start, end, max_distance)
+        alts = [w[-1] for w in waypoints]
+        return [(lat_lon[0], lat_lon[1], alt) for lat_lon, alt in zip(lats_lons, alts)]
 
     def __repr__(self):
         return f'<Operation|reference={self.reference_number}>'

@@ -31,7 +31,7 @@ class FlightVolume(JSONDeserialiser):
         return [
             max(xs) - ((max(xs) - min(xs)) / 2),
             max(ys) - ((max(ys) - min(ys)) / 2),
-            self.altitude_agl / 2
+            (self.altitude_upper_w84 - self.altitude_lower_w84) / 2
         ]
 
     def __repr__(self):

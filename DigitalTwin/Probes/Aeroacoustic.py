@@ -26,6 +26,7 @@ class Aeroacoustic(Subscriber):
         self.attitude = [datapoint.roll, datapoint.pitch, datapoint.yaw]
 
     def store_row(self):
+        print(self.attitude is not None, self.lat_lon_alt is not None, self.rotors_speed is not None, self.time_us is not None)
         if self.attitude is not None and self.lat_lon_alt is not None and self.rotors_speed is not None and self.time_us is not None:
             row = [*self.lat_lon_alt, round(self.time_us / 1000000.0, 6)]
             for rs in self.rotors_speed:
@@ -34,6 +35,7 @@ class Aeroacoustic(Subscriber):
 
     def new_datapoint(self, drone_id, stream_id, datapoint):
         # Integrate simplified ESC 
+        print("HELLO?")
         if self.__drone_id is None:
             self.__drone_id = drone_id
         if stream_id == HIL_ACTUATOR_CONTROLS:

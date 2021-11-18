@@ -132,33 +132,33 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__connection_manager.connect_to_vehicle()
 
     # Unused
-    def poll_mission(self):
-        import traceback
-        while not self.__should_stop:
-            if not self.__executing_mission:
-                try:
-                    mission: Mission = self.__mission_queue.get(block=False)
-                    waypoints_alt = mission.waypoints
-                    self.__executing_mission = True
-                    waypoints, alt = [[a[0], a[1]] for a in waypoints_alt], waypoints_alt[0][-1]
+    # def poll_mission(self):
+    #     import traceback
+    #     while not self.__should_stop:
+    #         if not self.__executing_mission:
+    #             try:
+    #                 mission: Mission = self.__mission_queue.get(block=False)
+    #                 waypoints_alt = mission.waypoints
+    #                 self.__executing_mission = True
+    #                 waypoints, alt = [[a[0], a[1]] for a in waypoints_alt], waypoints_alt[0][-1]
                     
-                    self.__logger.info('Received new mission')
-                    self.__commander.set_mission(waypoints, altitude=alt)
-                    self.__commander.start_mission()
-                    self.__anra_probe.start_sending_telemetry(
-                        drone_registration=mission.drone_registration_number,
-                        operation_id=mission.operation_id,
-                        control_area_id=mission.control_area_id,
-                        reference_number=mission.reference_number,
-                        dis_token=mission.dis_token
-                    )
+    #                 self.__logger.info('Received new mission')
+    #                 self.__commander.set_mission(waypoints, altitude=alt)
+    #                 self.__commander.start_mission()
+    #                 self.__anra_probe.start_sending_telemetry(
+    #                     drone_registration=mission.drone_registration_number,
+    #                     operation_id=mission.operation_id,
+    #                     control_area_id=mission.control_area_id,
+    #                     reference_number=mission.reference_number,
+    #                     dis_token=mission.dis_token
+    #                 )
 
-                except Empty as e:
-                    pass
-                except Exception as e:
-                    self.__logger.warn(e)
-                    print(traceback.format_exc())
-        self.__logger.info('Mission poll thread complete.')
+    #             except Empty as e:
+    #                 pass
+    #             except Exception as e:
+    #                 self.__logger.warn(e)
+    #                 print(traceback.format_exc())
+    #     self.__logger.info('Mission poll thread complete.')
 
     def mission_poll_thread_start(self):
         try:
@@ -175,9 +175,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         try:
             waypoints_alt = mission.waypoints
             self.__executing_mission = True
-            waypoints, alt = [[a[0], a[1]] for a in waypoints_alt], waypoints_alt[0][-1]
         
-            self.__commander.set_mission(waypoints, altitude=alt)
+            self.__commander.set_mission(waypoints_alt)
             self.__commander.start_mission()
             self.__anra_probe.start_sending_telemetry(
                 drone_registration=mission.drone_registration_number,
