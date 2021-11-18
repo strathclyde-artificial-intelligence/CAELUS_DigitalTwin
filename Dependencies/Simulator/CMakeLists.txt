@@ -19,8 +19,6 @@ target_include_directories(6dof PUBLIC
                            ${PROJECT_BINARY_DIR}
                            )
 add_definitions( -DCURL_STATICLIB )
-# Eigen Headers
-include_directories(PUBLIC "/usr/local/Cellar/eigen/3.3.9/include/eigen3/")
 # MAVLink headers
 target_include_directories(6dof PUBLIC ${CMAKE_SOURCE_DIR}/mavlink/standard/)
 target_include_directories(6dof_lib PUBLIC ${CMAKE_SOURCE_DIR}/mavlink/standard/)

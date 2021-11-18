@@ -11,5 +11,7 @@ RUN git clone git@github.com:strathclyde-artificial-intelligence/CAELUS_DigitalT
 FROM python:3.7
 COPY --from=intermediate /CAELUS_DigitalTwin /CAELUS_DigitalTwin
 RUN apt-get update && apt-get -y install cmake protobuf-compiler
+RUN sudo apt-get install libboost-all-dev
+RUN sudo apt install libeigen3-dev
 WORKDIR /CAELUS_DigitalTwin
 RUN bash install_all.sh
