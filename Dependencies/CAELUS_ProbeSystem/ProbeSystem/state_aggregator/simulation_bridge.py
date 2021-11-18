@@ -43,7 +43,6 @@ class SimulationBridge():
         return [getattr(streams, var) for var in dir(streams) if not var.startswith("__")]
 
     def new_datapoint(self, vehicle, name, val):
-        print("What is going on here")
         self.state_aggregator.new_datapoint_for_stream(name, val)
 
     def setup_telemetry_listeners(self):

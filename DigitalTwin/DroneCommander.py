@@ -18,7 +18,7 @@ class DroneCommander():
     @staticmethod
     def mission_from_waypoints(waypoints: Tuple[float, float, float]):
         commands = DroneCommander.commands_from_waypoints(waypoints)
-        commands.insert(0,Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 1, 0, 0, 0, float('nan'), waypoints[0][1], waypoints[0][0], waypoints[0][2]+30))
+        commands.insert(0,Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 1, 0, 0, 0, float('nan'), waypoints[0][1], waypoints[0][0], waypoints[0][2]))
         commands.append(Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL, mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 1, 0, 0, 0, float('nan'), waypoints[-1][1], waypoints[-1][0], waypoints[-1][2]))
         return commands
 
@@ -50,6 +50,7 @@ class DroneCommander():
     def __upload_vehicle_commands(self, commands):
         self.__logger.info('Waiting for vehicle to be ready for upload')
         self.__vehicle.wait_ready()
+        
         self.__logger.info('Uploading commands')
         cmd_n = len(commands)
         self.__vehicle._master.first_byte = True
@@ -75,6 +76,7 @@ class DroneCommander():
         self.__vehicle._wpts_dirty = False
         self.__vehicle.wait_ready()
         
+
     def set_vehicle(self, vehicle):
         self.__vehicle = vehicle
 
@@ -101,6 +103,7 @@ class DroneCommander():
     def __wait_for_vehicle_armable(self):
         self.__logger.info('Waiting for vehicle home lock')
         self.__wait_for_home_lock()
+        print(f'Home location: {self.__vehicle.home_location}')
         self.__logger.info('Waiting for vehicle to be armable (CHECK SKIPPED!)')
         time.sleep(2)
 

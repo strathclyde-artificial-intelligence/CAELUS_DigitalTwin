@@ -2,6 +2,7 @@ from ProbeSystem.helper_data.subscriber import Subscriber
 from ProbeSystem.helper_data.streams import *
 from datetime import datetime
 from bng_latlon import WGS84toOSGB36
+from math import e as E
 
 class Aeroacoustic(Subscriber):
     
@@ -13,10 +14,12 @@ class Aeroacoustic(Subscriber):
         self.time_us = None
         self.__last_time = 0
         self.rows = []
+        self.__last_pwms = [0,0,0,0]
         self.__drone_id = None
 
     def get_rotor_speed(self, datapoint):
-        self.rotors_speed = [datapoint.controls[i]*9*60 if datapoint.controls[i] > 0 else 0 for i in range(4)]
+        rps = self.pwm_to_rps([c if c > 0 else 0 for c in datapoint.controls][:4])
+        self.rotors_speed = [s * 60 for s in rps]
         self.time_us = datapoint.time_usec
 
     def store_lat_lon_alt(self, datapoint):
@@ -25,8 +28,27 @@ class Aeroacoustic(Subscriber):
     def store_attitude(self, datapoint):
         self.attitude = [datapoint.roll, datapoint.pitch, datapoint.yaw]
 
+    def pwm_to_rps(self, pwm):
+        # FAKE ESC -- Very temporary
+        # new_control = [0,0,0,0]
+        # sim_timestep = 0.004
+        # vtol_kv = 9
+        # vtol_tau = 0.006
+        # remap = [0, 3, 1, 2]
+        # for i in range(len(pwm)):
+        #     new_control[i] = self.__last_control[i] + ((sim_timestep * (vtol_kv * pwm[remap[i]] - self.__last_control[i])) / vtol_tau)
+        # self.__last_control = new_control
+        # print(new_control)
+        # return new_control
+        
+        # THIS IS JMAVSim's ESC
+        new_pwms = [0,0,0,0]
+        for i in range(len(pwm)):
+            new_pwms[i] = self.__last_pwms[i] + (pwm[i] - self.__last_pwms[i]) * (1.0 - E ** (-0.004 / 0.005)) 
+        self.__last_pwms = new_pwms
+        return [pwm * 9 for pwm in new_pwms]
+
     def store_row(self):
-        print(self.attitude is not None, self.lat_lon_alt is not None, self.rotors_speed is not None, self.time_us is not None)
         if self.attitude is not None and self.lat_lon_alt is not None and self.rotors_speed is not None and self.time_us is not None:
             row = [*self.lat_lon_alt, round(self.time_us / 1000000.0, 6)]
             for rs in self.rotors_speed:
@@ -34,8 +56,7 @@ class Aeroacoustic(Subscriber):
             self.rows.append(row)
 
     def new_datapoint(self, drone_id, stream_id, datapoint):
-        # Integrate simplified ESC 
-        print("HELLO?")
+
         if self.__drone_id is None:
             self.__drone_id = drone_id
         if stream_id == HIL_ACTUATOR_CONTROLS:
