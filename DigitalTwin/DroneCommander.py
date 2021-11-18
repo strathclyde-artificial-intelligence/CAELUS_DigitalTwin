@@ -13,13 +13,13 @@ class DroneCommander():
 
     @staticmethod
     def commands_from_waypoints(waypoints: Tuple[float, float], altitude: float):
-        return list(map(lambda wp: Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, float('nan'), wp[1], wp[0], altitude), waypoints))
+        return list(map(lambda wp: Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL_TERRAIN_ALT_INT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, float('nan'), wp[1], wp[0], altitude), waypoints))
 
     @staticmethod
     def mission_from_waypoints(waypoints: Tuple[float, float], altitude: float):
         commands = DroneCommander.commands_from_waypoints(waypoints, altitude)
-        commands.insert(0,Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 1, 0, 0, 0, float('nan'), waypoints[0][1], waypoints[0][0], altitude))
-        commands.append(Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 1, 0, 0, 0, float('nan'), waypoints[-1][1], waypoints[-1][0], altitude))
+        commands.insert(0,Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL_TERRAIN_ALT_INT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 1, 0, 0, 0, float('nan'), waypoints[0][1], waypoints[0][0], altitude))
+        commands.append(Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL_TERRAIN_ALT_INT, mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 1, 0, 0, 0, float('nan'), waypoints[-1][1], waypoints[-1][0], altitude))
         return commands
 
     def set_roi(self, location):
