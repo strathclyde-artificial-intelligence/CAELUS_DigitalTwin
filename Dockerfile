@@ -9,6 +9,7 @@ RUN chmod 400 /root/.ssh/id_rsa
 RUN git clone git@github.com:strathclyde-artificial-intelligence/CAELUS_DigitalTwin.git /CAELUS_DigitalTwin
 
 FROM python:3.7
+RUN apk update && apk add bash
 COPY --from=intermediate /CAELUS_DigitalTwin /CAELUS_DigitalTwin
 RUN apt-get update && apt-get -y install cmake protobuf-compiler
 RUN apt-get install libboost-all-dev -y
