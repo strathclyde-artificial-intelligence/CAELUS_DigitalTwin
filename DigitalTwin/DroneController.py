@@ -5,6 +5,7 @@ from ProbeSystem.state_aggregator.state_aggregator import StateAggregator
 from typing import Tuple, List
 from dataclasses import dataclass
 import os,signal
+import time
 
 from .MissionWriter import MissionWriter
 from DigitalTwin.Interfaces.TimeSeriesHandler import TimeSeriesHandler
@@ -76,6 +77,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
     
     # Called by vehicle when the mission has been completed
     def mission_complete(self):
+        print("Mission complete. Waiting 2 seconds to allow other threads to sync.")
+        time.sleep(2)
         self.__logger.info('Writing mission log file...')
         self.__mission_writer.save()
         self.__logger.info('Writing aeroacoustic input file (OST) ...')

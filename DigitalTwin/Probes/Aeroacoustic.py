@@ -16,7 +16,7 @@ class Aeroacoustic(Subscriber):
         self.__drone_id = None
 
     def get_rotor_speed(self, datapoint):
-        self.rotors_speed = [datapoint.controls[i]*9 if datapoint.controls[i] > 0 else 0 for i in range(4)]
+        self.rotors_speed = [datapoint.controls[i]*9*60 if datapoint.controls[i] > 0 else 0 for i in range(4)]
         self.time_us = datapoint.time_usec
 
     def store_lat_lon_alt(self, datapoint):
@@ -33,6 +33,7 @@ class Aeroacoustic(Subscriber):
             self.rows.append(row)
 
     def new_datapoint(self, drone_id, stream_id, datapoint):
+        # Integrate simplified ESC 
         if self.__drone_id is None:
             self.__drone_id = drone_id
         if stream_id == HIL_ACTUATOR_CONTROLS:
@@ -40,10 +41,10 @@ class Aeroacoustic(Subscriber):
                 return
             self.get_rotor_speed(datapoint)
             self.__last_time = datapoint.time_usec
-            self.store_row()
 
         elif stream_id == GLOBAL_FRAME:
             self.store_lat_lon_alt(datapoint)
+            self.store_row()
         elif stream_id == ATTITUDE:
             self.store_attitude(datapoint)
 
