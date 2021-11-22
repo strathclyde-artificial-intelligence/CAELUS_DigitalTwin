@@ -10,7 +10,6 @@ class Battery():
         self.__internal_time = 0
         self.__depth_of_discharge = 0
         self.__motors_n = motors_n
-        self.__last_control = [0] * motors_n
 
     def new_control(self, controls: List[float], dt_hr: float) -> Tuple[float, float]:
         controls = [max(v, 0) for v in controls]
@@ -21,19 +20,15 @@ class Battery():
         ##
         mod_idxs, capacities_extracted, current_demands = [m for m in self.__current_modulation_idxs], [], []
         for i in range(self.__motors_n):
-            motor_pwm = self.__last_control[i]
-            if motor_pwm != 0:
-                _, _, new_mod_idx, capacity_extracted, current_demand = powertrain_ESC_Motor(
-                        self.__last_control[i],
-                        self.__current_modulation_idxs[i],
-                        self.__current_voltage,
-                        dt_hr)
+            _, _, new_mod_idx, capacity_extracted, current_demand = powertrain_ESC_Motor(
+                    controls[i],
+                    self.__current_modulation_idxs[i],
+                    self.__current_voltage,
+                    dt_hr)
 
-                mod_idxs[i] = new_mod_idx
-                capacities_extracted.append(capacity_extracted)
-                current_demands.append(current_demand)
-                
-            self.__last_control[i] = controls[i]
+            mod_idxs[i] = new_mod_idx
+            capacities_extracted.append(capacity_extracted)
+            current_demands.append(current_demand)
 
         new_discharge, new_voltage = batt_disc(self.__depth_of_discharge, sum(capacities_extracted), sum(current_demands))
 
