@@ -95,7 +95,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__state_aggregator_thread.start()
 
         self.__battery_discharge_probe.set_vehicle(vehicle)
-        
+        self.__aeroacoustic_probe.set_vehicle(vehicle)
+
         self.__load_mission_from_payload()
 
     def __load_mission_from_payload(self):

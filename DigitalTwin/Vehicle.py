@@ -57,6 +57,7 @@ class Vehicle(DronekitVehicle):
         self.__logger = logging.getLogger()
         self.__controller = None
         self.__last_wp = -1
+        self.__mission_hanlder_queues = []
 
         self._hil_actuator_controls = HilActuatorControls()
         @self.on_message('HIL_ACTUATOR_CONTROLS')
@@ -83,10 +84,15 @@ class Vehicle(DronekitVehicle):
             4: 'Landing complete'
         }[s]
 
+    def add_mission_hanlder_queue(self, queue):
+        self.__mission_hanlder_queues.append(queue)
+
     def publish_mission_status(self, status):
         if status not in Vehicle.mission_status:
             self.__logger.warn("Tried to publish an invalid mission status!")
         self.__logger.info(f'Mission status updated: {self.__mission_status_to_string(status)}')
+        for q in self.__mission_hanlder_queues:
+            q.put(status)
         if status == Vehicle.LANDING_COMPLETE:
             if self.__controller is None:
                 self.__logger.warn('Mission complete but no handler to notify!')
