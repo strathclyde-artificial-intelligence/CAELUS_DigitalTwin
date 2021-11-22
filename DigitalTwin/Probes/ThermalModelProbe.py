@@ -36,5 +36,8 @@ class ThermalModelProbe(Subscriber):
     def get_payload_temperature(self):
         return self.__state[2]
 
+    def get_payload_time(self):
+        return self.__time_usec
+        
     def subscribes_to_streams(self):
         return [SYSTEM_TIME]

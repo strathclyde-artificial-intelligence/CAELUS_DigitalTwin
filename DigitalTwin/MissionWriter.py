@@ -11,12 +11,14 @@ class MissionWriter(threading.Thread):
         self.data = {
             'payload_temp':[],
             'battery_level':[],
+            'flight_time':0.0
         }
 
         self.__mission_id = mission_id
         self.__thermal_model = None
         self.__battery = None
         self.__esc = None
+        self.__flight_time_sec = 0.0
 
     def run(self):
         while True:
@@ -26,6 +28,7 @@ class MissionWriter(threading.Thread):
                 self.data['payload_temp'].append(new_temp)
             if len(self.data['battery_level']) == 0 or new_batt != self.data['battery_level'][-1]:
                 self.data['battery_level'].append(new_batt)
+            self.data['flight_time'] = self.__thermal_model.get_payload_time() / 1000000
 
     def set_thermal_model(self, tm):
         self.__thermal_model = tm

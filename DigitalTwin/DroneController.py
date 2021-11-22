@@ -152,5 +152,5 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         exit(-1)
 
     def set_time_series_handler(self, ts_handler: TimeSeriesHandler):
-        assert ts_handler is not None
-        self.__telemetry_feedback.set_time_series_handler(ts_handler)
+        if ts_handler is not None:
+            self.__telemetry_feedback.set_time_series_handler(ts_handler)

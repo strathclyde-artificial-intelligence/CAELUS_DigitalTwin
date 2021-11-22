@@ -13,12 +13,14 @@ class TelemetryFeedback(threading.Thread, TimeSeriesHandler):
         self.__streams = {}
         self.__thermal_model = None
         self.__battery = None
-
+        self.__ts_handler = None
+        
     def set_time_series_handler(self, ts_handler: TimeSeriesHandler):
         self.__ts_handler = ts_handler
 
     def new_time_series_stream_available(self, name, stream):
-        self.__ts_handler.new_time_series_stream_available(name, stream)
+        if self.__ts_handler is not None:
+            self.__ts_handler.new_time_series_stream_available(name, stream)
 
     def __default_setup(self, stream_id):
         self.__streams[stream_id] = Queue(maxsize=5)

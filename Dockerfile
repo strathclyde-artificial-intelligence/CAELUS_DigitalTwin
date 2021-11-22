@@ -12,6 +12,7 @@ FROM python:3.7
 RUN apt-get update && apt-get install -y bash
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 COPY --from=intermediate /CAELUS_DigitalTwin /CAELUS_DigitalTwin
+COPY ./.env /CAELUS_DigitalTwin/.env
 RUN apt-get update && apt-get -y install cmake protobuf-compiler
 RUN apt-get install libboost-all-dev -y
 RUN apt install libeigen3-dev

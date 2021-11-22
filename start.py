@@ -32,11 +32,20 @@ def start_with_payload(payload):
 
     sim_payload = SimulatorPayload(payload)
     controller_payload = ControllerPayload(payload)
-    gui, controller, sstack = new_simulation(sim_payload, controller_payload)
+    gui, controller, sstack = new_simulation(sim_payload, controller_payload, headless=True)
+
 
     sstack.start()
-    gui.start()
+    if gui is not None:
+        gui.start()
 
 import json
-with open('mission.json', 'r') as f:
-    start_with_payload(json.loads(f.read()))
+import sys
+
+if __name__ == '__main__':
+    if len(sys.argv) == 1:
+        print("Usage `python3 start.py <mission_file>`")
+        exit(-1)
+    _, filename = sys.argv
+    with open(filename, 'r') as f:
+        start_with_payload(json.loads(f.read()))

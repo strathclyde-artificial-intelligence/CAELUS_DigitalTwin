@@ -24,11 +24,13 @@ class PX4Wrapper(threading.Thread):
         self.daemon = False
 
     def __new_stream_available(self, stream_name, stream):
-        self.__streams.add(stream_name)
-        self.__stream_handler.new_stream_available(stream_name, stream)
+        if self.__stream_handler is not None:
+            self.__streams.add(stream_name)
+            self.__stream_handler.new_stream_available(stream_name, stream)
 
     def __invalidate_stream(self, stream_name):
-        self.__stream_handler.invalidate_stream(stream_name)
+        if self.__stream_handler is not None:
+            self.__stream_handler.invalidate_stream(stream_name)
 
     def __cleanup(self, timeout = 1):
         self.__logger.info('Cleaning up resources for PX4 Wrapper')
