@@ -24,6 +24,9 @@ class Aeroacoustic(Subscriber):
         self.__mission_status_queue = Queue()
         self.__agl_altitude = None
         self.__home_elevation = None
+        self.__mission_status = -1
+        self.__cruise_sample_step = 0
+        self.__cruise_sample_throttle = 10 # Save every x
 
     def get_rotor_speed(self, datapoint):
         rps = self.pwm_to_rps([c if c > 0 else 0 for c in datapoint.controls][:4])
@@ -66,6 +69,12 @@ class Aeroacoustic(Subscriber):
     def store_row(self):
         if self.attitude is not None and self.lat_lon_alt is not None and self.rotors_speed is not None and self.time_us is not None:
             self.__process_mission_status()
+            should_store = self.__cruise_sample_step % self.__cruise_sample_throttle == 0
+            self.__cruise_sample_step += 1
+            if self.__mission_status == Vehicle.TAKING_OFF or self.__mission_status == Vehicle.LANDING:
+                should_store = True
+            if not should_store:
+                return
             row = [*self.lat_lon_alt, round(self.time_us / 1000000.0, 6)]
             for rs in self.rotors_speed:
                 row.extend([rs, *self.attitude])
@@ -74,6 +83,7 @@ class Aeroacoustic(Subscriber):
     def __process_mission_status(self):
         try:
             new_status = self.__mission_status_queue.get_nowait()
+            self.__mission_status = new_status
             if new_status == Vehicle.TAKING_OFF:
                 self.__home_elevation = self.__vehicle.home_location.alt
             if new_status == Vehicle.TAKEOFF_COMPLETE:
@@ -111,7 +121,8 @@ class Aeroacoustic(Subscriber):
     def save(self):
         t = datetime.utcnow()
         rows = [row for row in self.rows]
-        header = f'{len(rows)} {datetime.now().isoformat()}'
+        t_h = datetime.now().isoformat().split(".")[0]+'Z'
+        header = f'{len(rows)} {t_h}'
         rows = self.convert_lon_lat_to_easting_northing(rows)
         rows = self.stringify_rows(rows)
         rows = [header] + rows
