@@ -26,7 +26,7 @@ class Aeroacoustic(Subscriber):
         self.__home_elevation = None
         self.__mission_status = -1
         self.__cruise_sample_step = 0
-        self.__cruise_sample_throttle = 10 # Save every x
+        self.__cruise_sample_throttle = 15 # Save every x
 
     def get_rotor_speed(self, datapoint):
         rps = self.pwm_to_rps([c if c > 0 else 0 for c in datapoint.controls][:4])
@@ -71,8 +71,6 @@ class Aeroacoustic(Subscriber):
             self.__process_mission_status()
             should_store = self.__cruise_sample_step % self.__cruise_sample_throttle == 0
             self.__cruise_sample_step += 1
-            if self.__mission_status == Vehicle.TAKING_OFF or self.__mission_status == Vehicle.LANDING:
-                should_store = True
             if not should_store:
                 return
             row = [*self.lat_lon_alt, round(self.time_us / 1000000.0, 6)]
