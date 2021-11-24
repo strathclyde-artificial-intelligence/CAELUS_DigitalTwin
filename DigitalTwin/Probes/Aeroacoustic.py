@@ -5,7 +5,7 @@ from datetime import datetime
 from bng_latlon import WGS84toOSGB36
 from math import e as E
 from queue import Empty, Queue
-
+import numpy as np
 from DigitalTwin.Vehicle import Vehicle
 
 class Aeroacoustic(Subscriber):
@@ -28,6 +28,26 @@ class Aeroacoustic(Subscriber):
         self.__cruise_sample_step = 0
         self.__cruise_sample_throttle = 15 # Save every x
 
+    @staticmethod
+    def euler_to_rotm(yaw, pitch, roll):
+        Rz_yaw = np.array([
+            [np.cos(yaw), -np.sin(yaw), 0],
+            [np.sin(yaw),  np.cos(yaw), 0],
+            [          0,            0, 1]])
+        Ry_pitch = np.array([
+            [ np.cos(pitch), 0, np.sin(pitch)],
+            [             0, 1,             0],
+            [-np.sin(pitch), 0, np.cos(pitch)]])
+        Rx_roll = np.array([
+            [1,            0,             0],
+            [0, np.cos(roll), -np.sin(roll)],
+            [0, np.sin(roll),  np.cos(roll)]])
+
+        return np.dot(Rz_yaw, np.dot(Ry_pitch, Rx_roll))
+
+    def get_direction_vector_from_rpy(self, r, p, y):
+        return np.array([0,0,1]).dot(Aeroacoustic.euler_to_rotm(y, p, r))
+
     def get_rotor_speed(self, datapoint):
         rps = self.pwm_to_rps([c if c > 0 else 0 for c in datapoint.controls][:4])
         self.rotors_speed = [s * 60 for s in rps]
@@ -40,7 +60,7 @@ class Aeroacoustic(Subscriber):
         self.lat_lon_alt = [datapoint.lat, datapoint.lon, alt]
 
     def store_attitude(self, datapoint):
-        self.attitude = [datapoint.roll, datapoint.pitch, datapoint.yaw]
+        self.attitude = self.get_direction_vector_from_rpy(datapoint.roll, datapoint.pitch, datapoint.yaw)
 
     def set_vehicle(self, v):
         self.__vehicle = v
