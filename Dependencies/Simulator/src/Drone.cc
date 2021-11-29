@@ -36,8 +36,6 @@ void Drone::fake_ground_transform(boost::chrono::microseconds us) {
         this->state[2] = 0;
         // Body frame velocity
         this->state.segment(3, 3) = Eigen::VectorXd::Zero(3);
-        // // Body frame acc
-        // this->dx_state.segment(3, 3) = Eigen::VectorXd::Zero(3);
         // Rotation rate
         this->state.segment(9, 3) = Eigen::VectorXd::Zero(3);
         // Orientation
@@ -49,6 +47,7 @@ void Drone::update(boost::chrono::microseconds us) {
     this->_process_mavlink_messages();
 
     if (this->hil_actuator_controls_msg_n > 300 && !this->should_reply_lockstep) return;
+
     MAVLinkSystem::update(us);
     DynamicObject::update(us);
     this->fake_ground_transform(us);
@@ -96,7 +95,7 @@ void Drone::_publish_state(boost::chrono::microseconds us)
     if (!(this->should_reply_lockstep || this->hil_actuator_controls_msg_n < 300)) return;
 
     this->clock.unlock_time();
-
+    
     if (this->sys_time_throttle_counter++ % 1000) {
         this->_publish_system_time();
     }
@@ -160,7 +159,6 @@ void Drone::_process_hil_actuator_controls(mavlink_message_t m) {
 #endif
     Eigen::VectorXd vec_controls{8};
     for (int i = 0; i < 8; i++) vec_controls[i] = controls.controls[i];
-
     this->virtual_esc.set_pwm(vec_controls);
 }
 

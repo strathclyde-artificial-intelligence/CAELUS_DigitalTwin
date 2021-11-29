@@ -20,6 +20,8 @@ class GodotRouter : public DroneStateProcessor {
 private:    
     UDPSender sender;
     Clock& clock;
+    uint throttle = 5;
+    uint counter = 0;
 public:
 
     GodotRouter(boost::asio::io_service& service, Clock& clock) : sender(service), clock(clock) {}
@@ -50,8 +52,10 @@ public:
     }
 
     void new_drone_state(Eigen::VectorXd state, Eigen::VectorXd dx_state) {
-        DroneStateProcessor::new_drone_state(state, dx_state);
-        sender.send_data(state_to_json(state, dx_state).str());
+        if (this->counter % throttle == 0) {
+            DroneStateProcessor::new_drone_state(state, dx_state);
+            sender.send_data(state_to_json(state, dx_state).str());
+        } this->counter++;
     }
 };
 

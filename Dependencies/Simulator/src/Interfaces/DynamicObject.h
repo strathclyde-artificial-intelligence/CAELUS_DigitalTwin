@@ -61,20 +61,20 @@ protected:
     /**
      * Drone state as populated by the CAELUS_FDM package.
      * <
-     *  x , y , z    [0:3]  vehicle origin with respect to earth-frame (NED m) (ENU when earth)
-     *  u, v, w      [3:6]  body-frame velocity (m/s)
-     *  ɸ , θ , ѱ    [6:9]  (roll, pitch, yaw) orientation with respect to earth-frame (rad)
-     *  p, q, r      [9:12] body-frame orientation velocity (rad/s)
+     *  x , y , z    [0:3]  linear position (Earth Fixed) (NED) (m)
+     *  u, v, w      [3:6]  body-frame velocity (Body Fixed) (m/s)
+     *  ɸ , θ , ѱ    [6:9]  (roll, pitch, yaw) angular position (Earth Fixed) (rad)
+     *  p, q, r      [9:12] Angular velocity (Body Fixed) (rad/s)
      * >
      */
     Eigen::VectorXd state{DYNAMIC_OBJECT_STATE_SIZE};
     /**
      *  (FixedWingEOM.h:evaluate)
      *  Drone state derivative as populated by the CAELUS_FDM package.
-     *  ẋ , ẏ , ż       [0:3]  earth-frame velocity (NED)
-     *  u., v., w.      [3:6]  body-frame acceleration (m/s**2)
-     *  ɸ. , θ. , ѱ.    [6:9]  earth-frame angle rates (Euler rates)
-     *  p. , q. , r.    [9:12] body-frame angular acceleration (What unit?)
+     *  ẋ , ẏ , ż       [0:3]  linear velocity (Earth Fixed) (NED)
+     *  u., v., w.      [3:6]  linear acceleration (Bpdy Fixed) (m/s**2)
+     *  ɸ. , θ. , ѱ.    [6:9]  angular velocity (Earth Fixed) (NED) (rad/s)
+     *  p. , q. , r.    [9:12] angular acceleration (Body Fixed) (rad/s**2)
      */
     Eigen::VectorXd dx_state{DYNAMIC_OBJECT_STATE_SIZE};
 

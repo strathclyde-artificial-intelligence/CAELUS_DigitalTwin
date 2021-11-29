@@ -49,16 +49,15 @@ namespace caelus_fdm {
          */
         int computeF(const double &t, const State &x) override {
             m_F.resize(3);
-            Eigen::Vector3d Vb = x.segment(3,3);
-            double k = -1/2 * rho * drag_coefficient;
-            m_F = k * Vb.norm() * Vb;
+            Eigen::Vector3d airspeed = earth2body(x) * (Eigen::Vector3d{-x[3], -x[4], -x[5]});
+            m_F = airspeed * 3.0 * 0.1;
             return 0;
         }
         int computeM(const double &t, const State &x) override {
             m_M.resize(3);
-            m_M[0] = 0.;
-            m_M[1] = 0.;
-            m_M[2] = 0.;
+            Eigen::Vector3d air_rotation_rate = earth2body(x) * (Eigen::Vector3d{-x[9], -x[10], -x[11]});
+            auto drag_move = air_rotation_rate * 3.0 * 0.1;
+            m_M = drag_move;
             return 0;
         }
 

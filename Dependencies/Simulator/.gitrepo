@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/strathclyde-artificial-intelligence/6-dof-simulator
 	branch = main
-	commit = 38170f1078f6b6db90eadacab8ca44a1f8d17206
-	parent = e2636a2c6e8f5e689276aa3c0421de6f3efdf2f3
+	commit = a8773286c38617855d264554984440662ed7d3b0
+	parent = 58851f57d324e08983a4e33191599c3aa81923d3
 	method = merge
 	cmdver = 0.4.3

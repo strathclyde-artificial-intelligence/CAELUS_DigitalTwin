@@ -256,9 +256,11 @@ public:
     virtual uint64_t get_sim_time() = 0;
     virtual Sensors& get_sensors() = 0;
     
-    virtual Eigen::VectorXd get_state() { }
-    virtual Eigen::VectorXd get_dx_state() { };
+    virtual Eigen::VectorXd get_state() = 0;
+    virtual Eigen::VectorXd get_dx_state() = 0;
 
+    // THIS IS CURRENTLY UNUSED -- Battery is broadcasted from python probe system
+    
     mavlink_message_t battery_status_msg(uint8_t system_id, uint8_t component_id) {
         uint8_t battery_id = 0;
         uint8_t battery_function = 1; // MAV_BATTERY_FUNCTION_ALL

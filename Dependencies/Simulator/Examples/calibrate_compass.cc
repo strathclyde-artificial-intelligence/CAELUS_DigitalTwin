@@ -29,7 +29,6 @@ public:
         rotation_vec[0] = 0;
         rotation_vec[1] = 0;
         rotation_vec[2] = -0.5;
-        this->rotation_vec = rotation_vec;
         this->poses.push_back(Attitude{0.0, 0.0, 0});
         this->poses.push_back(Attitude{90*DEG_RAD, 0.0, 0});
         this->poses.push_back(Attitude{180*DEG_RAD, 0.0, 0});
@@ -117,7 +116,7 @@ int main()
     while(1) {
         char buff[10] = {0};
         std::cout << ">>> ";
-        scanf("%c", &buff);
+        scanf("%c", (char*)&buff);
         d.next_pose();
     }
     t1.join();

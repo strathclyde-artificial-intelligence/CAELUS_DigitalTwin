@@ -58,7 +58,6 @@ Eigen::Vector3d DroneSensors::get_body_frame_angular_acceleration() {
 Eigen::Vector3d DroneSensors::get_magnetic_field() {
     LatLonAlt lLa = this->get_lat_lon_alt();
     Eigen::Vector3d magfield = magnetic_field_for_latlonalt(lLa);
-    // TODO: check this rotation necessary?
     return caelus_fdm::earth2body(this->drone.get_vector_state()) * magfield;
 }
 

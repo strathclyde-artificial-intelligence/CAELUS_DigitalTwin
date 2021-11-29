@@ -1,6 +1,9 @@
 #ifndef __TCPCONNECTION_H__
 #define __TCPCONNECTION_H__
 
+#pragma GCC diagnostic ignored "-W#pragma-messages"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 #include "../Interfaces/DataReceiver.h"
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>

@@ -1,6 +1,8 @@
 #ifndef __MAVLINKSYSTEM_H__
 #define __MAVLINKSYSTEM_H__
 
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 #include <mavlink.h>
 #include <chrono>
 #include <boost/asio.hpp>

@@ -19,21 +19,6 @@ caelus_fdm::RotationMatrix caelus_fdm::eulerRate2angularVelocity(const State &x)
     return rot;
 }
 
-//    RotationMatrix eulerRate2angularVelocity(const State &x)
-//    {
-//        auto phi = x[6], theta = x[7];
-//        RotationMatrix Rpsi   = rotateAroundAxisByAngle(-psi,3);
-//        RotationMatrix Rtheta = rotateAroundAxisByAngle(-theta,2);
-//        RotationMatrix Rphi   = rotateAroundAxisByAngle(-phi,1);
-//        RotationMatrix I =  Eigen::MatrixXd::Identity(3,3);
-//        Eigen::Matrix3d rot;
-//        rot.col(0) = I.col(0);
-//        rot.col(1) = Rphi*I.col(1);
-//        rot.col(2) = (Rphi*Rtheta)*I.col(2);
-//        return rot;
-//    }
-
-
 caelus_fdm::RotationMatrix caelus_fdm::angularVelocity2eulerRate(const State &x)
 {
     auto phi = x[6], theta = x[7];
@@ -43,8 +28,3 @@ caelus_fdm::RotationMatrix caelus_fdm::angularVelocity2eulerRate(const State &x)
             0, sin(phi)/cos(theta), cos(phi)/cos(theta);
     return rot;
 }
-
-//    RotationMatrix angularVelocity2eulerRate(const State &x)
-//    {
-//        return eulerRate2angularVelocity(x).inverse().eval();
-//    }

@@ -1,6 +1,8 @@
 #ifndef __MAVLINKCONNECTIONHANDLER_H__
 #define __MAVLINKCONNECTIONHANDLER_H__
 
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 #include <boost/asio.hpp>
 #include <boost/signals2/signal.hpp>
 #include "../Interfaces/MAVLinkMessageHandler.h"

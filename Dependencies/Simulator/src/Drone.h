@@ -16,7 +16,7 @@
 #include "Interfaces/MAVLinkMessageRelay.h"
 #include "Interfaces/MAVLinkMessageHandler.h"
 #include "Interfaces/DroneStateEncoder.h"
-#include "ESCs/FixedWingESC.h"
+#include "ESCs/QuadrotorESC.h"
 #include "DroneSensors.h"
 #include "Interfaces/Clock.h"
 #include "Interfaces/DroneStateProcessor.h"
@@ -58,7 +58,7 @@ private:
 
 
     DroneConfig config;
-    FixedWingESC virtual_esc{config};
+    QuadrotorESC virtual_esc{config};
 
     MAVLinkMessageRelay& connection;
     boost::lockfree::queue<mavlink_message_t, boost::lockfree::capacity<50>> message_queue;
@@ -97,10 +97,10 @@ public:
     uint8_t get_mav_mode() override;
     Sensors& get_sensors() override;
     
-    Eigen::VectorXd get_state() {
+    Eigen::VectorXd get_state() override {
         return this->state;
     }
-    Eigen::VectorXd get_dx_state() {
+    Eigen::VectorXd get_dx_state() override {
         return this->dx_state;
     };
 };
