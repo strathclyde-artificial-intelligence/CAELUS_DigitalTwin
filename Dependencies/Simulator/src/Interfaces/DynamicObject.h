@@ -91,17 +91,22 @@ protected:
 
         dx_state = Eigen::VectorXd::Zero(12);
 
+        // Linear velocity in earth frame
         dx_state.segment(0,3) = caelus_fdm::body2earth(state)*Vb;
+        // Linear acceleration
         dx_state.segment(3,3)  = total_forces/this->weight_force_m.get_mass(); // external forces
-        
         dx_state.segment(3,3) -= wb.cross(Vb.eval()); // account for frame dependent acc
+
         // earth-frame angle rates
         dx_state.segment(6,3) = caelus_fdm::angularVelocity2eulerRate(state)*wb;
         // body-frame angular acceleration
         
         dx_state.segment(9,3)  = total_momenta; // external torques
         dx_state.segment(9,3) -= wb.cross( this->moment_of_inertia*wb.eval() ); // account for frame dependent ang acc
-        dx_state.segment(9,3)  = this->moment_of_inertia.colPivHouseholderQr().solve(dx_state.segment(9,3).eval()); // inertia matrix into account
+        // Ax = B
+        // x = QR decomposition with column pivoting
+        // inertia matrix into account
+        dx_state.segment(9,3)  = this->moment_of_inertia.colPivHouseholderQr().solve(dx_state.segment(9,3).eval()); 
 
         // Remove numerical noise < 1e-12
         for (auto i = 0; i < dx_state.size(); i++)
