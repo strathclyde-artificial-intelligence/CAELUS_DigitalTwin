@@ -32,7 +32,7 @@ def start_with_payload(payload):
 
     sim_payload = SimulatorPayload(payload)
     controller_payload = ControllerPayload(payload)
-    gui, controller, sstack = new_simulation(sim_payload, controller_payload, headless=True)
+    gui, controller, sstack = new_simulation(sim_payload, controller_payload, headless=False)
 
 
     sstack.start()

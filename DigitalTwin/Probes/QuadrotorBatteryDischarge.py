@@ -12,11 +12,10 @@ class QuadrotorBatteryDischarge(Subscriber):
     def __init__(self):
         super().__init__()
         # REMOVED until MAZE will fix the model
-        # self.__battery = Battery(25.2, 0.0)
-        self.__battery = LinearBattery()
+        self.__battery = Battery(25.2, 0.0)
+        # self.__battery = LinearBattery()
         self.__vehicle = None
         self.__last_timestamp = 0
-        self.__temp_depth_of_discharge = 0
 
     def set_vehicle(self, vehicle):
         self.__vehicle: Vehicle = vehicle
@@ -34,10 +33,6 @@ class QuadrotorBatteryDischarge(Subscriber):
         self.__last_timestamp = ts
 
         curr_voltage, depth_of_discharge = self.__battery.new_control(datapoint.controls, dt * US_TO_HR)
-        curr_voltage = 25
-        self.__temp_depth_of_discharge += 0.001
-        depth_of_discharge = self.__temp_depth_of_discharge
-
         battery_level = int(100 - depth_of_discharge)
 
         self.__vehicle.message_factory.battery_status_send(

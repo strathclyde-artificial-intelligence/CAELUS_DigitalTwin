@@ -8,8 +8,8 @@ def test_battery_discharge():
 
 def test_powertrain():
     w,thrust,mod,qcon,idis = powertrain_ESC_Motor(0.5,  0.3, 22, 0.004)
-    assert round(w,4) == 2396.907
-    assert round(thrust,4) == 356.2001
-    assert round(mod,4) == 0.3369
-    assert round(qcon,4) == 9.3999
-    assert round(idis,4) == 2611.0833
+    assert round(w,4) == 159.4633
+    assert round(thrust,4) == 1.5766
+    assert round(mod,4) == 0.2973
+    assert round(qcon,4) == 0.0208
+    assert round(idis,4) == 5.7784

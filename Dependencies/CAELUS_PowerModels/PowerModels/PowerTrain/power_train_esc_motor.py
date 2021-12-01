@@ -28,31 +28,26 @@ from cmath import sqrt as csqrt
 #   All motors (including cruise motor) are identical
 
 def powertrain_ESC_Motor(w_ref, m_init, v_batt, dT) -> [float, float, float, float, float]:
-    # ESC Config Parameters
-    n_conv = 90
-    Nseries = 7    
-    Vcell_max = 4.2 
-    Vmax = Nseries*Vcell_max  
+    n_conv = 90 #   ESC Converter Efficiency
+    Nseries = 6 #   Number of battery cells in series
+    Vcell_max = 4.2 #   %   Maximum cell voltage
+    Vmax = Nseries*Vcell_max #   Maximum battery voltage
 
-    # Motor Config Parameters
-    kt = 6.2e-5            
-    km = kt/42             
-    np = 6                
-    Me = 1/(490*np*(pi/30))
-    Mt = Me                
-    Rs = 0.10              
-    
+    kt = 6.2e-5 # Thrust Factor: Thrust = kt*omega**2 (N)
+    km = kt/42 # Motor Coefficient: Torque = km*omega**2   (Nm)
+    np = 3 # Number of poles on the motor       (Ask Avy?)  
+    Me = 1/(490*np*(pi/30)) # EMF constant: (V / rad/s)
+    Mt = Me # Torque constant: (Nm/Amp)
+    Rs = 0.10 # Motor resistance: (ohm)
+    Im = 0.0007 # Motor and Propeller inertia
 
-    # Maximum motor speed
     w_max = ((-Mt * Me / Rs) + np*csqrt((Mt * Me / Rs)**2 - 4 * km * -Mt / Rs * Vmax)) / (2 * km)
-    w_max = w_max.real
-    
-    Vm = m_init*v_batt     
-    w = (  (-Mt*Me/Rs) + np*csqrt( (Mt*Me/Rs)**2 - 4*km*(-Mt/Rs)*Vm ) )/(2*km)
-    w = w.real
-    w_ref_r = w_ref * w_max   
 
-    tol = 1                # Tolerance value to allow convergence: rad/s
+    Vm = m_init*v_batt # Voltage applied to motor
+    w = (  (-Mt*Me/Rs) + np*csqrt( (Mt*Me/Rs)**2 - 4*km*(-Mt/Rs)*Vm ) )/(2*km)
+    w_ref_r = w_ref * w_max # motor reference speed in rad/s
+
+    tol = 1 # Tolerance value to allow convergence: rad/s
     mod = m_init
 
     ii = 0
@@ -62,12 +57,11 @@ def powertrain_ESC_Motor(w_ref, m_init, v_batt, dT) -> [float, float, float, flo
         Vm = mod*v_batt
         w = ((-Mt * Me / Rs) + np*csqrt(pow((Mt * Me / Rs), 2) - 4.0 * km * -Mt / Rs * Vm)) / (2.0 * km)
         ii+=1
-        if ii > 1000:
-            print("[BATTERY POWER TRAIN ERROR] Max loop count reached with initial params:")
-            print(w_ref, m_init, v_batt, dT)
+        if ii > 30000:
+            print("Broke out after 10000 loops")
             break
         
-    w = w.real
+    w = w.real/9.5492965964254
     thrust = kt * pow(w, 2)
     Torque = km * pow(w, 2)
 

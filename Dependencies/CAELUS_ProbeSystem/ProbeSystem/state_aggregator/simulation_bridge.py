@@ -29,7 +29,7 @@ class SimulationBridge():
         if self.__should_manage_vehicle:
             try:
                 print(f'Initialising bridge...')
-                vehicle = kit.connect('127.0.0.1:14540', wait_ready=True)
+                vehicle = kit.connect('127.0.0.1:14550', wait_ready=True)
                 self.vehicle_acquired(is_done_lock, vehicle)
             except Exception as e:
                 print('Failed in initialising SimulationBridge')

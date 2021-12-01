@@ -16,15 +16,19 @@ class Battery():
 
         # HOTFIX FOR FUNCTION THAT HANGS -- MAZHE SHOULD PROVIDE A FIX
         # DELETE WHEN FIXED!!
-        controls = [c if c > 0.1 else 0 for c in controls]
+        controls = [c if c > 0.12 else 0 for c in controls]
         ##
         mod_idxs, capacities_extracted, current_demands = [m for m in self.__current_modulation_idxs], [], []
         for i in range(self.__motors_n):
-            _, _, new_mod_idx, capacity_extracted, current_demand = powertrain_ESC_Motor(
-                    controls[i],
-                    self.__current_modulation_idxs[i],
-                    self.__current_voltage,
-                    dt_hr)
+            c = controls[i]
+            if c > 0:
+                _, _, new_mod_idx, capacity_extracted, current_demand = powertrain_ESC_Motor(
+                        controls[i],
+                        self.__current_modulation_idxs[i],
+                        self.__current_voltage,
+                        dt_hr)
+            else:
+                new_mod_idx, capacity_extracted, current_demand = mod_idxs[i], 0, 0
 
             mod_idxs[i] = new_mod_idx
             capacities_extracted.append(capacity_extracted)
