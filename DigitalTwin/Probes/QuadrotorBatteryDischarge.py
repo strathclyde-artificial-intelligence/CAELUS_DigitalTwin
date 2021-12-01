@@ -4,18 +4,20 @@ from PowerModels.PowerTrain.Battery import Battery
 from .LinearBattery import LinearBattery
 from ..Vehicle import Vehicle
 from time import time
+from ..Interfaces.DBAdapter import DBAdapter
 
 US_TO_HR = 1 / 3.6e9
 
 class QuadrotorBatteryDischarge(Subscriber):
     
-    def __init__(self):
+    def __init__(self, writer: DBAdapter):
         super().__init__()
         # REMOVED until MAZE will fix the model
         self.__battery = Battery(25.2, 0.0)
         # self.__battery = LinearBattery()
         self.__vehicle = None
         self.__last_timestamp = 0
+        self.__writer: DBAdapter = writer
 
     def set_vehicle(self, vehicle):
         self.__vehicle: Vehicle = vehicle
@@ -46,6 +48,8 @@ class QuadrotorBatteryDischarge(Subscriber):
             -1, # energy consumed
             int(battery_level), # battery remaining
         )
+
+        self.__writer.store({'battery_level': battery_level})
 
     def subscribes_to_streams(self):
         return [HIL_ACTUATOR_CONTROLS]

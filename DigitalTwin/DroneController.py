@@ -7,7 +7,8 @@ from dataclasses import dataclass
 import os,signal
 import time
 
-from .MissionWriter import MissionWriter
+from DigitalTwin.Interfaces.DBAdapter import DBAdapter
+
 from DigitalTwin.Interfaces.TimeSeriesHandler import TimeSeriesHandler
 from DigitalTwin.Probes.ThermalModelProbe import ThermalModelProbe
 from .VehicleConnectionManager import VehicleConnectionManager
@@ -22,6 +23,7 @@ from .Probes.QuadrotorBatteryDischarge import QuadrotorBatteryDischarge
 from .Interfaces.TimeSeriesHandler import TimeSeriesHandler
 from .PayloadModels import ControllerPayload
 from .TelemetryFeedback import TelemetryFeedback
+from .MongoDBWriter import MongoDBWriter
 
 @dataclass
 class Mission():
@@ -34,32 +36,31 @@ class Mission():
     dis_token: str
 
 class DroneController(VehicleManager, MissionManager, Stoppable):
-    def __init__(self, controller_payload: ControllerPayload):
+    def __init__(self, controller_payload: ControllerPayload, writer: DBAdapter):
         self.__controller_payload = controller_payload
         self.__connection_manager = VehicleConnectionManager(self)
         self.__commander = DroneCommander()
         self.__state_aggregator = StateAggregator(controller_payload.drone_id if controller_payload is not None else "unknown_id", should_manage_vehicle=False)
         self.__logger = logging.getLogger(__name__)
         self.__state_aggregator_thread = None
-        self.__mission_writer = MissionWriter(controller_payload.operation_id)
-        self.__setup_probes()
         self.__connection_manager.connect_to_vehicle()
         self.__telemetry_feedback = TelemetryFeedback()
+        self.__writer = writer
+        self.__setup_probes()
 
     def __setup_probes(self):
         self.__logger.info('Setting up probes')
         self.__anra_probe = AnraTelemetryPush()
         
-        self.__battery_discharge_probe = QuadrotorBatteryDischarge()
-        # TEMPORARY -- THIS SHOULD GO IN THE SIMULATOR
-        self.__thermal_model_probe = ThermalModelProbe(integrate_every_us= 0.004 / 3600 )
+        self.__battery_discharge_probe = QuadrotorBatteryDischarge(self.__writer)
+        self.__thermal_model_probe = ThermalModelProbe(self.__writer, integrate_every_us= 0.004 / 3600 )
         
         # Coupled but only instance that requires cross probe communication
         # THIS MUST NOT BE DELETED
         self.__anra_probe.set_payload_handler(self.__thermal_model_probe)
         # ----
 
-        self.__aeroacoustic_probe = Aeroacoustic()
+        self.__aeroacoustic_probe = Aeroacoustic(self.__writer)
 
         for probe in [
             self.__anra_probe,
@@ -111,10 +112,6 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
                 self.__controller_payload.drone_id,
                 self.__controller_payload.dis_auth_token
             ))
-
-            self.__mission_writer.set_battery(self.__battery_discharge_probe.get_battery())
-            self.__mission_writer.set_thermal_model(self.__thermal_model_probe)
-            self.__mission_writer.start()
 
             self.__telemetry_feedback.set_battery(self.__battery_discharge_probe.get_battery())
             self.__telemetry_feedback.set_thermal_model(self.__thermal_model_probe)

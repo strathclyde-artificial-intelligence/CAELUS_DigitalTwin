@@ -6,11 +6,12 @@ from bng_latlon import WGS84toOSGB36
 from math import e as E
 from queue import Empty, Queue
 import numpy as np
+from DigitalTwin.Interfaces.DBAdapter import DBAdapter
 from DigitalTwin.Vehicle import Vehicle
 
 class Aeroacoustic(Subscriber):
     
-    def __init__(self):
+    def __init__(self, writer: DBAdapter):
         super().__init__()
         self.lat_lon_alt = None
         self.rotors_speed = None
@@ -24,7 +25,7 @@ class Aeroacoustic(Subscriber):
         self.__mission_status_queue = Queue()
         self.__agl_altitude = None
         self.__home_elevation = None
-        self.__mission_status = -1
+        self.__writer: DBAdapter = writer
         self.__cruise_sample_step = 0
         self.__cruise_sample_throttle = 15 # Save every x
 
@@ -96,7 +97,7 @@ class Aeroacoustic(Subscriber):
             row = [*self.lat_lon_alt, round(self.time_us / 1000000.0, 6)]
             for rs in self.rotors_speed:
                 row.extend([rs, *self.attitude])
-            self.rows.append(row)
+            self.__writer.store({'aeroacoustic': row})
 
     def __process_mission_status(self):
         try:
