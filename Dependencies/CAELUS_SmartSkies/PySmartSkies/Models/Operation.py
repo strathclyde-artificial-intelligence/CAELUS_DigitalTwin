@@ -3,6 +3,13 @@ from ..Logger import Logger
 from .JSONDeserialiser import JSONDeserialiser
 from .FlightVolume import FlightVolume
 from pyproj import Geod
+from ..Helpers.Sutherland_Hodgman import PolygonClipper
+from itertools import chain, zip_longest
+
+clipper = PolygonClipper()
+
+def interleave(l1, l2):
+    return [x for x in chain.from_iterable(zip_longest(l1, l2)) if x is not None]
 
 class Operation(JSONDeserialiser):
 
@@ -28,11 +35,34 @@ class Operation(JSONDeserialiser):
         return [(lat, lon) for lat, lon in zip(result.lats, result.lons)]
 
     def get_waypoints(self, max_distance=850):
+        intersection_hulls = [
+            clipper(self.operation_volumes[i].coordinates, self.operation_volumes[i+1].coordinates) for i in range(len(self.operation_volumes) - 1)
+        ]
+        intersection_centres = [
+            FlightVolume.get_centre_of_convex_hull(intersection_hulls[i], self.operation_volumes[i].altitude_upper_w84, self.operation_volumes[i].altitude_lower_w84) for i in range(len(intersection_hulls))
+        ]
         waypoints = [volume.get_centre() for volume in self.operation_volumes]
-        start, end = waypoints[0], waypoints[-1]
-        lats_lons = self.__interpolate_with_max_distance(start, end, max_distance)
+        waypoints = [waypoints[0]] + interleave(intersection_centres, waypoints[1:-1]) + [waypoints[-1]]
+        latlons = []
+        for i in range(len(waypoints) - 1):
+            start = waypoints[i]
+            end = waypoints[i+1]
+            new_lats_lons = self.__interpolate_with_max_distance(start, end, max_distance)
+            latlons.extend(new_lats_lons)
         alts = [w[-1] for w in waypoints]
-        return [(lat_lon[0], lat_lon[1], alt) for lat_lon, alt in zip(lats_lons, alts)]
+        return [(lat_lon[0], lat_lon[1], alt) for lat_lon, alt in zip(latlons, alts)]
+
+    def get_takeoff_location(self):
+        start_v = self.operation_volumes[0]
+        lat, lon, _ = start_v.get_centre()
+        alt = start_v.altitude_lower_w84
+        return (lat, lon, alt)
+
+    def get_landing_location(self):
+        end_v = self.operation_volumes[-1]
+        lat, lon, _ = end_v.get_centre()
+        alt = end_v.altitude_lower_w84
+        return (lat, lon, alt)
 
     def __repr__(self):
         return f'<Operation|reference={self.reference_number}>'

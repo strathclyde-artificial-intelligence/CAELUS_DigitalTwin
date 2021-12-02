@@ -5,6 +5,16 @@ from ..Helpers.AttrDict import AttrDict
 class FlightVolume(JSONDeserialiser):
 
     @staticmethod
+    def get_centre_of_convex_hull(coordinates, max_alt, min_alt):
+        xs = [latitude for latitude,_ in coordinates]
+        ys = [longitude for _,longitude in coordinates]
+        return [
+            max(xs) - ((max(xs) - min(xs)) / 2),
+            max(ys) - ((max(ys) - min(ys)) / 2),
+            min_alt + (max_alt - min_alt) / 2
+        ]    
+
+    @staticmethod
     def feet_to_meters(feet):
         return feet / 3.281
 
@@ -24,15 +34,9 @@ class FlightVolume(JSONDeserialiser):
         self.altitude_upper_w84 = FlightVolume.feet_to_meters(volumes_dict.altitude_upper_w84.value)
         # there seems to be an extra list wrapper around the coordinate array
         self.coordinates = volumes_dict.outline_polygon.coordinates[0]
-        
+
     def get_centre(self):
-        xs = [latitude for latitude,_ in self.coordinates]
-        ys = [longitude for _,longitude in self.coordinates]
-        return [
-            max(xs) - ((max(xs) - min(xs)) / 2),
-            max(ys) - ((max(ys) - min(ys)) / 2),
-            (self.altitude_upper_w84 - self.altitude_lower_w84) / 2
-        ]
+        return FlightVolume.get_centre_of_convex_hull(self.coordinates, self.altitude_upper_w84, self.altitude_lower_w84)
 
     def __repr__(self):
         return f'<FlightVolume>'

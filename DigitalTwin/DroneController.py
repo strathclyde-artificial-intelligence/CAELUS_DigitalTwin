@@ -77,9 +77,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         print("Mission complete. Waiting 2 seconds to allow other threads to sync.")
         time.sleep(2)
         self.__logger.info('Writing mission log file...')
-        self.__mission_writer.save()
         self.__logger.info('Writing aeroacoustic input file (OST) ...')
-        self.__aeroacoustic_probe.save()
+        # self.__aeroacoustic_probe.save()
         os.kill(os.getpid(), signal.SIGINT)
 
     def vehicle_available(self, vehicle):

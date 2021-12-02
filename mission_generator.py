@@ -61,7 +61,7 @@ def make_operation(dis_api: DIS_API):
     drone = drones[-2]
     print(deliveries)
     effective_time_begin = datetime.datetime.utcnow()
-    effective_time_begin += datetime.timedelta(minutes=60)
+    effective_time_begin += datetime.timedelta(minutes=2)
     ops = dis_api.create_operation(deliveries[-1], drone, control_areas[-1], effective_time_begin.isoformat())
     op_details = dis_api.get_operation_details_with_delivery_id(deliveries[-1].id)
     
@@ -79,7 +79,8 @@ def make_operation(dis_api: DIS_API):
         "aeroacoustic_model_timestep": 0.004,
         "drone_config":{},
         "g_acceleration": 9.81,
-        "initial_lon_lat_alt": wps[0]
+        "initial_lon_lat_alt": op.get_takeoff_location(),
+        "final_lon_lat_alt":op.get_landing_location()
     }
 
     return json.dumps(payload)

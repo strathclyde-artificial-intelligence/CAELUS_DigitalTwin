@@ -84,7 +84,7 @@ class AnraTelemetryPush(Subscriber):
         }
 
         self.__remote_ip = '54.243.221.198'
-        self.__remote_port = 21001
+        self.__remote_port = 51001
         self.__send_thread = None
 
     def start_sending_telemetry(self,
