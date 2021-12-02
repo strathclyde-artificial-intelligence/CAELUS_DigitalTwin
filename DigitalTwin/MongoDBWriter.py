@@ -58,7 +58,6 @@ class MongoDBWriter(Thread, DBAdapter):
 
         query = { PUSH : {}, SET : {} }
         for k,v in data.items():
-            print(k,v)
             if type(v) == list and len(v) > 0:
                 query[PUSH][k] = {EACH:v}
             else:
