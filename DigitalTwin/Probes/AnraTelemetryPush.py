@@ -172,7 +172,7 @@ class AnraTelemetryPush(Subscriber):
             self.data['yaw'] * RAD_TO_DEG,
             self.get_climbrate(),
             self.data['heading'],
-            100,
+            self.data['battery_level'],
             'quadrotor',
             self.drone_registration,
             str(uuid.uuid4()),
@@ -186,7 +186,7 @@ class AnraTelemetryPush(Subscriber):
             self.pack_location(),
             self.get_timestamp(),
             self.get_timestamp(),
-            self.data['heading'], # why duplicate?
+            self.data['yaw'], # why duplicate?
             'TRUE_NORTH',
             'DEG',
             self.data['ground_speed'] * M_PER_SEC_TO_KNOTS,
@@ -220,9 +220,11 @@ class AnraTelemetryPush(Subscriber):
             self.data['heading'] = datapoint
         elif stream_id == GROUND_SPEED:
             self.data['ground_speed'] = datapoint
+        elif stream_id == BATTERY:
+            self.data['battery_level'] = datapoint.level
 
     def set_payload_handler(self, pl):
         self.__payload_handler = pl
 
     def subscribes_to_streams(self):
-        return [ATTITUDE, GPS, GLOBAL_FRAME, VELOCITY, HEADING, GROUND_SPEED]
+        return [ATTITUDE, GPS, GLOBAL_FRAME, VELOCITY, HEADING, GROUND_SPEED, BATTERY]
