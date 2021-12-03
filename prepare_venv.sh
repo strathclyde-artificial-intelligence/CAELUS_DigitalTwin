@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-VENV_LOCATION="./venv";
+VENV_LOCATION=$1;
 
 if ! [[ -d $VENV_LOCATION ]]; then
     echo "Virtual environment not present. Creating virtual environment named 'venv' at $VENV_LOCATION.";

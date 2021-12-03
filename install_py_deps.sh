@@ -1,5 +1,5 @@
 DEPENDENCIES_FOLDER=$1
-
+VENV_LOCATION=$2
 
 PROBE_SYSTEM="${DEPENDENCIES_FOLDER}/CAELUS_ProbeSystem";
 THERMAL_MODEL="${DEPENDENCIES_FOLDER}/CAELUS_ThermalModel";
@@ -11,10 +11,10 @@ echo "[🚚] Installing Python Dependencies";
 for DEP in ${PYTHON_DEPS[@]};
 do 
     echo "- Installing ${DEP##*/}"
-    pip3 install $DEP --upgrade
+    ${VENV_LOCATION}/bin/pip3 install $DEP --upgrade
     echo "- Installing ${DEP##*/}'s Dependencies"
-    pip3 install -r "${DEP}/requirements.txt"
+    ${VENV_LOCATION}/bin/pip3 install -r "${DEP}/requirements.txt"
 done
 
 echo "[🚚] Installing DigitalTwin Python Dependencies"
-pip3 install -r "requirements.txt"
+${VENV_LOCATION}/bin/pip3 install -r "requirements.txt"
