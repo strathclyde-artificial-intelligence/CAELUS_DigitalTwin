@@ -7,6 +7,7 @@ from PySmartSkies.Credentials import DIS_Credentials, CVMS_Credentials
 from PySmartSkies.Session import Session
 import json
 from start import start_with_payload
+import time
 
 load_dotenv()
 
@@ -59,13 +60,13 @@ import datetime
 def make_operation(dis_api: DIS_API):
     deliveries, pilots, drones, control_areas = dis_api.get_requested_deliveries()
     drone = drones[-2]
-    print(deliveries)
-    effective_time_begin = datetime.datetime.utcnow()
+    effective_time_begin = datetime.datetime.now(datetime.timezone.utc)
     effective_time_begin += datetime.timedelta(minutes=2)
     ops = dis_api.create_operation(deliveries[-1], drone, control_areas[-1], effective_time_begin.isoformat())
     op_details = dis_api.get_operation_details_with_delivery_id(deliveries[-1].id)
     
     op: Operation = ops[0]
+    print([v.coordinates for v in op.operation_volumes])
     wps = op.get_waypoints()
     payload = {
         'waypoints': wps,
@@ -79,6 +80,7 @@ def make_operation(dis_api: DIS_API):
         "aeroacoustic_model_timestep": 0.004,
         "drone_config":{},
         "g_acceleration": 9.81,
+        "effective_start_time": time.mktime(effective_time_begin.timetuple()),
         "initial_lon_lat_alt": op.get_takeoff_location(),
         "final_lon_lat_alt":op.get_landing_location()
     }

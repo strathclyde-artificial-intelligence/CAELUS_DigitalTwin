@@ -50,7 +50,7 @@ class Operation(JSONDeserialiser):
             new_lats_lons = self.__interpolate_with_max_distance(start, end, max_distance)
             latlons.extend(new_lats_lons)
         alts = [w[-1] for w in waypoints]
-        return [(lat_lon[0], lat_lon[1], alt) for lat_lon, alt in zip(latlons, alts)]
+        return [(lat_lon[0], lat_lon[1], alt) for lat_lon, alt in zip(latlons, alts)] + [self.get_landing_location()]
 
     def get_takeoff_location(self):
         start_v = self.operation_volumes[0]

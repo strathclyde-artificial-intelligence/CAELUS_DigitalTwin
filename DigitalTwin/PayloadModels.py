@@ -33,11 +33,18 @@ class ControllerPayload(Unpackable):
         self.drone_registration_number: str = get(config_dict, 'drone_registration_number')
         self.dis_auth_token: str = get(config_dict, 'dis_auth_token')
 
+class OrchestratorPayload(Unpackable):
+    
+    def __init__(self, config_dict):
+        self.effective_start_time: str = get(config_dict, 'effective_start_time')
+
+
 class SimulatorPayload(Unpackable):
 
     def __init__(self, config_dict):
         self.drone_config: Dict[str, float] = get(config_dict, 'drone_config')
         self.g_acceleration: float = get(config_dict, 'g_acceleration')
         self.initial_lon_lat_alt: Tuple[float, float, float] = get(config_dict, 'initial_lon_lat_alt')
+        self.final_lon_lat_alt: Tuple[float, float, float] = get(config_dict, 'final_lon_lat_alt')
         self.thermal_model_timestep: float = get(config_dict, 'thermal_model_timestep')
         self.aeroacoustic_model_timestep: float = get(config_dict, 'aeroacoustic_model_timestep')
