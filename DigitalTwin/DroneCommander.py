@@ -17,7 +17,7 @@ class DroneCommander():
 
     @staticmethod
     def mission_from_waypoints(waypoints: Tuple[float, float, float]):
-        commands = DroneCommander.commands_from_waypoints(waypoints)
+        commands = DroneCommander.commands_from_waypoints(waypoints[:-1]) # Last waypoint should be landing
         commands.insert(0,Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 1, 0, 0, 0, float('nan'), waypoints[0][1], waypoints[0][0], waypoints[0][2]))
         commands.append(Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL, mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 1, 0, 0, 0, float('nan'), waypoints[-1][1], waypoints[-1][0], waypoints[-1][2]))
         return commands

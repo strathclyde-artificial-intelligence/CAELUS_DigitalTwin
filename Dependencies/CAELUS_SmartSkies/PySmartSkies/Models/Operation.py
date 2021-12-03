@@ -29,10 +29,12 @@ class Operation(JSONDeserialiser):
         self.operation_volumes = [FlightVolume(json) for json in self.operation_volumes]
 
     def __interpolate_with_max_distance(self, start, end, max_dist):
+        def lerp(i_percentage, start_alt, end_alt):
+            return (1 - i_percentage) * start_alt + i_percentage * end_alt
         geod = Geod(ellps='WGS84')
         az12,az21,dist = geod.inv(start[1], start[0], end[1], end[0])
         result = geod.fwd_intermediate(start[1],start[0],az12,npts=ceil(dist / max_dist),del_s=max_dist, initial_idx=0, terminus_idx=0)
-        return [(lat, lon) for lat, lon in zip(result.lats, result.lons)]
+        return [(lat_lon[0], lat_lon[1], lerp(i / len(result.lats), start[-1], end[-1])) for i, lat_lon in enumerate(zip(result.lats, result.lons))]
 
     def get_waypoints(self, max_distance=850):
         intersection_hulls = [
@@ -49,8 +51,7 @@ class Operation(JSONDeserialiser):
             end = waypoints[i+1]
             new_lats_lons = self.__interpolate_with_max_distance(start, end, max_distance)
             latlons.extend(new_lats_lons)
-        alts = [w[-1] for w in waypoints]
-        return [(lat_lon[0], lat_lon[1], alt) for lat_lon, alt in zip(latlons, alts)] + [self.get_landing_location()]
+        return [(lat_lon_alt[0], lat_lon_alt[1], lat_lon_alt[2]) for lat_lon_alt in latlons] + [self.get_landing_location()]
 
     def get_takeoff_location(self):
         start_v = self.operation_volumes[0]
