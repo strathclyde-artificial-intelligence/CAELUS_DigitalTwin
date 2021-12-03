@@ -45,5 +45,4 @@ RUN apt-get install -y bc
 WORKDIR /CAELUS_DigitalTwin
 RUN bash install_all.sh
 
-CMD source venv/bin/activate
-ENTRYPOINT ["python3", "start.py"]
+ENTRYPOINT ["./venv/bin/python", "start.py"]
