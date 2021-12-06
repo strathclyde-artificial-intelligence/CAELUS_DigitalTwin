@@ -55,7 +55,7 @@ class PX4Wrapper(threading.Thread):
         self.termination_complete.acquire()
         try:
             self.__process = subprocess.Popen(
-                'make px4_sitl none_iris',
+                'make px4_sitl none_custom_quad',
                 cwd=self.__px4_folder,
                 shell=True,
                 stdout=subprocess.PIPE
