@@ -1,5 +1,7 @@
 import logging
 import os
+
+from DigitalTwin.PayloadModels import SimulatorPayload
 from .Interfaces.Stoppable import Stoppable
 from .Wrappers.PX4Wrapper import PX4Wrapper
 from .Wrappers.SimulatorWrapper import SimulatorWrapper
@@ -9,7 +11,8 @@ class SimulationController(Stoppable):
     
     PX4_FOLDER_ENVIRON = 'PX4_ROOT_FOLDER'
 
-    def __init__(self, initial_lon_lat_alt, stream_handler=None, logger = logging.getLogger(__name__)):
+    def __init__(self, initial_lon_lat_alt, simulator_payload: SimulatorPayload, stream_handler=None, logger = logging.getLogger(__name__)):
+        self.__simulator_payload = simulator_payload
         self.__logger = logger
         self.__initial_lon_lat_alt = initial_lon_lat_alt
         self.__px4_wrapper = None
@@ -40,6 +43,7 @@ class SimulationController(Stoppable):
         self.__simulator_wrapper = JMAVSimWrapper(
             f'{os.environ[SimulationController.PX4_FOLDER_ENVIRON]}/Tools/jMAVSim/out/production/',
             self.__initial_lon_lat_alt,
+            self.__simulator_payload,
             stream_handler=stream_handler
         )
 

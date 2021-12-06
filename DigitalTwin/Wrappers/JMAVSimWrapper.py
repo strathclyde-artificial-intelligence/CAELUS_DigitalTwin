@@ -6,12 +6,14 @@ from time import sleep
 from typing import Optional
 from ..Interfaces.Stoppable import Stoppable
 from ..Interfaces.StreamHandler import StreamHandler
+from ..PayloadModels import SimulatorPayload
 
 class JMAVSimWrapper(threading.Thread):
 
-    def __init__(self, simulator_jar_file_location, initial_lon_lat_alt, stream_handler: Optional[StreamHandler] = None, logger=logging.getLogger(__name__)):
+    def __init__(self, simulator_jar_file_location, initial_lon_lat_alt, simulator_payload: SimulatorPayload, stream_handler: Optional[StreamHandler] = None, logger=logging.getLogger(__name__)):
         super().__init__()
         self.name = 'JMAVSimWrapper'
+        self.__simulator_payload: SimulatorPayload = simulator_payload
         self.__initial_lon_lat_alt = initial_lon_lat_alt
         self.__should_stop = False
         self.__sim_folder = simulator_jar_file_location
@@ -53,13 +55,13 @@ class JMAVSimWrapper(threading.Thread):
         self.termination_complete.acquire()
         try:
             lon, lat, alt = self.__initial_lon_lat_alt
-
+            drone_conf = self.__simulator_payload.drone_config
             self.__process = subprocess.Popen(
                 'export PX4_SIM_SPEED_FACTOR=5; '
                 f'export PX4_HOME_LAT={lat};'
                 f'export PX4_HOME_LON={lon};'
                 f'export PX4_HOME_ALT={alt};'
-                'java -XX:GCTimeRatio=20 -Djava.ext.dirs= -jar jmavsim_run.jar -tcp 127.0.0.1:4560 -r 250 -lockstep -no-gui',
+                f'java -XX:GCTimeRatio=20 -Djava.ext.dirs= -jar jmavsim_run.jar -tcp 127.0.0.1:4560 -r 250 -lockstep -no-gui -drone-config "{drone_conf}"',
                 cwd=self.__sim_folder,
                 shell=True,
                 stdout=subprocess.PIPE

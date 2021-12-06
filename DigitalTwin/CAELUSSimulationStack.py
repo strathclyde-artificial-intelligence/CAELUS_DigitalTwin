@@ -15,11 +15,11 @@ from .PayloadModels import SimulatorPayload
 
 class CAELUSSimulationStack(threading.Thread, SimulationStack, Stoppable, VehicleManager, MissionManager):
 
-    def __init__(self, drone_config: SimulatorPayload, stream_handler = None, logger = logging.getLogger(__name__)):
+    def __init__(self, simulator_payload: SimulatorPayload, stream_handler = None, logger = logging.getLogger(__name__)):
         super().__init__()
         self.name = 'CAELUSSimulationStack'
         self.__operation_queue: List[Operation] = []
-        self.__sim_controller = SimulationController(drone_config.initial_lon_lat_alt, stream_handler=stream_handler)
+        self.__sim_controller = SimulationController(simulator_payload.initial_lon_lat_alt, simulator_payload, stream_handler=stream_handler)
         # Thread safe queue of ([Waypoint], altitude)
         self.__mission_queue = Queue()
         self.__logger = logger
