@@ -7,3 +7,4 @@ venv/
 Dependencies/PX4-Autopilot
 *.simout
 *.ost
+*.ini
