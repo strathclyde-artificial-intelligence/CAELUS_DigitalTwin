@@ -1,7 +1,6 @@
 from DigitalTwin.Interfaces.MissionManager import MissionManager
 from DigitalTwin.Interfaces.SimulationStack import SimulationStack
 from .ThreadMonitor import ThreadMonitor
-from .MissionWindow import MissionWindow
 from .StreamWindow import StreamWindow
 from .SeriesPlotsWindow import SeriesPlotsWindow
 from ..Interfaces.StreamHandler import StreamHandler
@@ -32,10 +31,7 @@ class GUI(StreamHandler, TimeSeriesHandler):
 
     def __create_sub_windows(self):
         self.__sub_windows['thread_monitor'] = ThreadMonitor(dpg)
-        self.__sub_windows['mission_window'] = MissionWindow(dpg)
         self.__sub_windows['series_plot_window'] = SeriesPlotsWindow(dpg)
-        self.__sub_windows['mission_window'].set_sim_stack(self.__sim_stack)
-        self.__sub_windows['mission_window'].set_mission_manager(self.__mission_manager)
 
     def start(self):
         self.__logger.info('Initialising GUI')
