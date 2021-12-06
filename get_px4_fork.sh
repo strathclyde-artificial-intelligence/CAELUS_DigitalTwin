@@ -15,6 +15,8 @@ ${VENV_LOCATION}/bin/pip3 install -r px4_python_requirements.txt
 (cd $PX4_DIR; make)
 
 echo "[⚙️] Building JMAVSim"
+(cd $PX4_DIR; git submodule sync)
+(cd $PX4_DIR; git submodule update --init --recursive --remote)
 (cd $PX4_DIR/Tools/jMAVSim/; ant create_run_jar copy_res)
 
 echo -e "Make sure to issue '${RED}export PX4_ROOT_FOLDER=$PX4_DIR${NC}' before starting the digital twin."
