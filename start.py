@@ -30,10 +30,10 @@ def start_with_payload(payload):
     check_exported_px4()
     check_smartskies_env()
 
+    print('Staring simulation...')
     sim_payload = SimulatorPayload(payload)
     controller_payload = ControllerPayload(payload)
     gui, controller, sstack = new_simulation(sim_payload, controller_payload, headless=False)
-
 
     sstack.start()
     if gui is not None:
