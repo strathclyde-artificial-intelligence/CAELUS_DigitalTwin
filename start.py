@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-
+from os import environ
 from DigitalTwin.PayloadModels import ControllerPayload, SimulatorPayload
 load_dotenv()
 
@@ -47,5 +47,6 @@ if __name__ == '__main__':
         print("Usage `python3 start.py <mission_file>`")
         exit(-1)
     _, filename = sys.argv
+    headless = True if 'IN_DOCKER' in environ else False
     with open(filename, 'r') as f:
-        start_with_payload(json.loads(f.read()))
+        start_with_payload(json.loads(f.read()), headless=headless)
