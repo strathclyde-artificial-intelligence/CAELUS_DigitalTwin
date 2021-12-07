@@ -44,7 +44,7 @@ RUN apt-get install libboost-all-dev -y
 RUN apt install libeigen3-dev
 RUN apt-get install -y bc
 WORKDIR /CAELUS_DigitalTwin
-ENV PATH="./venv/bin:$PATH"
+ENV PATH="/CAELUS_DigitalTwin/venv/bin:$PATH"
 RUN bash install_all.sh
 
 ENTRYPOINT ["python", "-u", "start.py"]
