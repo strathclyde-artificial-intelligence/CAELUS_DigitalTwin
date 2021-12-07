@@ -57,7 +57,6 @@ class PX4Wrapper(threading.Thread):
             self.__process = subprocess.Popen(
                 'make px4_sitl none_custom_quad',
                 cwd=self.__px4_folder,
-                shell=True,
                 stdout=subprocess.PIPE if self.__stream_handler is not None else None
             )
             self.__new_stream_available('px4_stdout', self.__process.stdout)
@@ -71,6 +70,7 @@ class PX4Wrapper(threading.Thread):
             self.termination_complete.release()
 
     def graceful_stop(self):
+        self.__logger.info('PX4 asked to gracefully stop...')
         self.__should_stop = True  
 
     def halt(self):
