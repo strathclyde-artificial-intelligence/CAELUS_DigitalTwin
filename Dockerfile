@@ -18,6 +18,7 @@ apt-get install -y --no-install-recommends \
 ENV ANT_VERSION=1.10.3
 ENV ANT_HOME=/opt/ant
 ENV IN_DOCKER=1
+
 # change to tmp folder
 WORKDIR /tmp
 
@@ -43,6 +44,7 @@ RUN apt-get install libboost-all-dev -y
 RUN apt install libeigen3-dev
 RUN apt-get install -y bc
 WORKDIR /CAELUS_DigitalTwin
+ENV PATH="./venv/bin:$PATH"
 RUN bash install_all.sh
 
-ENTRYPOINT ["./venv/bin/python", "-u", "start.py"]
+ENTRYPOINT ["python", "-u", "start.py"]
