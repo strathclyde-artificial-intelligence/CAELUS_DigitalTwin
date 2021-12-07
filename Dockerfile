@@ -45,4 +45,4 @@ RUN apt-get install -y bc
 WORKDIR /CAELUS_DigitalTwin
 RUN bash install_all.sh
 
-ENTRYPOINT ["./venv/bin/python", "start.py"]
+ENTRYPOINT ["./venv/bin/python", "-u", "start.py"]
