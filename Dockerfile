@@ -45,6 +45,7 @@ RUN apt install libeigen3-dev
 RUN apt-get install -y bc
 WORKDIR /CAELUS_DigitalTwin
 ENV PATH="/CAELUS_DigitalTwin/venv/bin:$PATH"
+ENV PX4_ROOT_FOLDER="/CAELUS_DigitalTwin/Dependencies/PX4-Autopilot"
 RUN bash install_all.sh
 
 ENTRYPOINT ["python", "-u", "start.py"]
