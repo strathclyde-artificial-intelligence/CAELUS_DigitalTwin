@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from threading import Thread
 from queue import Queue
 import time
+from os import environ
 
 class MongoDBWriter(Thread, DBAdapter):
 
@@ -11,7 +12,8 @@ class MongoDBWriter(Thread, DBAdapter):
 
     @staticmethod
     def acquire_client():
-        mongo_uri = 'mongodb://localhost/'
+        mongo_uri = 'mongodb://mongo/' if 'IN_DOCKER' in environ else 'mongodb://localhost/'
+        
         client = MongoClient(mongo_uri, 27017, connectTimeoutMS=5 * 1000)
         while True:
             print(f'Trying to acquire MongoDB connection at {mongo_uri}')

@@ -17,7 +17,7 @@ apt-get install -y --no-install-recommends \
 
 ENV ANT_VERSION=1.10.3
 ENV ANT_HOME=/opt/ant
-
+ENV IN_DOCKER=1
 # change to tmp folder
 WORKDIR /tmp
 
