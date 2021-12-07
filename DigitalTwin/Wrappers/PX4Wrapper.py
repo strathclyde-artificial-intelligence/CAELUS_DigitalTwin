@@ -56,12 +56,14 @@ class PX4Wrapper(threading.Thread):
         try:
             self.__process = subprocess.Popen(
                 'make px4_sitl none_custom_quad',
+                shell=True,
                 cwd=self.__px4_folder,
                 stdout=subprocess.PIPE if self.__stream_handler is not None else None
             )
             self.__new_stream_available('px4_stdout', self.__process.stdout)
             while not self.__should_stop and self.__process.poll() is None:
                 sleep(1)
+            self.__logger.info('PX4 Thread is exiting!')
         except Exception as e:
             self.__logger.error(e)
         finally:
