@@ -26,14 +26,14 @@ def check_exported_px4():
             logger.error(f'You must export your local copy of the CAELUS px4 fork folder (export PX4_ROOT_FOLDER=<px4 folder>)')
             exit(-1)
 
-def start_with_payload(payload):
+def start_with_payload(payload, headless=True):
     check_exported_px4()
     check_smartskies_env()
 
     print('Staring simulation...')
     sim_payload = SimulatorPayload(payload)
     controller_payload = ControllerPayload(payload)
-    gui, controller, sstack = new_simulation(sim_payload, controller_payload, headless=False)
+    gui, controller, sstack = new_simulation(sim_payload, controller_payload, headless=headless)
 
     sstack.start()
     if gui is not None:
