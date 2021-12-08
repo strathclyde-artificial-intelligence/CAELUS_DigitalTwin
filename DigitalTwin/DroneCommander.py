@@ -89,7 +89,12 @@ class DroneCommander():
         commands = DroneCommander.mission_from_waypoints(waypoints)
         
         self.__vehicle.commands.clear()
-        self.__upload_vehicle_commands(commands)
+        self.__vehicle.commands.upload()
+        for c in commands:
+            self.__vehicle.commands.add(c)
+        self.__vehicle.commands.upload()
+
+        # self.__upload_vehicle_commands(commands)
         self.__vehicle.commands.wait_ready()
 
         self.__logger.info('Waiting for vehicle commands acquisition')
