@@ -44,9 +44,13 @@ import sys
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        print("Usage `python3 start.py <mission_file>`")
+        print("Usage `python3 start.py <mission_payload_json>`")
         exit(-1)
-    _, filename = sys.argv
+    _, json_payload = sys.argv
     headless = True if 'IN_DOCKER' in environ else False
-    with open(filename, 'r') as f:
-        start_with_payload(json.loads(f.read()), headless=headless)
+    try:
+        start_with_payload(json.loads(json_payload), headless=headless)
+    except Exception as e:
+        print(f'Failed in reading json payload ({e})')
+
+        
