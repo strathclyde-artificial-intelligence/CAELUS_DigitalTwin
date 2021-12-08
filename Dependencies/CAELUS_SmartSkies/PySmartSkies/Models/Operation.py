@@ -33,7 +33,9 @@ class Operation(JSONDeserialiser):
             return (1 - i_percentage) * start_alt + i_percentage * end_alt
         geod = Geod(ellps='WGS84')
         az12,az21,dist = geod.inv(start[1], start[0], end[1], end[0])
-        result = geod.fwd_intermediate(start[1],start[0],az12,npts=ceil(dist / max_dist),del_s=max_dist, initial_idx=0, terminus_idx=0)
+        if dist <= max_dist:
+            return []
+        result = geod.fwd_intermediate(start[1],start[0],az12,npts=ceil(dist / max_dist),del_s=max_dist)
         return [(lat_lon[0], lat_lon[1], lerp(i / len(result.lats), start[-1], end[-1])) for i, lat_lon in enumerate(zip(result.lats, result.lons))]
 
     def get_waypoints(self, max_distance=850):
@@ -44,14 +46,9 @@ class Operation(JSONDeserialiser):
             FlightVolume.get_centre_of_convex_hull(intersection_hulls[i], self.operation_volumes[i].altitude_upper_w84, self.operation_volumes[i].altitude_lower_w84) for i in range(len(intersection_hulls))
         ]
         waypoints = [volume.get_centre() for volume in self.operation_volumes]
-        waypoints = [waypoints[0]] + interleave(intersection_centres, waypoints[1:-1]) + [waypoints[-1]]
-        latlons = []
-        for i in range(len(waypoints) - 1):
-            start = waypoints[i]
-            end = waypoints[i+1]
-            new_lats_lons = self.__interpolate_with_max_distance(start, end, max_distance)
-            latlons.extend(new_lats_lons)
-        return [(lat_lon_alt[0], lat_lon_alt[1], lat_lon_alt[2]) for lat_lon_alt in latlons] + [self.get_landing_location()]
+        waypoints = [waypoints[0]] + intersection_centres + [waypoints[-1]]
+        waypoints = sorted(waypoints, key=lambda w: w[0])
+        return [(lat_lon_alt[0], lat_lon_alt[1], lat_lon_alt[2]) for lat_lon_alt in waypoints] + [self.get_landing_location()]
 
     def get_takeoff_location(self):
         start_v = self.operation_volumes[0]
