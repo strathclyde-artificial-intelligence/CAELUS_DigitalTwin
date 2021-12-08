@@ -10,8 +10,6 @@ empy==3.3.4
 future==0.18.2
 geographiclib==1.52
 geopy==2.2.0
-grpcio==1.40.0
-grpcio-tools==1.41.1
 idna==3.2
 iniconfig==1.1.1
 Jinja2==3.0.2
