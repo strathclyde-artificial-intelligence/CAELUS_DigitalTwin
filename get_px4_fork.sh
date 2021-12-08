@@ -1,5 +1,3 @@
-VENV_LOCATION=$1;
-
 RED='\033[0;31m'
 NC='\033[0m'
 PX4_DIR=./Dependencies/PX4-Autopilot
@@ -11,7 +9,7 @@ if [ ! -d $PX4_DIR ]; then
 fi
 
 echo "[🚚] Installing PX4-Autpilot python dependencies"
-${VENV_LOCATION}/bin/pip3 install -r px4_python_requirements.txt
+pip3 install -r px4_python_requirements.txt
 (cd $PX4_DIR; make)
 
 echo "[⚙️] Building JMAVSim"
