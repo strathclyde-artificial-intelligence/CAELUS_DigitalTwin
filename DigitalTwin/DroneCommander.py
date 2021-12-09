@@ -103,13 +103,13 @@ class DroneCommander():
 
         self.__end_waypoint = waypoints[-1]
 
-    def __wait_for_home_lock(self):
+    def wait_for_home_lock(self):
         while self.__vehicle.home_location is None:
             time.sleep(0.5)
 
     def __wait_for_vehicle_armable(self):
         self.__logger.info('Waiting for vehicle home lock')
-        self.__wait_for_home_lock()
+        self.wait_for_home_lock()
         print(f'Home location: {self.__vehicle.home_location}')
         self.__logger.info('Waiting for vehicle to be armable (CHECK SKIPPED!)')
         time.sleep(2)

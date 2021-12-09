@@ -126,7 +126,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__logger.info(f'Received new mission!')
         try:
             waypoints_alt = mission.waypoints
-        
+
             self.__commander.set_mission(waypoints_alt)
             self.__commander.start_mission()
             self.__anra_probe.start_sending_telemetry(
