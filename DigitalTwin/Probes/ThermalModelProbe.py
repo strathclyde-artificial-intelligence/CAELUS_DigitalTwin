@@ -35,6 +35,7 @@ class ThermalModelProbe(Subscriber):
             self.__state = new_state
             self.__time_usec += elapsed_time_us
             self.__writer.store({'payload_temperature': self.__state[2]})
+            self.__writer.store({'simulation_time_elapsed': self.__time_usec / 1000000}, series=False)
         
     # Used by the anra telemetry probe and mission writer -- DO NOT DELETE nor REFACTOR (unless you really know what you are doing)
     def get_payload_temperature(self):
