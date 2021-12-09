@@ -43,10 +43,15 @@ import json
 import sys
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
+    if len(sys.argv) == 1 and 'PAYLOAD' not in environ:
         print("Usage `python3 start.py <mission_payload_json>`")
+        print("or")
+        print("Export 'PAYLOAD={...}' and then issue `python3 start.py`")
         exit(-1)
-    _, json_payload = sys.argv
+    if 'PAYLOAD' in environ:
+        json_payload = environ['PAYLOAD']    
+    else:
+        _, json_payload = sys.argv
     headless = True if 'IN_DOCKER' in environ else False
     try:
         start_with_payload(json.loads(json_payload), headless=headless)
