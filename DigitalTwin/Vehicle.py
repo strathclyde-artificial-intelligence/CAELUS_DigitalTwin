@@ -3,6 +3,8 @@ from dronekit import Vehicle as DronekitVehicle
 from threading import Thread
 import time
 
+from DigitalTwin.Interfaces.DBAdapter import DBAdapter
+
 class HilActuatorControls(object):
     """
     The message definition is here: https://mavlink.io/en/messages/common.html#HIL_ACTUATOR_CONTROLS
@@ -42,6 +44,7 @@ class SystemTime(object):
         return f"SYSTEM_TIME: time_unix_usec={self.time_unix_usec}, time_boot_ms={self.time_boot_ms}"
    
 class Vehicle(DronekitVehicle):
+    DB_MISSION_STATUS = 'waypoint_completion'
     TAKING_OFF = 0
     TAKEOFF_COMPLETE = 1
     CRUISING = 2
@@ -58,6 +61,7 @@ class Vehicle(DronekitVehicle):
         self.__controller = None
         self.__last_wp = -1
         self.__mission_hanlder_queues = []
+        self.__writer = None
 
         self._hil_actuator_controls = HilActuatorControls()
         @self.on_message('HIL_ACTUATOR_CONTROLS')
@@ -91,6 +95,8 @@ class Vehicle(DronekitVehicle):
         if status not in Vehicle.mission_status:
             self.__logger.warn("Tried to publish an invalid mission status!")
         self.__logger.info(f'Mission status updated: {self.__mission_status_to_string(status)}')
+        if self.__writer is not None:
+            self.__writer.store({Vehicle.DB_MISSION_STATUS:f"{max(0, self.commands.next-1)}/{self.__mission_items_n}"}, series=False)
         for q in self.__mission_hanlder_queues:
             q.put(status)
         if status == Vehicle.LANDING_COMPLETE:
@@ -122,6 +128,7 @@ class Vehicle(DronekitVehicle):
             time.sleep(1)
 
     def prepare_for_mission(self, mission_items_n):
+
         self.__logger.info(f"Preparing for mission with {mission_items_n} items")
         self.__mission_items_n = mission_items_n
         self.__mission_ended = False
@@ -130,7 +137,9 @@ class Vehicle(DronekitVehicle):
         self.__mission_completion_thread.name = 'Mission Completion Checker'
         self.__mission_completion_thread.daemon = True
         self.__mission_completion_thread.start()
-        
+
+    def set_writer(self, writer: DBAdapter = None):
+        self.__writer = writer
 
     def set_controller(self, c):
         self.__controller = c

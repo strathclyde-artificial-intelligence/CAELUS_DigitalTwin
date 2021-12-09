@@ -84,7 +84,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
     def vehicle_available(self, vehicle):
         
         vehicle.set_controller(self)
-
+        vehicle.set_writer(self.__writer)
+        
         self.__logger.info(f'New vehicle available {vehicle}')
         self.__commander.set_vehicle(vehicle)
         

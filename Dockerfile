@@ -46,6 +46,7 @@ COPY ./.env /CAELUS_DigitalTwin/.env
 WORKDIR /CAELUS_DigitalTwin
 ENV PATH="/CAELUS_DigitalTwin/venv/bin:$PATH"
 ENV PX4_ROOT_FOLDER="/CAELUS_DigitalTwin/Dependencies/PX4-Autopilot"
+ENV PX4_SIM_SPEED_FACTOR=10
 RUN bash install_all.sh
 
 ENTRYPOINT ["python3", "-u", "start.py"]

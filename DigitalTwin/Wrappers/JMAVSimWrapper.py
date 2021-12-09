@@ -59,7 +59,7 @@ class JMAVSimWrapper(threading.Thread):
             lon, lat, alt = self.__initial_lon_lat_alt
             drone_conf = self.__simulator_payload.drone_config
             self.__process = subprocess.Popen(
-                'export PX4_SIM_SPEED_FACTOR=5; '
+                'export PX4_SIM_SPEED_FACTOR=10; '
                 f'export PX4_HOME_LAT={lat};'
                 f'export PX4_HOME_LON={lon};'
                 f'export PX4_HOME_ALT={alt};'
