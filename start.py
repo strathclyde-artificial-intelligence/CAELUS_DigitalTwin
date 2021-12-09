@@ -7,6 +7,7 @@ from os import environ, path
 import logging 
 from os.path import exists
 from DigitalTwin.SimulationFactory import new_simulation
+from DigitalTwin.error_codes import *
 
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
@@ -57,5 +58,6 @@ if __name__ == '__main__':
         start_with_payload(json.loads(json_payload), headless=headless)
     except Exception as e:
         print(f'Failed in reading json payload ({e})')
+        exit(JSON_READ_EC)
 
         
