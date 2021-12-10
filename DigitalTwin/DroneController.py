@@ -127,6 +127,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         try:
             waypoints_alt = mission.waypoints
 
+            self.__commander.wait_for_home_lock()
             self.__commander.set_mission(waypoints_alt)
             self.__commander.start_mission()
             self.__anra_probe.start_sending_telemetry(

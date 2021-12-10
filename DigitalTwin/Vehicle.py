@@ -96,7 +96,7 @@ class Vehicle(DronekitVehicle):
             self.__logger.warn("Tried to publish an invalid mission status!")
         self.__logger.info(f'Mission status updated: {self.__mission_status_to_string(status)}')
         if self.__writer is not None:
-            wp_n = max(0, self.commands.next-1) if not self.__mission_ended else self.__mission_items_n
+            wp_n = max(0, self.commands.next-1) if not Vehicle.LANDING_COMPLETE else self.__mission_items_n
             self.__writer.store({Vehicle.DB_MISSION_STATUS:f"{wp_n}/{self.__mission_items_n}"}, series=False)
         for q in self.__mission_hanlder_queues:
             q.put(status)
