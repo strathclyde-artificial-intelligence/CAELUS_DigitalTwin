@@ -87,18 +87,19 @@ class DroneCommander():
         self.__logger.info('Constructing new missions from waypoints')
         self.__logger.info('\n'+DroneCommander.waypoints_to_string(waypoints))
         commands = DroneCommander.mission_from_waypoints(waypoints)
-        
-        self.__vehicle.commands.clear()
-        self.__vehicle.commands.upload()
-        
+
+        self.__vehicle.commands.wait_ready()
+
+        # self.__vehicle.commands.clear()
+        # self.__vehicle.commands.upload()
 
         for c in commands:
             self.__vehicle.commands.add(c)
         print(f'Uploading {len(commands)} commands...')
-        self.__upload_vehicle_commands(commands)
-        # self.__vehicle.commands.upload()
+        self.__vehicle.commands.upload(timeout=60)
         print(f'Done uploading!')
 
+        # self.__upload_vehicle_commands(commands)
         self.__vehicle.commands.wait_ready()
 
         self.__logger.info('Waiting for vehicle commands acquisition')

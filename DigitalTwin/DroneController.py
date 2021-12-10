@@ -46,21 +46,21 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__connection_manager.connect_to_vehicle()
         self.__telemetry_feedback = TelemetryFeedback()
         self.__writer = writer
-        self.__setup_probes()
+        self.__initialise_probes()
+
+    def __initialise_probes(self):
+        self.__anra_probe = AnraTelemetryPush()
+        self.__battery_discharge_probe = QuadrotorBatteryDischarge(self.__writer)
+        self.__thermal_model_probe = ThermalModelProbe(self.__writer, integrate_every_us= 0.004 / 3600 )
+        self.__aeroacoustic_probe = Aeroacoustic(self.__writer)
 
     def __setup_probes(self):
         self.__logger.info('Setting up probes')
-        self.__anra_probe = AnraTelemetryPush()
-        
-        self.__battery_discharge_probe = QuadrotorBatteryDischarge(self.__writer)
-        self.__thermal_model_probe = ThermalModelProbe(self.__writer, integrate_every_us= 0.004 / 3600 )
-        
+
         # Coupled but only instance that requires cross probe communication
         # THIS MUST NOT BE DELETED
         self.__anra_probe.set_payload_handler(self.__thermal_model_probe)
         # ----
-
-        self.__aeroacoustic_probe = Aeroacoustic(self.__writer)
 
         for probe in [
             self.__anra_probe,
@@ -129,6 +129,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
 
             self.__commander.wait_for_home_lock()
             self.__commander.set_mission(waypoints_alt)
+            self.__setup_probes()
             self.__commander.start_mission()
             self.__anra_probe.start_sending_telemetry(
                 drone_registration=mission.drone_registration_number,
