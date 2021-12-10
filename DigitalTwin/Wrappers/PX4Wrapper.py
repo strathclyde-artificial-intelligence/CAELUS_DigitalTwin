@@ -7,6 +7,8 @@ from typing import Optional
 from time import sleep
 from ..Interfaces.Stoppable import Stoppable
 from ..Interfaces.StreamHandler import StreamHandler
+from threading import Thread
+from ..error_codes import *
 
 class PX4Wrapper(threading.Thread):
 
@@ -50,6 +52,19 @@ class PX4Wrapper(threading.Thread):
                 sleep(t)
             self.__logger.info(f'Poll timeout expired, killing {self.__process}')    
             self.__process.kill()
+    
+    # To be run on a separate thread 
+    def monitor_px4_output(self, stream):
+        triggers = {
+            'IGN MISSION_ITEM': MISSION_UPLOAD_FAIL,
+            'Operation timeout': MISSION_UPLOAD_FAIL
+        }
+        t_keys = triggers.keys()
+        while not self.__should_stop and stream.readable():
+            line = stream.readline().decode('utf-8')
+            for k in t_keys:
+                if k in line:
+                    exit(triggers[k])
 
     def run(self):
         self.termination_complete.acquire()
@@ -60,6 +75,11 @@ class PX4Wrapper(threading.Thread):
                 cwd=self.__px4_folder,
                 stdout=subprocess.PIPE if self.__stream_handler is not None else None
             )
+            output_monitor = Thread(target=self.monitor_px4_output, args=(self.__process.stdout,))
+            output_monitor.name = 'PX4 Output Monitor'
+            output_monitor.daemon = True
+            output_monitor.start()
+
             self.__new_stream_available('px4_stdout', self.__process.stdout)
             while not self.__should_stop and self.__process.poll() is None:
                 sleep(1)
