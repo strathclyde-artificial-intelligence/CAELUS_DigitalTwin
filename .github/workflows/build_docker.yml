@@ -23,4 +23,4 @@ jobs:
           load: true
           tags: ghcr.io/h3xept/caelus_dt:latest
           options:
-            --e CLONE_TOKEN=${{ secrets.CLONE_TOKEN }}
+            --e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
