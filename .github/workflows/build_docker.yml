@@ -22,5 +22,5 @@ jobs:
           context: .
           load: true
           tags: ghcr.io/h3xept/caelus_dt:latest
-          options:
-            --e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          secrets: |
+            "github_token=${{ secrets.GITHUB_TOKEN }}"

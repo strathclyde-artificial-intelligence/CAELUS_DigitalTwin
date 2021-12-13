@@ -6,6 +6,10 @@ RUN touch /root/.ssh/known_hosts
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 RUN chmod 755 /root/.ssh
 RUN chmod 400 /root/.ssh/id_rsa
+
+RUN --mount=type=secret,id=github_token \
+  export CLONE_TOKEN="$(cat /run/secrets/github_token)"
+
 RUN git clone https://$CLONE_TOKEN:x-oauth-basic@github.com/strathclyde-artificial-intelligence/CAELUS_DigitalTwin.git /CAELUS_DigitalTwin
 
 FROM python:3.7
@@ -42,7 +46,7 @@ RUN apt-get install libboost-all-dev -y
 RUN apt install libeigen3-dev
 RUN apt-get install -y bc
 COPY --from=intermediate /CAELUS_DigitalTwin /CAELUS_DigitalTwin
-
+  
 WORKDIR /CAELUS_DigitalTwin
 ENV PATH="/CAELUS_DigitalTwin/venv/bin:$PATH"
 ENV PX4_ROOT_FOLDER="/CAELUS_DigitalTwin/Dependencies/PX4-Autopilot"
