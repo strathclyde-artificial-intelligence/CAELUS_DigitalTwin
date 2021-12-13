@@ -12,12 +12,6 @@ from DigitalTwin.error_codes import *
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
 
-def check_smartskies_env():
-    if not exists('./.env'):
-        logger.error(f'.env file contianing SmartSkies credentials not found.')
-        logger.error(f'Please create a .env file in the root directory of the digital twin architecture following the format specified in https://github.com/H3xept/CAELUS_SmartSkies')
-        exit(-1)
-
 def check_exported_px4():
     local_px4 = 'Dependencies/PX4-Autopilot'
     if not 'PX4_ROOT_FOLDER' in environ:
@@ -29,7 +23,6 @@ def check_exported_px4():
 
 def start_with_payload(payload, headless=True):
     check_exported_px4()
-    check_smartskies_env()
 
     print('Staring simulation...')
     sim_payload = SimulatorPayload(payload)

@@ -1,0 +1,135 @@
+{
+    "waypoints": [
+      [
+        -4.248889001,
+        55.8609929995,
+        99.8171289241085
+      ],
+      [
+        -4.2488890035,
+        55.860993,
+        99.8171289241085
+      ],
+      [
+        -4.2493289878758205,
+        55.86092310612251,
+        145.5348978969826
+      ],
+      [
+        -4.255917017499999,
+        55.8598447115,
+        145.5348978969826
+      ],
+      [
+        -4.26294503500005,
+        55.85869642299994,
+        137.00091435537945
+      ],
+      [
+        -4.269973051999999,
+        55.8575481345,
+        137.00091435537945
+      ],
+      [
+        -4.277001068999282,
+        55.8563998460008,
+        125.57147211216092
+      ],
+      [
+        -4.278928534499999,
+        55.856084923,
+        125.57147211216092
+      ],
+      [
+        -4.280855643138199,
+        55.855770433221615,
+        122.52362084730265
+      ],
+      [
+        -4.284131999999999,
+        55.85577,
+        122.52362084730265
+      ],
+      [
+        -4.287408001851842,
+        55.855770031571524,
+        124.50472416946053
+      ],
+      [
+        -4.2947257685,
+        55.8558552855,
+        124.50472416946053
+      ],
+      [
+        -4.3020435370000225,
+        55.85594057122399,
+        126.02864980188967
+      ],
+      [
+        -4.309361306,
+        55.856025857,
+        126.02864980188967
+      ],
+      [
+        -4.316679074999979,
+        55.85611114299981,
+        125.57147211216092
+      ],
+      [
+        -4.323996843499999,
+        55.8561964285,
+        125.57147211216092
+      ],
+      [
+        -4.331314612000021,
+        55.85628171400019,
+        127.09539774459006
+      ],
+      [
+        -4.3386323805,
+        55.856367,
+        127.09539774459006
+      ],
+      [
+        -4.3459501489998065,
+        55.85645228599826,
+        128.16214568729046
+      ],
+      [
+        -4.346272312,
+        55.8564560405,
+        128.16214568729046
+      ],
+      [
+        -4.346594479000001,
+        55.856459795,
+        126.63822005486132
+      ],
+      [
+        -4.346594476,
+        55.856459795,
+        34.135934166412675
+      ]
+    ],
+    "operation_id": "543be146-53f6-4f6f-9ffa-75a4f577fe5b",
+    "control_area_id": "2eee4ddf-b230-4be1-aee0-0a827e818fa5",
+    "operation_reference_number": "14c567b8-bfd1-46eb-9313-cf0c3eafefb3",
+    "drone_id": "a1ccc111-0647-4c4d-b93e-91bd740bb87d",
+    "drone_registration_number": "5c17c4d2-e878-4a47-a6a3-724f16f46ba2",
+    "dis_auth_token": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJaR2w3MjFlODhJenB3ZUJpZ1lESkl6UEY2OExHVDJrajYtNzFweGE2ZUEwIn0.eyJleHAiOjE2Mzg1MzM5MDIsImlhdCI6MTYzODUzMDMwMiwianRpIjoiNTMxYWNiZTYtOGNkOC00NzEzLTg1YTEtNDVhODNmODk1OTM2IiwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mbHlhbnJhLm5ldC9hdXRoL3JlYWxtcy9BTlJBIiwiYXVkIjpbIkFucmFUZWNobm9sb2dpZXMiLCJTUy1DVFIiLCJhY2NvdW50Il0sInN1YiI6Ijc0MjYyYWFiLTg2YzgtNGRkOS1iYmRiLTA2MTcxMGY0ZGJjNCIsInR5cCI6IkJlYXJlciIsImF6cCI6IkRNUyIsInNlc3Npb25fc3RhdGUiOiJkYWUwYzFhMC03MTU1LTQ0YzEtYTliYy04NzY3OGIxMWJhNTQiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIkxheWVyTWFuYWdlcl9SZWFkT25seSJdfSwicmVzb3VyY2VfYWNjZXNzIjp7IlNTLUNUUiI6eyJyb2xlcyI6WyJQSUxPVCIsIkFETUlOIl19LCJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6ImVtYWlsIHByb2ZpbGUiLCJ3ZWJzaXRlIjoiIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5hbWUiOiJESVMgQWRtaW4iLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhZG1pbkBkaXMudGVzdCIsImdpdmVuX25hbWUiOiJESVMiLCJmYW1pbHlfbmFtZSI6IkFkbWluIiwiZW1haWwiOiJhZG1pbkBkaXMudGVzdCJ9.Vq83JdseKArR-pewv3hV9GFw0K3DprnDAHmoEin_jMouKCGZbFtdEOVm_B-t6EFwqhaupia6DUsZG-GuqttWLjjAdkrV5mCM0RRmk9UJ0XgyvavOb_Zog74R-vazUpgIzTLjDaGEAUX6czxHj7s6w9nYjiH6Ek61Ldkp1U4X0u9dcoYCG-b03TC745bKs7OARiKJVNchf1N47siI0w_iCRnPkyucItwXHgJ5LygSJQCVLnIuhcxKbN_TF1_9KVIHkUvCSoNSUihlzk8MxlHiJ_kT2RU17HEkUinIzIoqTOXHdpWL1ZSSQsghwkpUff6qczLw8_VL7Fnjs4Mcw0rokA",
+    "thermal_model_timestep": 1,
+    "aeroacoustic_model_timestep": 0.004,
+    "drone_config": {},
+    "g_acceleration": 9.81,
+    "effective_start_time": 1638530518.879659,
+    "initial_lon_lat_alt": [
+      -4.248889001,
+      55.8609929995,
+      53.946967387991464
+    ],
+    "final_lon_lat_alt": [
+      -4.346594476,
+      55.856459795,
+      34.135934166412675
+    ]
+  }
