@@ -22,4 +22,3 @@ jobs:
           context: .
           load: true
           tags: ghcr.io/h3xept/caelus_dt:latest
-          push: true
