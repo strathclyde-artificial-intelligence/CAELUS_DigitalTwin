@@ -42,7 +42,7 @@ RUN apt-get install libboost-all-dev -y
 RUN apt install libeigen3-dev
 RUN apt-get install -y bc
 COPY --from=intermediate /CAELUS_DigitalTwin /CAELUS_DigitalTwin
-COPY ./.env /CAELUS_DigitalTwin/.env
+
 WORKDIR /CAELUS_DigitalTwin
 ENV PATH="/CAELUS_DigitalTwin/venv/bin:$PATH"
 ENV PX4_ROOT_FOLDER="/CAELUS_DigitalTwin/Dependencies/PX4-Autopilot"
