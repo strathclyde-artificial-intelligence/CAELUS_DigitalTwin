@@ -47,7 +47,7 @@ class Operation(JSONDeserialiser):
         ]
         waypoints = [volume.get_centre() for volume in self.operation_volumes]
         waypoints = [waypoints[0]] + intersection_centres + [waypoints[-1]]
-        waypoints = sorted(waypoints, key=lambda w: w[0])
+        # waypoints = sorted(waypoints, key=lambda w: w[0])
         return [(lat_lon_alt[0], lat_lon_alt[1], lat_lon_alt[2]) for lat_lon_alt in waypoints] + [self.get_landing_location()]
 
     def get_takeoff_location(self):

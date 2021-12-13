@@ -43,7 +43,7 @@ def pp_vendors_and_products(vendors, products):
             print(f"\t> {p}")
 
 def get_possible_vendors_and_products(dis_api: DIS_API, cvms_api: CVMS_API):
-    vendors = cvms_api.get_vendor_list()
+    vendors = cvms_api.get_vendor_list(items_per_page=400)
     
     products = {
         str(v.id):cvms_api.get_product_list_from_vendor(v.id) for v in vendors
