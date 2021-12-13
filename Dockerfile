@@ -31,7 +31,6 @@ RUN apt-get update && apt-get -y install cmake protobuf-compiler
 RUN apt-get install libboost-all-dev -y
 RUN apt install libeigen3-dev
 RUN apt-get install -y bc
-COPY --from=intermediate /CAELUS_DigitalTwin /CAELUS_DigitalTwin
   
 WORKDIR /CAELUS_DigitalTwin
 ENV PATH="/CAELUS_DigitalTwin/venv/bin:$PATH"
