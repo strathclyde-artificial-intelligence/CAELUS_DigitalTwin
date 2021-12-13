@@ -1,17 +1,3 @@
-FROM alpine/git as intermediate
-ARG SSH_PRIVATE_KEY
-RUN mkdir /root/.ssh/
-RUN echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
-RUN touch /root/.ssh/known_hosts
-RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
-RUN chmod 755 /root/.ssh
-RUN chmod 400 /root/.ssh/id_rsa
-
-RUN --mount=type=secret,id=github_token \
-  export CLONE_TOKEN="$(cat /run/secrets/github_token)"
-
-RUN git clone https://$CLONE_TOKEN:x-oauth-basic@github.com/strathclyde-artificial-intelligence/CAELUS_DigitalTwin.git /CAELUS_DigitalTwin
-
 FROM python:3.7
 
 RUN apt-get update -y
@@ -22,7 +8,7 @@ apt-get install -y --no-install-recommends \
 ENV ANT_VERSION=1.10.3
 ENV ANT_HOME=/opt/ant
 ENV IN_DOCKER=1
-
+COPY . /CAELUS_DigitalTwin
 # change to tmp folder
 WORKDIR /tmp
 
