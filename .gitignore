@@ -1,9 +1,9 @@
 .DS_Store
 *.o
 __pycache__
-venv/
+venv
 .env
-.vscode/
+.vscode
 Dependencies/PX4-Autopilot
 *.simout
 *.ost
