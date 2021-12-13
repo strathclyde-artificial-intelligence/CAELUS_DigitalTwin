@@ -6,7 +6,7 @@ RUN touch /root/.ssh/known_hosts
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 RUN chmod 755 /root/.ssh
 RUN chmod 400 /root/.ssh/id_rsa
-RUN git clone git@github.com:strathclyde-artificial-intelligence/CAELUS_DigitalTwin.git /CAELUS_DigitalTwin
+RUN git clone https://$CLONE_TOKEN:x-oauth-basic@github.com/strathclyde-artificial-intelligence/CAELUS_DigitalTwin.git /CAELUS_DigitalTwin
 
 FROM python:3.7
 
