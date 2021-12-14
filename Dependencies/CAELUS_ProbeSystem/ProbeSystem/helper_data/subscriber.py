@@ -9,9 +9,9 @@ class Subscriber(ABC, Thread):
         super().__init__()
         self.daemon = True
         self.name = f'PROBE_{self}'
-
-    def run(self) -> None:
         self.__setup_queue()
+        
+    def run(self) -> None:
         q: Queue = self.queue
         while True:
             data = q.get(block=True)
