@@ -68,9 +68,13 @@ class MongoDBWriter(Thread, DBAdapter):
         return query
 
     def __store(self):
-        query = self.update_query_for(self.__data_buffer)
-        self.__handle.update_one({'operation_id':self.__operation_id}, query, upsert=True)
-        self.__data_buffer = None
+        try:
+            query = self.update_query_for(self.__data_buffer)
+            self.__handle.update_one({'operation_id':self.__operation_id}, query, upsert=True)
+            self.__data_buffer = None
+        except Exception as e:
+            print(e)
+
 
     def store(self, data, series=True):
         self.__thread_queue.put_nowait((data, series))
