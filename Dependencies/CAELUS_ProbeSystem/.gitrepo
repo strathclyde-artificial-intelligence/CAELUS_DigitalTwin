@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/strathclyde-artificial-intelligence/CAELUS_ProbeSystem
 	branch = main
-	commit = 0d3577ae8e053d56a76eb54deb8ff477f84bede0
-	parent = 1af411ef42681cf35660f737c88978e00b8ae4cf
+	commit = 92e71cdc221b622f4f7063645b8c0d757047a7a7
+	parent = ddc22c2650fb62a989511e83747fd0f89d7f3286
 	method = merge
 	cmdver = 0.4.3
