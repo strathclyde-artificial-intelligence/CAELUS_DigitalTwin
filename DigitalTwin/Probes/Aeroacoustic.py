@@ -10,7 +10,7 @@ from DigitalTwin.Interfaces.DBAdapter import DBAdapter
 from DigitalTwin.Vehicle import Vehicle
 
 class Aeroacoustic(Subscriber):
-    
+    ROTOR_N = 5
     def __init__(self, writer: DBAdapter):
         super().__init__()
         self.lat_lon_alt = None
@@ -19,7 +19,7 @@ class Aeroacoustic(Subscriber):
         self.time_us = None
         self.__last_time = 0
         self.rows = []
-        self.__last_pwms = [0,0,0,0]
+        self.__last_pwms = [0] * Aeroacoustic.ROTOR_N
         self.__drone_id = None
         self.__vehicle = None
         self.__mission_status_queue = Queue()
@@ -46,11 +46,11 @@ class Aeroacoustic(Subscriber):
 
         return np.dot(Rz_yaw, np.dot(Ry_pitch, Rx_roll))
 
-    def get_direction_vector_from_rpy(self, r, p, y):
-        return np.array([0,0,1]).dot(Aeroacoustic.euler_to_rotm(y, p, r))
+    def get_direction_vector_from_rpy(self, initial_vec, r, p, y):
+        return np.array(initial_vec).dot(Aeroacoustic.euler_to_rotm(y, p, r))
 
     def get_rotor_speed(self, datapoint):
-        rps = self.pwm_to_rps([c if c > 0 else 0 for c in datapoint.controls][:4])
+        rps = self.pwm_to_rps([c if c > 0 else 0 for c in datapoint.controls][:5])
         self.rotors_speed = [s * 60 for s in rps]
         self.time_us = datapoint.time_usec
 
@@ -61,27 +61,16 @@ class Aeroacoustic(Subscriber):
         self.lat_lon_alt = [datapoint.lat, datapoint.lon, alt]
 
     def store_attitude(self, datapoint):
-        self.attitude = self.get_direction_vector_from_rpy(datapoint.roll, datapoint.pitch, datapoint.yaw)
+        self.attitude = self.get_direction_vector_from_rpy([0,0,1], datapoint.roll, datapoint.pitch, datapoint.yaw)
+        self.pusher_attitude = self.get_direction_vector_from_rpy([-1,0,0], datapoint.roll, datapoint.pitch, datapoint.yaw)
 
     def set_vehicle(self, v):
         self.__vehicle = v
         self.__vehicle.add_mission_hanlder_queue(self.__mission_status_queue)
 
     def pwm_to_rps(self, pwm):
-        # FAKE ESC -- Very temporary
-        # new_control = [0,0,0,0]
-        # sim_timestep = 0.004
-        # vtol_kv = 9
-        # vtol_tau = 0.006
-        # remap = [0, 3, 1, 2]
-        # for i in range(len(pwm)):
-        #     new_control[i] = self.__last_control[i] + ((sim_timestep * (vtol_kv * pwm[remap[i]] - self.__last_control[i])) / vtol_tau)
-        # self.__last_control = new_control
-        # print(new_control)
-        # return new_control
-        
         # THIS IS JMAVSim's ESC
-        new_pwms = [0,0,0,0]
+        new_pwms = [0] * Aeroacoustic.ROTOR_N
         for i in range(len(pwm)):
             new_pwms[i] = self.__last_pwms[i] + (pwm[i] - self.__last_pwms[i]) * (1.0 - E ** (-0.004 / 0.005)) 
         self.__last_pwms = new_pwms
@@ -95,8 +84,8 @@ class Aeroacoustic(Subscriber):
             if not should_store:
                 return
             row = [*self.lat_lon_alt, round(self.time_us / 1000000.0, 6)]
-            for rs in self.rotors_speed:
-                row.extend([rs, *self.attitude])
+            for rs, att in zip(self.rotors_speed, [self.attitude]*4 + [self.pusher_attitude]):
+                row.extend([rs, *att])
             self.__writer.store({'aeroacoustic': row})
 
     def __process_mission_status(self):
