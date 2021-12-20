@@ -5,16 +5,14 @@ from .LinearBattery import LinearBattery
 from ..Vehicle import Vehicle
 from time import time
 from ..Interfaces.DBAdapter import DBAdapter
-
+from ..PayloadModels import DRONE_TYPE_FIXED_WING, DRONE_TYPE_QUADROTOR
 US_TO_HR = 1 / 3.6e9
 
 class QuadrotorBatteryDischarge(Subscriber):
     
-    def __init__(self, writer: DBAdapter):
+    def __init__(self, writer: DBAdapter, drone_type: int):
         super().__init__()
-        # REMOVED until MAZE will fix the model
-        self.__battery = Battery(25.2, 0.0)
-        # self.__battery = LinearBattery()
+        self.__battery = Battery(25.2, 0.0, motors_n=4 if drone_type == DRONE_TYPE_QUADROTOR else 5)
         self.__vehicle = None
         self.__last_timestamp = 0
         self.__writer: DBAdapter = writer

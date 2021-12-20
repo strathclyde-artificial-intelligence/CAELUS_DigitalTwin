@@ -50,7 +50,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
 
     def __initialise_probes(self):
         self.__anra_probe = AnraTelemetryPush()
-        self.__battery_discharge_probe = QuadrotorBatteryDischarge(self.__writer)
+        self.__battery_discharge_probe = QuadrotorBatteryDischarge(self.__writer, self.__controller_payload.drone_type)
         self.__thermal_model_probe = ThermalModelProbe(self.__writer, integrate_every_us= 0.004 / 3600 )
         self.__aeroacoustic_probe = Aeroacoustic(self.__writer)
 
