@@ -32,7 +32,8 @@ def test_get_vendor_list():
     global viable_vendor
     global viable_buyer_id
     global viable_buyer
-    for vendor in authenticated_api.get_vendor_list():
+    vendors = authenticated_api.get_vendor_list()
+    for vendor in vendors:
         if viable_vendor_id is None and 'vendor' in vendor.name:
             viable_vendor_id = vendor.id
             viable_vendor = vendor
@@ -40,6 +41,7 @@ def test_get_vendor_list():
             viable_buyer_id = vendor.id
             viable_buyer = vendor
         assert vendor is not None and isinstance(vendor, Vendor)
+    assert any([v.vendor_id == 180 for v in vendors])
 
 def test_get_product_list_from_vendor():
     global viable_product_id

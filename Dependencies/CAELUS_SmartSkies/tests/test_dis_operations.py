@@ -98,6 +98,11 @@ def test_get_delivery_eta():
     assert isinstance(eta, float)
     assert eta >= 0
 
+def test_abort_delivery():
+    response = authenticated_api.abort_delivery(viable_delivery.id)
+    assert response is not None
+    assert response['status_code'] == 200
+    
 def test_provide_clearance_update():
     assert authenticated_api.provide_clearance_update(viable_delivery.id)
 

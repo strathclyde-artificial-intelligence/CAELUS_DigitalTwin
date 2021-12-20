@@ -20,11 +20,12 @@ class DIS_API():
     get_accepted_deliveries_endpoint = f'{base_endpoint}/telemetry_list'
     get_operation_details_with_delivery_id_endpoint = f'{base_endpoint}/operations/'
     get_delivery_eta_endpoint = lambda delivery_id: f'{DIS_API.base_endpoint}/delivery/{delivery_id}/eta'
+    abort_delivery_endpoint = lambda delivery_id: f'{DIS_API.base_endpoint}/delivery/{delivery_id}/abort'
     provide_clearance_update_endpoint = f'https://dms-api-dev.flyanra.net/updatedronestatus' # why is this different than all others?
     delivery_status_update_endpoint = f'{base_endpoint}/delivery/status'
     end_or_close_delivery_endpoint = lambda delivery_id: f'{DIS_API.base_endpoint}/{delivery_id}/status'
 
-    @staticmethod
+    @staticmethod   
     def __auth_request(session):
         dis_credentials = session.get_dis_credentials()
         return POST_Request(DIS_API.auth_endpoint, {
@@ -94,6 +95,10 @@ class DIS_API():
     def __get_delivery_eta(session, delivery_id):
         return GET_Request(DIS_API.get_delivery_eta_endpoint(delivery_id), {}, bearer_token=session.get_dis_token())
 
+    @staticmethod
+    def __abort_delivery(session, delivery_id):
+        return POST_Request(DIS_API.abort_delivery_endpoint(delivery_id), {}, bearer_token=session.get_dis_token())
+
     def __init__(self, session, logger=Logger()):
         self._logger = logger
         if session is None:
@@ -158,6 +163,13 @@ class DIS_API():
         eta = float(response['data']['eta'])
         return eta
 
+<<<<<<< HEAD
+    def abort_delivery(self, delivery_id):
+        response = self.__abort_delivery(self._session, delivery_id).send()
+        if response is None or response['status_code'] != 200:
+            self._logger.warn(f'Delivery {delivery_id} not aborted.')
+        return response
+=======
     def provide_clearance_update(self, delivery_id) -> bool:
         response = self.__provide_clearance_update(self._session, delivery_id).send()
         return response['result'] or False
@@ -171,3 +183,4 @@ class DIS_API():
         response = self.__end_or_close_delivery(self._session, delivery_id).send()
         if response is not None and 'status_code' in response and response['status_code'] == 200:
             return response
+>>>>>>> 4807289afef1c80c4dec73960e8a62dc0672e6a2
