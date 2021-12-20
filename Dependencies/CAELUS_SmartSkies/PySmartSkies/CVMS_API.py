@@ -15,7 +15,8 @@ class CVMS_API():
     get_product_list_endpoint = f'{base_endpoint}/shop/item_list'
     place_order_endpoint = f'{base_endpoint}/shop/place_order_add'
     checkout_order_endpoint = f'{base_endpoint}/order/split/checkout'
-    
+    send_clearance_update_endpoint = f'{base_endpoint}/updatedronestatus'
+
     @staticmethod
     def __auth_request(session):
         cvms_credentials = session.get_cvms_credentials()
@@ -75,6 +76,13 @@ class CVMS_API():
         }, bearer_token=session.get_cvms_token())
 
 
+    @staticmethod
+    def __provide_clearance_update(session, delivery_id):
+        return POST_Request(CVMS_API.send_clearance_update_endpoint, {
+            "delivery_id": delivery_id,
+            "status": "CLEAR_FOR_TAKEOFF_CUSTOMER"
+        }, bearer_token=session.get_cvms_token())
+
     def __init__(self, session, logger=Logger()):
         self._logger = logger
         if session is None:
@@ -125,3 +133,7 @@ class CVMS_API():
             self._logger.fatal(f'Trying to checkout without an order (orders is None).')
         self._logger.info(f'Checking out orders {orders}')
         return self.__checkout_order(self._session, [o.id for o in orders]).send()
+
+    def provide_clearance_update(self, delivery_id:str):
+        self._logger.info(f'Providing clearance update for delivery {delivery_id}')
+        return self.__provide_clearance_update(self._session, delivery_id).send()
