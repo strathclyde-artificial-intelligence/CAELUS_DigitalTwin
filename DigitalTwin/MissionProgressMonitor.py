@@ -1,5 +1,9 @@
 import threading
 import time
+
+from PySmartSkies.CVMS_API import CVMS_API
+from PySmartSkies.DIS_API import DIS_API
+from PySmartSkies.DeliveryStatus import *
 from .Interfaces.DBAdapter import DBAdapter
 import logging
 import queue
@@ -15,14 +19,21 @@ class MissionProgressMonitor(threading.Thread):
 
     mission_status = [TAKING_OFF, TAKEOFF_COMPLETE, CRUISING, LANDING, LANDING_COMPLETE]
 
-    def __init__(self, vehicle, writer: DBAdapter, controller, mission_items_n):
+    def __init__(self, vehicle, writer: DBAdapter, controller, mission_items_n, delivery_id = None, smartskies_session = None):
         super().__init__()
         self.__writer = writer
         self.__logger = logging.getLogger()
         self.__vehicle = vehicle
         self.__controller = controller
         self.__mission_items_n = mission_items_n
+        self.__cvms_api = CVMS_API(smartskies_session) if smartskies_session is not None else None
+        self.__dis_api = DIS_API(smartskies_session) if smartskies_session is not None else None
         self.name = 'Mission Progress Monitor'
+        self.__status_steps = {
+            0: [STATUS_DELIVERY_REQUESTED,STATUS_DELIVERY_REQUEST_ACCEPTED, STATUS_READY_FOR_DELIVERY],
+            4: [STATUS_CLEAR_TO_LAND_CUSTOMER, STATUS_LANDING_CUSTOMER],
+        }
+        self.__delivery_id = delivery_id
         self.daemon = True
         self.__last_wp = -1
 
@@ -35,11 +46,30 @@ class MissionProgressMonitor(threading.Thread):
             4: 'Landing complete'
         }[s]
 
+    def publish_smartskies_status_update(self, status):
+        try:
+            if self.__cvms_api is None or self.__dis_api is None:
+                self.__logger.warn('Skipping SmartSkies status update -- No API bridge available.')
+            elif self.__delivery_id is None:
+                self.__logger.warn('No delivery ID provided -- Smartskies update aborted.')
+            else:
+                if status not in self.__status_steps:
+                    return
+                items = self.__status_steps[status]
+                for i in items:
+                    if i == STATUS_CLEAR_TO_LAND_CUSTOMER: # Must be issued by CVMS
+                        self.__cvms_api.send_clearance_update_endpoint(self.__delivery_id)
+                    else:
+                        self.__dis_api.delivery_status_update(self.__delivery_id, i)
+                    self.__logger.info(f'Sent Smartskies Update: {i}')
+        except Exception as e:
+            self.__logger.error(f'Error in publishing status update (SmartSkies): {e}')
 
     def publish_mission_status(self, status):
         if status not in MissionProgressMonitor.mission_status:
             self.__logger.warn("Tried to publish an invalid mission status!")
         self.__logger.info(f'Mission status updated: {self.__mission_status_to_string(status)}')
+        self.publish_smartskies_status_update(status)
         if self.__writer is not None:
             wp_n = max(0, self.__vehicle.commands.next-1) if not (status == MissionProgressMonitor.LANDING_COMPLETE) else self.__mission_items_n
             self.__writer.store({MissionProgressMonitor.DB_MISSION_STATUS:f"{wp_n}/{self.__mission_items_n}"}, series=False)

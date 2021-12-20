@@ -2,6 +2,9 @@ import logging
 from dronekit import Vehicle as DronekitVehicle
 from threading import Thread
 import time
+from PySmartSkies.DIS_API import DIS_API
+from PySmartSkies.CVMS_API import CVMS_API
+from PySmartSkies.Session import Session
 
 from DigitalTwin.Interfaces.DBAdapter import DBAdapter
 from DigitalTwin.MissionProgressMonitor import MissionProgressMonitor
@@ -72,7 +75,7 @@ class Vehicle(DronekitVehicle):
 
         self.__logger.info(f"Preparing for mission with {mission_items_n} items")
         
-        self.__mission_completion_thread = MissionProgressMonitor(self, self.__writer, self.__controller, mission_items_n)
+        self.__mission_completion_thread = MissionProgressMonitor(self, self.__writer, self.__controller, mission_items_n, self.__delivery_id, self.__smartskies_session)
         self.__mission_completion_thread.start()
 
     def set_writer(self, writer: DBAdapter = None):
@@ -80,7 +83,11 @@ class Vehicle(DronekitVehicle):
 
     def set_controller(self, c):
         self.__controller = c
-        
+    
+    def set_smartskies_auth_data(self, dis_token, cvms_token, delivery_id):
+        self.__smartskies_session = Session.with_tokens(dis_token, cvms_token)
+        self.__delivery_id = delivery_id
+
     @property
     def hil_actuator_controls(self):
         return self._hil_actuator_controls

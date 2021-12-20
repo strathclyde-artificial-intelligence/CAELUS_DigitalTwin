@@ -85,6 +85,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         
         vehicle.set_controller(self)
         vehicle.set_writer(self.__writer)
+        vehicle.set_smartskies_auth_data(self.__controller_payload.dis_auth_token, self.__controller_payload.cvms_auth_token, self.__controller_payload.delivery_id)
         
         self.__logger.info(f'New vehicle available {vehicle}')
         self.__commander.set_vehicle(vehicle)

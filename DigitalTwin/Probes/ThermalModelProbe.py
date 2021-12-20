@@ -25,7 +25,10 @@ class ThermalModelProbe(Subscriber):
     def step_state(self, elapsed_time_us):
         dt_s = elapsed_time_us / 1000000
         last_time_s = self.__time_usec / 1000000
-        _, solution = self.__thermal_sim.solve(last_time_s, last_time_s+dt_s, self.__state)
+        try:
+            _, solution = self.__thermal_sim.solve(last_time_s, last_time_s+dt_s, self.__state)
+        except Exception as e:
+            self.__logger.error(f'Thermal model error: {e}')
         return solution[-1]
     
     def new_datapoint(self, drone_id, stream_id, datapoint):

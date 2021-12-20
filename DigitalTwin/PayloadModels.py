@@ -31,11 +31,13 @@ class ControllerPayload(Unpackable):
     def __init__(self, config_dict):
         self.waypoints: Tuple[float, float, float] = get(config_dict, 'waypoints')
         self.operation_id: str = get(config_dict, 'operation_id')
+        self.delivery_id: str = get(config_dict, 'delivery_id')
         self.control_area_id: str = get(config_dict, 'control_area_id')
         self.operation_reference_number: str = get(config_dict, 'operation_reference_number')
         self.drone_id: str = get(config_dict, 'drone_id')
         self.drone_registration_number: str = get(config_dict, 'drone_registration_number')
         self.dis_auth_token: str = get(config_dict, 'dis_auth_token')
+        self.cvms_auth_token: str = get(config_dict, 'cvms_auth_token')
         self.drone_type: str = get(config_dict, 'drone_type', default_if_not_found=DRONE_TYPE_QUADROTOR)
 
 class OrchestratorPayload(Unpackable):
