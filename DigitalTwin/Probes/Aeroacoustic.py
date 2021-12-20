@@ -66,7 +66,6 @@ class Aeroacoustic(Subscriber):
 
     def set_vehicle(self, v):
         self.__vehicle = v
-        self.__vehicle.add_mission_hanlder_queue(self.__mission_status_queue)
 
     def pwm_to_rps(self, pwm):
         # THIS IS JMAVSim's ESC

@@ -163,13 +163,11 @@ class DIS_API():
         eta = float(response['data']['eta'])
         return eta
 
-<<<<<<< HEAD
     def abort_delivery(self, delivery_id):
         response = self.__abort_delivery(self._session, delivery_id).send()
         if response is None or response['status_code'] != 200:
             self._logger.warn(f'Delivery {delivery_id} not aborted.')
         return response
-=======
     def provide_clearance_update(self, delivery_id) -> bool:
         response = self.__provide_clearance_update(self._session, delivery_id).send()
         return response['result'] or False
@@ -183,4 +181,3 @@ class DIS_API():
         response = self.__end_or_close_delivery(self._session, delivery_id).send()
         if response is not None and 'status_code' in response and response['status_code'] == 200:
             return response
->>>>>>> 4807289afef1c80c4dec73960e8a62dc0672e6a2
