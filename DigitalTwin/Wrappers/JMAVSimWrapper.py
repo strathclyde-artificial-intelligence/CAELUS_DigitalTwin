@@ -81,6 +81,7 @@ class JMAVSimWrapper(threading.Thread):
     def graceful_stop(self):
         self.__should_stop = True
         self.__process.send_signal(signal.SIGINT)
+        self.__cleanup(timeout=1)
 
     def halt(self):
         exit(-1)

@@ -63,7 +63,9 @@ class MissionProgressMonitor(threading.Thread):
                         self.__dis_api.delivery_status_update(self.__delivery_id, i)
                     self.__logger.info(f'Sent Smartskies Update: {i}')
         except Exception as e:
+            import traceback
             self.__logger.error(f'Error in publishing status update (SmartSkies): {e}')
+            print(traceback.print_exc())
 
     def publish_mission_status(self, status):
         if status not in MissionProgressMonitor.mission_status:
