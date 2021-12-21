@@ -57,11 +57,13 @@ class MissionProgressMonitor(threading.Thread):
                     return
                 items = self.__status_steps[status]
                 for i in items:
+                    flag = False
                     if i == STATUS_CLEAR_TO_LAND_CUSTOMER: # Must be issued by CVMS
-                        self.__cvms_api.send_clearance_update_endpoint(self.__delivery_id)
+                        flag = self.__cvms_api.provide_clearance_update(self.__delivery_id)
                     else:
-                        self.__dis_api.delivery_status_update(self.__delivery_id, i)
-                    self.__logger.info(f'Sent Smartskies Update: {i}')
+                        flag = self.__dis_api.delivery_status_update(self.__delivery_id, i)
+                    if flag:
+                        self.__logger.info(f'Sent Smartskies Update: {i}')
         except Exception as e:
             import traceback
             self.__logger.error(f'Error in publishing status update (SmartSkies): {e}')
