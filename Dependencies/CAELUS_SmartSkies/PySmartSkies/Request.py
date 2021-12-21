@@ -35,10 +35,13 @@ class Request(ABC):
         if response.status_code != requests.codes.ok:
             logging_method = self._logger.fatal if must_succeed else self._logger.warn
             logging_method(f'Request at endpoint `{self._endpoint}` failed (Status code {response.status_code}).')
-            data = response.json()
-            if data is not None and 'error' in data:
-                logging_method(f'Remote error: {data["error"]}')
-            return None
+            try:
+                data = response.json()
+                if data is not None and 'error' in data:
+                    logging_method(f'Remote error: {data["error"]}')
+            except Exception as e:
+                logging_method(f'Local error: {e}')
+                return None
         return response.json() if jsonify else response.content
 
 
