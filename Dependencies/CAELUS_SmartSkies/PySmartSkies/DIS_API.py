@@ -175,7 +175,9 @@ class DIS_API():
     # Status values can be found in DeliveryStatus.py
     def delivery_status_update(self, delivery_id, new_status) -> bool:
         response = self.__delivery_status_update(self._session, delivery_id, new_status).send()
-        return response['status_code'] == 200
+        if response is not None and 'status_code' in response:
+            return response['status_code'] == 200
+        return False
 
     def end_or_close_delivery(self, delivery_id):
         response = self.__end_or_close_delivery(self._session, delivery_id).send()
