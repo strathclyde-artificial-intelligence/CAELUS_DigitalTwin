@@ -8,3 +8,4 @@ Dependencies/PX4-Autopilot
 *.simout
 *.ost
 *.ini
+gui_layout.ini
