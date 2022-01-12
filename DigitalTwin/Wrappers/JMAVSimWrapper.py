@@ -7,6 +7,7 @@ from typing import Optional
 from ..Interfaces.Stoppable import Stoppable
 from ..Interfaces.StreamHandler import StreamHandler
 from ..PayloadModels import SimulatorPayload
+import json
 
 class JMAVSimWrapper(threading.Thread):
 
