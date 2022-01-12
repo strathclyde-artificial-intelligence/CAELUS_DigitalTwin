@@ -8,6 +8,7 @@ from PySmartSkies.Session import Session
 import json
 from start import start_with_payload
 import time
+import pickle
 
 load_dotenv()
 
@@ -37,37 +38,67 @@ def pp_vendors_and_products(vendors, products):
 
     for v_id, ps in products.items():
         if len(ps) == 0:
-            continue
+            print(f'No products for vendor {v_id}')
         print(f'Vendor: {vids[v_id].name} (id: {v_id})')
         for p in ps: 
             print(f"\t> {p}")
 
 def get_possible_vendors_and_products(dis_api: DIS_API, cvms_api: CVMS_API):
-    vendors = cvms_api.get_vendor_list(items_per_page=400)
-    
-    products = {
-        str(v.id):cvms_api.get_product_list_from_vendor(v.id) for v in vendors
-    }
-
-    return vendors, products
+    VENDORS_PICKLE_F = 'vendors.pickle'
+    try:
+        with open(VENDORS_PICKLE_F, 'rb') as f:
+            vs_ps = pickle.loads(f.read())
+            return vs_ps['vendors'], vs_ps['products']
+    except Exception as e:
+        print(e)
+        vendors = cvms_api.get_vendor_list(items_per_page=400)
+        products = {
+            str(v.id):cvms_api.get_product_list_from_vendor(v.id) for v in vendors
+        }
+        with open(VENDORS_PICKLE_F, 'wb') as f:
+            s = pickle.dumps({'vendors':vendors, 'products':products})
+            f.write(s)
+        return vendors, products
 
 def make_order(cvms_api: CVMS_API, product, vendor):
     res = cvms_api.place_order(vendor, [product])
     o = cvms_api.checkout_orders(res)
     return o
 
+def drone_params_from_weight(base_w):
+    # Should be able to lift 3 times its weight
+    max_thrust = ((base_w * 3) * 9.81) / 4
+    max_torque = (0.05 * base_w) / 0.8 # proportional to default torque
+    return {'max_thrust': max_thrust, 'max_torque':max_torque}
+    
+
+def get_drone_base_weight():
+    while True:
+        try:
+            kg = float(input("Drone base weight (kg): "))
+            if kg <= 0:
+                raise Exception("Can't be lower or equal than zero")
+            return kg
+        except:
+            pass
+        
 import datetime
 def make_operation(dis_api: DIS_API):
     deliveries, pilots, drones, control_areas = dis_api.get_requested_deliveries()
-    drone = drones[-2]
+    drone = drones[-3]
     effective_time_begin = datetime.datetime.utcnow()
-    effective_time_begin += datetime.timedelta(minutes=2)
-    time_begin_unix = time.time() + 2 * 60
+    effective_time_begin += datetime.timedelta(minutes=1)
+    print(effective_time_begin.isoformat())
+    time_begin_unix = time.time() + 2 * 60 + 60
     ops = dis_api.create_operation(deliveries[-1], drone, control_areas[-1], effective_time_begin.isoformat())
     op_details = dis_api.get_operation_details_with_delivery_id(deliveries[-1].id)
-    
+    base_mass = get_drone_base_weight()
     op: Operation = ops[0]
     wps = op.get_waypoints()
+
+    drone_config = {'mass':base_mass}
+    drone_config.update(drone_params_from_weight(base_mass))
+
     payload = {
         'waypoints': wps,
         "operation_id": op_details.operation_id,
@@ -104,4 +135,3 @@ if order is not None and order['result']:
     print(f"Order successful ({order})")
     payload = make_operation(dis)
     print(payload)
-#     start_with_payload(payload)
