@@ -51,7 +51,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
     def __initialise_probes(self):
         self.__anra_probe = AnraTelemetryPush()
         self.__battery_discharge_probe = QuadrotorBatteryDischarge(self.__writer, self.__controller_payload.drone_type)
-        self.__thermal_model_probe = ThermalModelProbe(self.__writer, integrate_every_us= 0.004 / 3600 )
+        self.__thermal_model_probe = ThermalModelProbe(self.__writer, integrate_every_us= self.__controller_payload.thermal_model_timestep * 1000000 )
         self.__aeroacoustic_probe = Aeroacoustic(self.__writer)
 
     def __setup_probes(self):
@@ -118,7 +118,6 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
     def vehicle_timeout(self, vehicle):
         self.__logger.info(f'Vehicle timed out!')
         self.__connection_manager.stop_connecting()
-        self.__connection_manager.connect_to_vehicle()
 
     def add_mission(self, mission: Mission):
         self.__logger.info(f'Received new mission!')
