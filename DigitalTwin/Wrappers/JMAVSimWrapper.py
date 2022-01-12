@@ -63,7 +63,7 @@ class JMAVSimWrapper(threading.Thread):
                 f'export PX4_HOME_LAT={lat};'
                 f'export PX4_HOME_LON={lon};'
                 f'export PX4_HOME_ALT={alt};'
-                f'java -XX:GCTimeRatio=20 -Djava.ext.dirs= -jar jmavsim_run.jar -tcp 127.0.0.1:4560 -r 250 -lockstep -no-gui -drone-config "{drone_conf}"',
+                f"java -XX:GCTimeRatio=20 -Djava.ext.dirs= -jar jmavsim_run.jar -tcp 127.0.0.1:4560 -r 250 -lockstep -no-gui -drone-config '{drone_conf}'",
                 cwd=self.__sim_folder,
                 shell=True,
                 stdout=subprocess.PIPE

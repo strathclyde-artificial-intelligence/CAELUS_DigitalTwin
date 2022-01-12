@@ -1,3 +1,4 @@
+import enum
 import os
 from PySmartSkies.Models.Operation import Operation
 from dotenv import load_dotenv
@@ -6,6 +7,7 @@ from PySmartSkies.CVMS_API import CVMS_API
 from PySmartSkies.Credentials import DIS_Credentials, CVMS_Credentials
 from PySmartSkies.Session import Session
 import json
+from Dependencies.CAELUS_SmartSkies.PySmartSkies.Models.Product import Product
 from start import start_with_payload
 import time
 import pickle
@@ -63,7 +65,7 @@ def get_possible_vendors_and_products(dis_api: DIS_API, cvms_api: CVMS_API):
 def make_order(cvms_api: CVMS_API, product, vendor):
     res = cvms_api.place_order(vendor, [product])
     o = cvms_api.checkout_orders(res)
-    return o
+    return o, product
 
 def drone_params_from_weight(base_w):
     # Should be able to lift 3 times its weight
@@ -77,18 +79,43 @@ def get_drone_base_weight():
         try:
             kg = float(input("Drone base weight (kg): "))
             if kg <= 0:
-                raise Exception("Can't be lower or equal than zero")
+                raise Exception("Can't be lower or equal to zero")
             return kg
         except:
             pass
-        
+
+def prompt_selection(options: dict):
+    keys = list(options.keys())
+    while True:
+        try:
+            for i,k in enumerate(keys):
+                print(f'{i}) {k}')
+            selection = int(input(f'(0-{len(keys)-1}): '))
+            if selection >= len(keys):
+                raise Exception()
+            return options[keys[selection]]
+        except Exception as e:
+            print(e)
+
+def drone_selection():
+    drone_conf = {}
+    _type = prompt_selection({'quadrotor':0, 'fixed-wing':1})
+    drone_conf.update({'type':_type})
+    if _type == 1:
+        drone_conf.update({'tail_length':0.30})
+    return drone_conf
+
 import datetime
-def make_operation(dis_api: DIS_API):
+def make_operation(dis_api: DIS_API, product: Product):
     deliveries, pilots, drones, control_areas = dis_api.get_requested_deliveries()
-    drone = drones[-3]
+    if len(deliveries) == 0:
+        print('Smartskies failed in creating delivery. Hospitals may be too far apart!')
+        exit(-1)
+    drone = drones[0]
+    # Operation begin in smartskies request
     effective_time_begin = datetime.datetime.utcnow()
     effective_time_begin += datetime.timedelta(minutes=1)
-    print(effective_time_begin.isoformat())
+    # Orchestrator effective time start
     time_begin_unix = time.time() + 2 * 60 + 60
     ops = dis_api.create_operation(deliveries[-1], drone, control_areas[-1], effective_time_begin.isoformat())
     op_details = dis_api.get_operation_details_with_delivery_id(deliveries[-1].id)
@@ -96,8 +123,16 @@ def make_operation(dis_api: DIS_API):
     op: Operation = ops[0]
     wps = op.get_waypoints()
 
-    drone_config = {'mass':base_mass}
+    drone_config = drone_selection()
+    drone_config.update({'mass':base_mass + product.per_item_weight})
     drone_config.update(drone_params_from_weight(base_mass))
+
+    # Takeoff location must be rounded up / increased slightly
+    # To prevent collision of the drone with the bottom of the
+    # takeoff volume
+    initial_lon_lat_alt_corrected = list(op.get_takeoff_location())
+    initial_lon_lat_alt_corrected[-1] += 0.5
+    # --------
 
     payload = {
         'waypoints': wps,
@@ -111,10 +146,10 @@ def make_operation(dis_api: DIS_API):
         "delivery_id": deliveries[-1].id,
         "thermal_model_timestep": 1,
         "aeroacoustic_model_timestep": 0.004,
-        "drone_config":{},
+        "drone_config":drone_config,
         "g_acceleration": 9.81,
         "effective_start_time": time_begin_unix,
-        "initial_lon_lat_alt": op.get_takeoff_location(),
+        "initial_lon_lat_alt": initial_lon_lat_alt_corrected,
         "final_lon_lat_alt":op.get_landing_location()
     }
 
@@ -130,8 +165,8 @@ vs, ps = get_possible_vendors_and_products(dis, cvms)
 pp_vendors_and_products(vs, ps)
 s = input("Vendor number - Product number: ")
 chosen_vendor, chosen_product = parse_product_and_vendor(s, vs, ps)
-order = make_order(cvms,chosen_product, chosen_vendor)
+order, product = make_order(cvms,chosen_product, chosen_vendor)
 if order is not None and order['result']:
     print(f"Order successful ({order})")
-    payload = make_operation(dis)
+    payload = make_operation(dis, product)
     print(payload)
