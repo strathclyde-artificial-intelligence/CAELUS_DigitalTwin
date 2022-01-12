@@ -28,8 +28,6 @@ RUN update-alternatives --install "/usr/bin/ant" "ant" "/opt/ant/bin/ant" 1 && \
 RUN apt-get update && apt-get install -y bash
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 RUN apt-get update && apt-get -y install cmake protobuf-compiler
-RUN apt-get install libboost-all-dev -y
-RUN apt install libeigen3-dev
 RUN apt-get install -y bc
   
 WORKDIR /CAELUS_DigitalTwin
