@@ -60,6 +60,8 @@ class PX4Wrapper(threading.Thread):
             'Operation timeout': MISSION_UPLOAD_FAIL
         }
         t_keys = triggers.keys()
+        if stream is None:
+            exit(STREAM_READ_FAILURE)
         while not self.__should_stop and stream.readable():
             line = stream.readline().decode('utf-8')
             for k in t_keys:
