@@ -86,6 +86,7 @@ class MissionProgressMonitor(threading.Thread):
     def __process_mission_status(self, waypoint_n):
         if self.__last_wp > 0 and waypoint_n == 0:
             self.publish_mission_status(MissionProgressMonitor.LANDING_COMPLETE)
+            self.close_delivery_operation()
         elif waypoint_n == 0:
             self.publish_mission_status(MissionProgressMonitor.TAKING_OFF)
         elif waypoint_n == self.__mission_items_n - 1:
@@ -97,6 +98,10 @@ class MissionProgressMonitor(threading.Thread):
         else:
             self.__logger.warn(f'Unrecognised waypoint number: {waypoint_n}')
         self.__last_wp = waypoint_n
+
+    def close_delivery_operation(self):
+        self.__logger.info(f'Sending delivery end notification to SmartSkies (id: {self.__delivery_id})')
+        self.__dis_api.end_or_close_delivery(self.__delivery_id)
 
     def put_command_in_queue(self, command):
         self.__command_queue.put(command)
