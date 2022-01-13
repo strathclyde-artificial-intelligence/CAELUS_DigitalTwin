@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import os,signal
 import time
 
+from .error_codes import *
 from DigitalTwin.Interfaces.DBAdapter import DBAdapter
 
 from DigitalTwin.Interfaces.TimeSeriesHandler import TimeSeriesHandler
@@ -118,6 +119,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
     def vehicle_timeout(self, vehicle):
         self.__logger.info(f'Vehicle timed out!')
         self.__connection_manager.stop_connecting()
+        exit(VEHICLE_TIMED_OUT)
 
     def add_mission(self, mission: Mission):
         self.__logger.info(f'Received new mission!')
