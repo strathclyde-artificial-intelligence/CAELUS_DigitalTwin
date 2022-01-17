@@ -1,6 +1,8 @@
 # PySmartSkies
 [CAELUS] Python SDK for SmartSkies platform.  
 
+[![PySmartSkies Test](https://github.com/H3xept/CAELUS_SmartSkies/actions/workflows/python-app.yml/badge.svg)](https://github.com/H3xept/CAELUS_SmartSkies/actions/workflows/python-app.yml)
+
 # Installing the Library
 To install the library environment-wide you can run `pip3 install .`.
 This command allows you to use *PySmartSkies* by importing it as shown below:

@@ -32,9 +32,10 @@ def test_get_vendor_list():
     global viable_vendor
     global viable_buyer_id
     global viable_buyer
+    preferred_vendor_id = 66
     vendors = authenticated_api.get_vendor_list()
     for vendor in vendors:
-        if viable_vendor_id is None and 'vendor' in vendor.name:
+        if viable_vendor_id is None and 'vendor' in vendor.name and vendor.id == preferred_vendor_id:
             viable_vendor_id = vendor.id
             viable_vendor = vendor
         if viable_buyer_id is None and 'vendor' not in vendor.name:
@@ -46,8 +47,9 @@ def test_get_vendor_list():
 def test_get_product_list_from_vendor():
     global viable_product_id
     global viable_product
+    preferred_product_id = 103
     for product in authenticated_api.get_product_list_from_vendor(viable_vendor_id):
-        if viable_product_id is None:
+        if viable_product_id is None and product.id == preferred_product_id:
             viable_product_id = product.id
             viable_product = product
         assert product is not None and isinstance(product, Product)

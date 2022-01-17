@@ -20,10 +20,10 @@ viable_operation = None
 operation_id = None
 
 @pytest.fixture(autouse=True)
-def authenticate_cvms():
+def authenticate_dis():
     global authenticated_api
     if authenticated_api is None:
-        session = Session(cvms_credentials, dis_credentials)
+        session = Session(dis_credentials, dis_credentials)
         api = DIS_API(session)
         api.authenticate()
         authenticated_api = api
@@ -109,5 +109,10 @@ def test_provide_clearance_update():
 def test_delivery_status_update():
     assert authenticated_api.delivery_status_update(viable_delivery.id, STATUS_READY_FOR_DELIVERY)
 
-def test_end_or_close_delivery():
-    assert authenticated_api.end_or_close_delivery(operation_id) is not None
+def test_request_after_token_expiry():
+    import time
+    session = Session(dis_credentials, dis_credentials)
+    api = DIS_API(session)
+    api.authenticate()
+    session.store_dis_bearer(session.get_dis_token(), session.get_dis_refresh_token(), time.time())
+    test_get_requested_deliveries()

@@ -1,4 +1,7 @@
-from typing import List, Tuple
+from geojson import Point, LineString, loads
+from json import dumps
+from geomet import wkt
+from typing import List, Tuple, Union
 import datetime
 from .Logger import Logger
 from .Request import GET_Request, POST_Request, BodyType
@@ -9,12 +12,20 @@ from .Models.ControlArea import ControlArea
 from .Models.Operation import Operation
 from .Models.FlightVolume import FlightVolume
 from .DeliveryStatus import *
+import time
+
+class ParameterException(Exception):
+    pass
 
 class DIS_API():
+    
+    CONSTRAINT_TYPES = ['obstacle', 'population', 'terrain', 'danger', 'enroute', 'restricted', 'celltowers']
 
     base_auth_endpoint = f'https://oauth.flyanra.net'
+    base_aware_endpoint = f'https://spatialdev.flyanra.net/aware/api'
     base_endpoint = f'https://ss-anrademo-dis.flyanra.net'
     auth_endpoint = f'{base_auth_endpoint}/auth/realms/ANRA/protocol/openid-connect/token'
+    refresh_token_endpoint = f'{base_auth_endpoint}/auth/realms/ANRA/protocol/openid-connect/token'
     requested_deliveries_endpoint = f'{base_endpoint}/selectbox_lists'
     create_operation_endpoint = f'{base_endpoint}/create_operation'
     get_accepted_deliveries_endpoint = f'{base_endpoint}/telemetry_list'
@@ -24,6 +35,8 @@ class DIS_API():
     provide_clearance_update_endpoint = f'https://dms-api-dev.flyanra.net/updatedronestatus' # why is this different than all others?
     delivery_status_update_endpoint = f'{base_endpoint}/delivery/status'
     end_or_close_delivery_endpoint = lambda delivery_id: f'{DIS_API.base_endpoint}/{delivery_id}/status'
+    # AWARE
+    get_constraints_endpoint = f'{base_aware_endpoint}/constraint'
 
     @staticmethod   
     def __auth_request(session):
@@ -36,11 +49,19 @@ class DIS_API():
         }, body_type=BodyType.FORM_ENCODED)
     
     @staticmethod
+    def __token_refresh_request(session):
+        return POST_Request(DIS_API.refresh_token_endpoint, {
+            'grant_type':'refresh_token',
+            'client_id': 'DMS',
+            'refresh_token': session.get_dis_refresh_token()
+        }, body_type=BodyType.FORM_ENCODED)
+
+    @staticmethod
     def __get_requested_deliveries(session):
         return GET_Request(DIS_API.requested_deliveries_endpoint, {}, bearer_token=session.get_dis_token())
 
     @staticmethod
-    def __create_operation(session, delivery, drone, control_area, effective_time_begin=None):
+    def __create_operation(session, delivery, drone, control_area, effective_time_begin=None, expected_cruise_speed=7):
         if effective_time_begin is None:
             effective_time_begin = datetime.datetime.utcnow()
             effective_time_begin += datetime.timedelta(minutes=30)
@@ -57,7 +78,7 @@ class DIS_API():
             'customer_coordinate': delivery.dropoff_coordinate,
             'altitude': 200,
             'takeoff_landing_radius': 100,
-            'flight_speed': 7,
+            'flight_speed': expected_cruise_speed, # miles/h
             'altitude_buffer': 100,
             'expand_factor': "LOW",
             'effective_time_begin': effective_time_begin,
@@ -99,11 +120,50 @@ class DIS_API():
     def __abort_delivery(session, delivery_id):
         return POST_Request(DIS_API.abort_delivery_endpoint(delivery_id), {}, bearer_token=session.get_dis_token())
 
+    @staticmethod
+    def __get_constraint(session, type: str, location: Union[Point, LineString], range: int):
+        """
+        param type: one of CONSTRAINT_TYPES
+        param location: (WKT) https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry
+        param range: radius from location in meters
+        """
+        if type not in DIS_API.CONSTRAINT_TYPES:
+            raise ParameterException(f'Constraint type not valid ({type} not in {DIS_API.CONSTRAINT_TYPES})')
+        if not (isinstance(location, Point) or isinstance(location, LineString)):
+            raise ParameterException(f'Location must be either a geojson Point or LineString')
+        if range <= 0:
+            raise ParameterException(f'Radius must be greater than zero if specified.')
+        wkt_location = wkt.dumps(location, decimals=8)
+        return GET_Request(DIS_API.get_constraints_endpoint, {
+            'type': type,
+            'location':wkt_location,
+            'range': range
+        }, bearer_token=session.get_dis_token())
+
     def __init__(self, session, logger=Logger()):
         self._logger = logger
         if session is None:
             self._logger.fatal('Attempted to construct DIS_API with an empty Session.')
         self._session = session
+        self._session.set_refresh_closure(lambda: self.refresh_token())
+
+    def __process_auth_payload(self, payload):
+        try:
+            if payload is None or 'access_token' not in payload:
+                raise Exception('Error while refreshing token for DIS user.')
+            bearer = payload['access_token']
+            refresh = payload['refresh_token']
+            expiry = time.time() + payload['expires_in']
+            self._session.store_dis_bearer(f'Bearer {bearer}', refresh, expiry)
+        except Exception as e:
+            self._logger.fatal(f'Malformed authentication payload.')
+            self._logger.fatal(e)
+
+    def refresh_token(self):
+        self._logger.info('Refreshing DIS user token.')
+        refresh_request = DIS_API.__token_refresh_request(self._session)
+        response = refresh_request.send()
+        self.__process_auth_payload(response)
 
     def authenticate(self):
         self._logger.info('Authenticating DIS user.')
@@ -111,10 +171,7 @@ class DIS_API():
             self._logger.fatal('Trying to authenticate with the DIS service without having specified DIS credentials in the Session constructor.')
         auth_request = DIS_API.__auth_request(self._session)
         response = auth_request.send()
-        if response is None or 'access_token' not in response:
-            self._logger.fatal('Error while authenticating CVMS user.')
-        bearer = response['access_token']
-        self._session.store_dis_bearer(f'Bearer {bearer}')
+        self.__process_auth_payload(response)
 
     def get_requested_deliveries(self) -> Tuple[List[Delivery], List[Pilot], List[Drone], List[ControlArea]]:
         response = self.__get_requested_deliveries(self._session).send()['data']
@@ -183,3 +240,48 @@ class DIS_API():
         response = self.__end_or_close_delivery(self._session, delivery_id).send()
         if response is not None and 'status_code' in response and response['status_code'] == 200:
             return response
+
+    # INFO: All AWARE endpoints return a FeatureCollection object from the GeoJSON library
+    # Documentation here (https://pypi.org/project/geojson/#featurecollection)
+
+    def get_aware_obstacle(self, location: Union[Point, LineString], range: int):
+        response = self.__get_constraint(self._session, 'obstacle', location, range).send()
+        if response is not None:
+            return loads(dumps(response))
+        self._logger.error(f'Endpoint "get_aware_obstacle" failed to respond.')
+
+    def get_aware_population(self, location: Union[Point, LineString], range: int):
+        response = self.__get_constraint(self._session, 'population', location, range).send()
+        if response is not None:
+            return loads(dumps(response))
+        self._logger.error(f'Endpoint "get_aware_population" failed to respond.')
+
+    def get_aware_terrain(self, location: Union[Point, LineString], range: int):
+        response = self.__get_constraint(self._session, 'terrain', location, range).send()
+        if response is not None:
+            return loads(dumps(response))
+        self._logger.error(f'Endpoint "get_aware_terrain" failed to respond.')
+
+    def get_aware_danger(self, location: Union[Point, LineString], range: int):
+        response = self.__get_constraint(self._session, 'danger', location, range).send()
+        if response is not None:
+            return loads(dumps(response))
+        self._logger.error(f'Endpoint "get_aware_danger" failed to respond.')
+
+    def get_aware_enroute(self, location: Union[Point, LineString], range: int):
+        response = self.__get_constraint(self._session, 'enroute', location, range).send()
+        if response is not None:
+            return loads(dumps(response))
+        self._logger.error(f'Endpoint "get_aware_enroute" failed to respond.')
+
+    def get_aware_restricted(self, location: Union[Point, LineString], range: int):
+        response = self.__get_constraint(self._session, 'restricted', location, range).send()
+        if response is not None:
+            return loads(dumps(response))
+        self._logger.error(f'Endpoint "get_aware_restricted" failed to respond.')
+
+    def get_aware_celltowers(self, location: Union[Point, LineString], range: int):
+        response = self.__get_constraint(self._session, 'celltowers', location, range).send()
+        if response is not None:
+            return loads(dumps(response))
+        self._logger.error(f'Endpoint "get_aware_celltowers" failed to respond.')
