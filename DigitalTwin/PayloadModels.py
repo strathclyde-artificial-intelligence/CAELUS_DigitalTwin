@@ -37,6 +37,7 @@ class ControllerPayload(Unpackable):
         self.drone_id: str = get(config_dict, 'drone_id')
         self.drone_registration_number: str = get(config_dict, 'drone_registration_number')
         self.dis_auth_token: str = get(config_dict, 'dis_auth_token')
+        self.dis_refresh_token: str = get(config_dict, 'dis_refresh_token')
         self.cvms_auth_token: str = get(config_dict, 'cvms_auth_token')
         self.drone_type: str = get(config_dict['drone_config'], 'type', default_if_not_found=DRONE_TYPE_QUADROTOR)
         self.thermal_model_timestep: float = get(config_dict, 'thermal_model_timestep')

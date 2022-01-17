@@ -84,8 +84,8 @@ class Vehicle(DronekitVehicle):
     def set_controller(self, c):
         self.__controller = c
     
-    def set_smartskies_auth_data(self, dis_token, cvms_token, delivery_id):
-        self.__smartskies_session = Session.with_tokens(dis_token, cvms_token)
+    def set_smartskies_auth_data(self, dis_token, dis_refresh_token, cvms_token, delivery_id):
+        self.__smartskies_session = Session.with_tokens(dis_token, dis_refresh_token, cvms_token)
         self.__delivery_id = delivery_id
 
     @property

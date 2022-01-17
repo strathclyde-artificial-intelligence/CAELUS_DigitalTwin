@@ -27,7 +27,7 @@ class Aeroacoustic(Subscriber):
         self.__home_elevation = None
         self.__writer: DBAdapter = writer
         self.__cruise_sample_step = 0
-        self.__cruise_sample_throttle = 15 # Save every x
+        self.__cruise_sample_throttle = 25 # Save every x
 
     @staticmethod
     def euler_to_rotm(yaw, pitch, roll):

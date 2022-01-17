@@ -142,6 +142,7 @@ def make_operation(dis_api: DIS_API, product: Product):
         "drone_id": drone.drone_id,
         "drone_registration_number": drone.registration_number,
         "dis_auth_token": dis_api._session.get_dis_token(),
+        "dis_refresh_token": dis_api._session.get_dis_refresh_token(),
         "cvms_auth_token": dis_api._session.get_cvms_token(),
         "delivery_id": deliveries[-1].id,
         "thermal_model_timestep": 1,
