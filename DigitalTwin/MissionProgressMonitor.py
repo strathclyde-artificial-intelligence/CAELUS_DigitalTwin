@@ -54,7 +54,7 @@ class MissionProgressMonitor(threading.Thread):
             try:
                 while True:
                     self.__logger.info('Waiting for clear to land signal from SmartSkies')
-                    status = self.__dis_api.get_delivery_status_id()
+                    status = self.__dis_api.get_delivery_status_id(self.__delivery_id)
                     if status == CLEAR_TO_LAND_CODE:
                         break
                     sleep(0.5)
@@ -62,6 +62,7 @@ class MissionProgressMonitor(threading.Thread):
                 self.__logger.error(f'Errored while waiting for clear to land signal')
                 self.__logger.error(e)
         previous_mode = self.__vehicle.mode
+        self.__logger.info('Setting vehicle to loiter')
         self.__vehicle.mode = VehicleMode("LOITER")
         __wait()
         self.__vehicle.mode = previous_mode
@@ -115,7 +116,7 @@ class MissionProgressMonitor(threading.Thread):
             self.close_delivery_operation()
         elif waypoint_n == 0:
             self.publish_mission_status(MissionProgressMonitor.TAKING_OFF)
-        elif waypoint_n == self.__mission_items_n - 1:
+        elif waypoint_n == self.__mission_items_n - 2:
             self.__drone_ready_for_landing()
             self.publish_mission_status(MissionProgressMonitor.LANDING)
         elif waypoint_n > 0:
