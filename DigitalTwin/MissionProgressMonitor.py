@@ -55,7 +55,9 @@ class MissionProgressMonitor(threading.Thread):
                 while True:
                     self.__logger.info('Waiting for clear to land signal from SmartSkies')
                     status = self.__dis_api.get_delivery_status_id(self.__delivery_id)
+                    print(status)
                     if status == CLEAR_TO_LAND_CODE:
+                        self.__logger.info("Received clear to land signal - Initiating land")
                         break
                     sleep(0.5)
             except Exception as e:
