@@ -2,11 +2,13 @@ import threading
 import time
 
 from PySmartSkies.CVMS_API import CVMS_API
+from dronekit import VehicleMode
 from PySmartSkies.DIS_API import DIS_API
 from PySmartSkies.DeliveryStatus import *
 from .Interfaces.DBAdapter import DBAdapter
 import logging
 import queue
+from time import sleep
 
 class MissionProgressMonitor(threading.Thread):
 
@@ -45,6 +47,30 @@ class MissionProgressMonitor(threading.Thread):
             3: 'Landing',
             4: 'Landing complete'
         }[s]
+
+    def __wait_for_clear_to_land(self):
+        CLEAR_TO_LAND_CODE = 17
+        def __wait():
+            try:
+                while True:
+                    self.__logger.info('Waiting for clear to land signal from SmartSkies')
+                    status = self.__dis_api.get_delivery_status_id()
+                    if status == CLEAR_TO_LAND_CODE:
+                        break
+                    sleep(0.5)
+            except Exception as e:
+                self.__logger.error(f'Errored while waiting for clear to land signal')
+                self.__logger.error(e)
+        previous_mode = self.__vehicle.mode
+        self.__vehicle.mode = VehicleMode("LOITER")
+        __wait()
+        self.__vehicle.mode = previous_mode
+                
+    def __drone_ready_for_landing(self):
+        if self.__dis_api is None:
+            self.__logger.warn('Controller skipped ready to land signal because no SmartSkies API is available.')
+            return
+        self.__wait_for_clear_to_land()
 
     def publish_smartskies_status_update(self, status):
         try:
@@ -90,6 +116,7 @@ class MissionProgressMonitor(threading.Thread):
         elif waypoint_n == 0:
             self.publish_mission_status(MissionProgressMonitor.TAKING_OFF)
         elif waypoint_n == self.__mission_items_n - 1:
+            self.__drone_ready_for_landing()
             self.publish_mission_status(MissionProgressMonitor.LANDING)
         elif waypoint_n > 0:
             if self.__last_wp == 0:
