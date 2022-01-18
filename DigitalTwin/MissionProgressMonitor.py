@@ -52,21 +52,22 @@ class MissionProgressMonitor(threading.Thread):
         CLEAR_TO_LAND_CODE = 17
         def __wait():
             try:
+                self.__logger.info('Waiting for clear to land signal from SmartSkies')
                 while True:
-                    self.__logger.info('Waiting for clear to land signal from SmartSkies')
                     status = self.__dis_api.get_delivery_status_id(self.__delivery_id)
-                    print(status)
                     if status == CLEAR_TO_LAND_CODE:
                         self.__logger.info("Received clear to land signal - Initiating land")
                         break
-                    sleep(0.5)
+                    sleep(2)
             except Exception as e:
                 self.__logger.error(f'Errored while waiting for clear to land signal')
                 self.__logger.error(e)
         previous_mode = self.__vehicle.mode
         self.__logger.info('Setting vehicle to loiter')
         self.__vehicle.mode = VehicleMode("LOITER")
-        __wait()
+        t = threading.Thread(target=__wait)
+        t.start()
+        t.join()
         self.__vehicle.mode = previous_mode
                 
     def __drone_ready_for_landing(self):
@@ -85,8 +86,10 @@ class MissionProgressMonitor(threading.Thread):
                 if status not in self.__status_steps:
                     return
                 items = self.__status_steps[status]
+                self.__logger.info(f'About to publish updates: {items}')
                 for i in items:
                     flag = False
+                    self.__logger.info(f'Sending {i}')
                     if i == STATUS_CLEAR_TO_LAND_CUSTOMER: # Must be issued by CVMS
                         flag = self.__cvms_api.provide_clearance_update(self.__delivery_id)
                     else:
