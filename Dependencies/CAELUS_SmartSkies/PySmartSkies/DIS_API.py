@@ -27,6 +27,7 @@ class DIS_API():
     auth_endpoint = f'{base_auth_endpoint}/auth/realms/ANRA/protocol/openid-connect/token'
     refresh_token_endpoint = f'{base_auth_endpoint}/auth/realms/ANRA/protocol/openid-connect/token'
     requested_deliveries_endpoint = f'{base_endpoint}/selectbox_lists'
+    get_delivery_status_endpoint = f'https://dms-api-dev.flyanra.net/order/delivery_details'
     create_operation_endpoint = f'{base_endpoint}/create_operation'
     get_accepted_deliveries_endpoint = f'{base_endpoint}/telemetry_list'
     get_operation_details_with_delivery_id_endpoint = f'{base_endpoint}/operations/'
@@ -119,6 +120,10 @@ class DIS_API():
     @staticmethod
     def __abort_delivery(session, delivery_id):
         return POST_Request(DIS_API.abort_delivery_endpoint(delivery_id), {}, bearer_token=session.get_dis_token())
+
+    @staticmethod
+    def __get_delivery_status(session, delivery_id):
+        return GET_Request(DIS_API.get_delivery_status_endpoint, {'drone_delivery_id':delivery_id}, bearer_token=session.get_dis_token())
 
     @staticmethod
     def __get_constraint(session, type: str, location: Union[Point, LineString], range: int):
@@ -219,6 +224,14 @@ class DIS_API():
         response = self.__get_delivery_eta(self._session, delivery_id).send()
         eta = float(response['data']['eta'])
         return eta
+
+    def get_delivery_status_id(self, delivery_id) -> int:
+        response = self.__get_delivery_status(self._session, delivery_id).send()
+        if response is not None and 'data' in response and 'drone_status_id' in response['data']:
+            return response['data']['drone_status_id']
+        else:
+            self._logger.warn(f'Failed in requesting status for delivery {delivery_id}')
+            return -1
 
     def abort_delivery(self, delivery_id):
         response = self.__abort_delivery(self._session, delivery_id).send()

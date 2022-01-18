@@ -116,3 +116,7 @@ def test_request_after_token_expiry():
     api.authenticate()
     session.store_dis_bearer(session.get_dis_token(), session.get_dis_refresh_token(), time.time())
     test_get_requested_deliveries()
+
+def test_get_delivery_status_id():
+    status = authenticated_api.get_delivery_status_id(viable_delivery.id)
+    assert status > 0
