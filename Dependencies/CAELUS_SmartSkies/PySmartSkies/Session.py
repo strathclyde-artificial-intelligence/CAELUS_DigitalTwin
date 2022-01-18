@@ -58,7 +58,6 @@ class Session():
                 self.__logger.fatal('Tried to refresh token but refrsh closure is not defined.')
             else:
                 self.__refresh_closure()
-                return self.get_dis_token()
         return self.__dis_bearer
 
     def get_dis_refresh_token(self):
