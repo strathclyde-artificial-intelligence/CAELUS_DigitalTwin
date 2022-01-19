@@ -16,11 +16,19 @@ class DroneCommander():
         return list(map(lambda wp: Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, float('nan'), wp[1], wp[0], wp[2]), waypoints))
 
     @staticmethod
-    def mission_from_waypoints(waypoints: Tuple[float, float, float]):
+    def mission_from_waypoints_vtol(waypoints: Tuple[float, float, float]):
+        commands = DroneCommander.commands_from_waypoints(waypoints[:-1]) # Last waypoint should be landing
+        commands.insert(0,Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL, mavutil.mavlink.MAV_CMD_NAV_VTOL_TAKEOFF, 0, 1, 0, 0, 0, float('nan'), waypoints[0][1], waypoints[0][0], waypoints[0][2]))
+        commands.append(Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL, mavutil.mavlink.MAV_CMD_NAV_VTOL_LAND, 0, 1, 0, 0, 0, float('nan'), waypoints[-1][1], waypoints[-1][0], waypoints[-1][2]))
+        return commands
+
+    @staticmethod
+    def mission_from_waypoints_quad(waypoints: Tuple[float, float, float]):
         commands = DroneCommander.commands_from_waypoints(waypoints[:-1]) # Last waypoint should be landing
         commands.insert(0,Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 1, 0, 0, 0, float('nan'), waypoints[0][1], waypoints[0][0], waypoints[0][2]))
         commands.append(Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL, mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 1, 0, 0, 0, float('nan'), waypoints[-1][1], waypoints[-1][0], waypoints[-1][2]))
         return commands
+
 
     def set_roi(self, location):
         # create the MAV_CMD_DO_SET_ROI command
@@ -34,7 +42,8 @@ class DroneCommander():
         # send command to vehicle
         self.__vehicle.send_mavlink(msg)
 
-    def __init__(self):
+    def __init__(self, drone_type: int):
+        self.__drone_type = drone_type
         self.__vehicle: Vehicle = None
         self.__logger = logging.getLogger(__name__)
     
@@ -81,12 +90,16 @@ class DroneCommander():
         self.__vehicle = vehicle
 
     def set_mission(self, waypoints):
-        
+        QUAD = 0
         self.__mission_waypoints = waypoints
         
         self.__logger.info('Constructing new missions from waypoints')
         self.__logger.info('\n'+DroneCommander.waypoints_to_string(waypoints))
-        commands = DroneCommander.mission_from_waypoints(waypoints)
+
+        if self.__drone_type == QUAD:
+            commands = DroneCommander.mission_from_waypoints_quad(waypoints)
+        else:
+            commands = DroneCommander.mission_from_waypoints_vtol(waypoints)
 
         self.__vehicle.commands.wait_ready()
 

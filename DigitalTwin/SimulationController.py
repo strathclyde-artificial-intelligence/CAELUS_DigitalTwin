@@ -33,6 +33,7 @@ class SimulationController(Stoppable):
         self.__px4_wrapper = PX4Wrapper(
             os.environ[SimulationController.PX4_FOLDER_ENVIRON],
             self.__initial_lon_lat_alt,
+            int(self.__simulator_payload.drone_type),
             stream_handler=stream_handler
         )
 

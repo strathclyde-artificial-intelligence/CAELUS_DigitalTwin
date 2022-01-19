@@ -40,7 +40,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
     def __init__(self, controller_payload: ControllerPayload, writer: DBAdapter):
         self.__controller_payload = controller_payload
         self.__connection_manager = VehicleConnectionManager(self)
-        self.__commander = DroneCommander()
+        self.__commander = DroneCommander(controller_payload.drone_type)
         self.__state_aggregator = StateAggregator(controller_payload.drone_id if controller_payload is not None else "unknown_id", should_manage_vehicle=False)
         self.__logger = logging.getLogger(__name__)
         self.__state_aggregator_thread = None
