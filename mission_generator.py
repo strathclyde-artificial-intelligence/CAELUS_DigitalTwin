@@ -111,7 +111,7 @@ def make_operation(dis_api: DIS_API, product: Product):
     if len(deliveries) == 0:
         print('Smartskies failed in creating delivery. Hospitals may be too far apart!')
         exit(-1)
-    drone = drones[0]
+    drone = drones[-1]
     # Operation begin in smartskies request
     effective_time_begin = datetime.datetime.utcnow()
     effective_time_begin += datetime.timedelta(minutes=1)
