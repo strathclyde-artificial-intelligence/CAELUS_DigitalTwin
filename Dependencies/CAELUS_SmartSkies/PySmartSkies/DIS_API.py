@@ -98,7 +98,7 @@ class DIS_API():
     def __provide_clearance_update(session, delivery_id):
         return POST_Request(DIS_API.provide_clearance_update_endpoint, {
             'delivery_id': delivery_id,
-            'status': 'CLEAR_FOR_TAKEOFF_CUSTOMER'
+            'status': 'CLEAR_TO_LAND_CUSTOMER'
             }, bearer_token=session.get_dis_token())
 
     @staticmethod
