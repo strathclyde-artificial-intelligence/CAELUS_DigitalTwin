@@ -33,7 +33,7 @@ class MissionProgressMonitor(threading.Thread):
         self.name = 'Mission Progress Monitor'
         self.__status_steps = {
             0: [STATUS_DELIVERY_REQUESTED,STATUS_DELIVERY_REQUEST_ACCEPTED, STATUS_READY_FOR_DELIVERY],
-            4: [STATUS_CLEAR_TO_LAND_CUSTOMER, STATUS_LANDING_CUSTOMER],
+            3: [STATUS_CLEAR_TO_LAND_CUSTOMER, STATUS_LANDING_CUSTOMER],
         }
         self.__delivery_id = delivery_id
         self.daemon = True
@@ -52,7 +52,6 @@ class MissionProgressMonitor(threading.Thread):
         CLEAR_TO_LAND_CODE = 17
         def __wait():
             try:
-                self.__logger.info('Waiting for clear to land signal from SmartSkies')
                 while True:
                     status = self.__dis_api.get_delivery_status_id(self.__delivery_id)
                     if status == CLEAR_TO_LAND_CODE:
@@ -66,8 +65,10 @@ class MissionProgressMonitor(threading.Thread):
         self.__logger.info('Setting vehicle to loiter')
         self.__vehicle.mode = VehicleMode("LOITER")
         t = threading.Thread(target=__wait)
+        self.__logger.info('Waiting for clear to land signal from SmartSkies')
         t.start()
         t.join()
+        self.__logger.info('Drone allowed to land.')
         self.__vehicle.mode = previous_mode
                 
     def __drone_ready_for_landing(self):
@@ -91,6 +92,7 @@ class MissionProgressMonitor(threading.Thread):
                     flag = False
                     self.__logger.info(f'Sending {i}')
                     if i == STATUS_CLEAR_TO_LAND_CUSTOMER: # Must be issued by CVMS
+                        self.__logger.info('Customer sending clear to land signal')
                         flag = self.__cvms_api.provide_clearance_update(self.__delivery_id)
                     else:
                         flag = self.__dis_api.delivery_status_update(self.__delivery_id, i)
@@ -113,6 +115,7 @@ class MissionProgressMonitor(threading.Thread):
             if self.__controller is None:
                 self.__logger.warn('Mission complete but no handler to notify!')
             else:
+                self.__logger.info("Controller notified of mission completion.")
                 self.__controller.mission_complete()
 
     def __process_mission_status(self, waypoint_n):
@@ -122,8 +125,8 @@ class MissionProgressMonitor(threading.Thread):
         elif waypoint_n == 0:
             self.publish_mission_status(MissionProgressMonitor.TAKING_OFF)
         elif waypoint_n == self.__mission_items_n - 2:
-            self.__drone_ready_for_landing()
             self.publish_mission_status(MissionProgressMonitor.LANDING)
+            self.__drone_ready_for_landing()
         elif waypoint_n > 0:
             if self.__last_wp == 0:
                 self.publish_mission_status(MissionProgressMonitor.TAKEOFF_COMPLETE)
@@ -140,8 +143,15 @@ class MissionProgressMonitor(threading.Thread):
         self.__command_queue.put(command)
 
     def run(self):
-        while True:
-            new_waypoint = self.__vehicle.commands.next
-            if self.__last_wp != new_waypoint:
-                self.__process_mission_status(new_waypoint)
-            time.sleep(1)
+        try:
+            while True:
+                new_waypoint = self.__vehicle.commands.next
+                if self.__last_wp != new_waypoint:
+                    print("Loop")
+                    self.__process_mission_status(new_waypoint)
+                    print("End")
+                time.sleep(1)
+
+        except Exception as e:
+            self.__logger.error('Error in main loop (Mission progress monitor):')
+            self.__logger.error(e)

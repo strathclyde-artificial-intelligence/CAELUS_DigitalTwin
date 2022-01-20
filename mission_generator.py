@@ -123,9 +123,10 @@ def make_operation(dis_api: DIS_API, product: Product):
     op: Operation = ops[0]
     wps = op.get_waypoints()
 
+    total_mass = base_mass + product.per_item_weight
     drone_config = drone_selection()
-    drone_config.update({'mass':base_mass + product.per_item_weight})
-    drone_config.update(drone_params_from_weight(base_mass))
+    drone_config.update({'mass':total_mass})
+    drone_config.update(drone_params_from_weight(total_mass))
 
     # Takeoff location must be rounded up / increased slightly
     # To prevent collision of the drone with the bottom of the
