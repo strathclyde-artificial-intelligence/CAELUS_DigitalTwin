@@ -246,8 +246,8 @@ class DIS_API():
     def delivery_status_update(self, delivery_id, new_status) -> bool:
         response = self.__delivery_status_update(self._session, delivery_id, new_status).send()
         if response is not None and 'status_code' in response:
-            ret = response['status_code']
-            if ret != 200:
+            ret = response['status_code'] == 200
+            if not ret:
                 self._logger.warn('Status update failed with response: ')
                 self._logger.warn(response)
             return ret
