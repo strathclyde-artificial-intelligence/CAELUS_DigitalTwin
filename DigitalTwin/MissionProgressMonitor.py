@@ -98,6 +98,7 @@ class MissionProgressMonitor(threading.Thread):
                         flag = self.__dis_api.delivery_status_update(self.__delivery_id, i)
                     if flag:
                         self.__logger.info(f'Sent Smartskies Update: {i}')
+                    time.sleep(1)
         except Exception as e:
             import traceback
             self.__logger.error(f'Error in publishing status update (SmartSkies): {e}')
