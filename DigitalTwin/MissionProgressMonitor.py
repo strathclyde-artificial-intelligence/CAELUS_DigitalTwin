@@ -148,9 +148,7 @@ class MissionProgressMonitor(threading.Thread):
             while True:
                 new_waypoint = self.__vehicle.commands.next
                 if self.__last_wp != new_waypoint:
-                    print("Loop")
                     self.__process_mission_status(new_waypoint)
-                    print("End")
                 time.sleep(1)
 
         except Exception as e:
