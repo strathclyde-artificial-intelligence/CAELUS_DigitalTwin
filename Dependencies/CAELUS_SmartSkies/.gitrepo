@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/H3xept/CAELUS_SmartSkies
 	branch = main
-	commit = eef1da6bf6f7c1340c5412fec26e3c8a1aa22555
-	parent = 37b47363901dfa0d6392a3d20da4b9f69e60de6d
+	commit = 8459a7a892ee47cacd068678459ebc64ff22eb20
+	parent = 14320b0b9e8be015bc5cee3bf64bace6eead8b29
 	method = merge
 	cmdver = 0.4.3
