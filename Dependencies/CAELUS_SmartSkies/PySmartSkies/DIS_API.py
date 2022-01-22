@@ -239,8 +239,9 @@ class DIS_API():
             self._logger.warn(f'Delivery {delivery_id} not aborted.')
         return response
     def provide_clearance_update(self, delivery_id) -> bool:
-        response = self.__provide_clearance_update(self._session, delivery_id).send()
-        return response['result'] or False
+        response_clearance = self.__provide_clearance_update(self._session, delivery_id).send()
+        response_transition = self.delivery_status_update(delivery_id, STATUS_CLEAR_TO_LAND_CUSTOMER)
+        return response_clearance['result'] or False
 
     # Status values can be found in DeliveryStatus.py
     def delivery_status_update(self, delivery_id, new_status) -> bool:

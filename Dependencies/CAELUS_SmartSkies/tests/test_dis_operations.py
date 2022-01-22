@@ -103,11 +103,11 @@ def test_abort_delivery():
     assert response is not None
     assert response['status_code'] == 200
     
-def test_provide_clearance_update():
-    assert authenticated_api.provide_clearance_update(viable_delivery.id)
-
 def test_delivery_status_update():
     assert authenticated_api.delivery_status_update(viable_delivery.id, STATUS_READY_FOR_DELIVERY)
+    
+def test_provide_clearance_update():
+    assert authenticated_api.provide_clearance_update(viable_delivery.id)
 
 def test_request_after_token_expiry():
     import time
