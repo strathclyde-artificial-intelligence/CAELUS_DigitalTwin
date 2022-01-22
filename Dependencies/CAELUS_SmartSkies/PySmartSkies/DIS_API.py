@@ -240,7 +240,6 @@ class DIS_API():
         return response
     def provide_clearance_update(self, delivery_id) -> bool:
         response_clearance = self.__provide_clearance_update(self._session, delivery_id).send()
-        response_transition = self.delivery_status_update(delivery_id, STATUS_CLEAR_TO_LAND_CUSTOMER)
         return response_clearance['result'] or False
 
     # Status values can be found in DeliveryStatus.py
