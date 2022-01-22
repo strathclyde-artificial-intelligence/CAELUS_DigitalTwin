@@ -12,22 +12,7 @@ from start import start_with_payload
 import time
 import pickle
 
-load_dotenv()
-
-dis_credentials = DIS_Credentials(
-    os.environ['DIS_GRANT_TYPE'],
-    os.environ['DIS_CLIENT_ID'],
-    os.environ['DIS_USERNAME'],
-    os.environ['DIS_PASSWORD']
-)
-
-cvms_credentials = CVMS_Credentials(
-    os.environ['CVMS_PHONE'],
-    os.environ['CVMS_PASSWORD'],
-    os.environ['CVMS_DEVICE_ID']
-)
-
-def authenticate():
+def authenticate(cvms_credentials, dis_credentials):
     session = Session(cvms_credentials, dis_credentials)
     dis_api = DIS_API(session)
     dis_api.authenticate()
@@ -162,13 +147,35 @@ def parse_product_and_vendor(s, vendors, products):
     print(f'Chosen vendor: {vendor_id}, product: {product_id}')
     return list(filter(lambda v: str(v.id) == vendor_id, vendors))[0], list(filter(lambda p: str(p.id) == product_id, products[vendor_id]))[0]
 
-cvms, dis = authenticate()
-vs, ps = get_possible_vendors_and_products(dis, cvms)
-pp_vendors_and_products(vs, ps)
-s = input("Vendor number - Product number: ")
-chosen_vendor, chosen_product = parse_product_and_vendor(s, vs, ps)
-order, product = make_order(cvms,chosen_product, chosen_vendor)
-if order is not None and order['result']:
-    print(f"Order successful ({order})")
-    payload = make_operation(dis, product)
-    print(payload)
+def mission_generator(cvms, dis):
+    try:
+        vs, ps = get_possible_vendors_and_products(dis, cvms)
+        pp_vendors_and_products(vs, ps)
+        s = input("Vendor number - Product number: ")
+        chosen_vendor, chosen_product = parse_product_and_vendor(s, vs, ps)
+        order, product = make_order(cvms,chosen_product, chosen_vendor)
+        if order is not None and order['result']:
+            print(f"Order successful ({order})")
+            payload = make_operation(dis, product)
+            print(payload)
+    except Exception as e:
+        print(e)
+        input("Press enter to continue")
+
+if __name__ == '__main__':
+    load_dotenv()
+
+    dis_credentials = DIS_Credentials(
+        os.environ['DIS_GRANT_TYPE'],
+        os.environ['DIS_CLIENT_ID'],
+        os.environ['DIS_USERNAME'],
+        os.environ['DIS_PASSWORD']
+    )
+
+    cvms_credentials = CVMS_Credentials(
+        os.environ['CVMS_PHONE'],
+        os.environ['CVMS_PASSWORD'],
+        os.environ['CVMS_DEVICE_ID']
+    )
+    cvms, dis = authenticate(cvms_credentials, dis_credentials)
+    mission_generator(cvms, dis)
