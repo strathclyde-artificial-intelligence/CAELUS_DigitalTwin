@@ -13,6 +13,7 @@ from PySmartSkies.Session import Session
 from consolemenu import *
 from consolemenu.items import *
 from mission_generator import mission_generator
+from PySmartSkies import DeliveryStatus
 
 dis_credentials = DIS_Credentials(
     os.environ['DIS_GRANT_TYPE'],
@@ -44,10 +45,12 @@ def verb_for_operation_close(status):
     else:
         return 'Cancel'
 
-def abort_delivery_and_operation(dis_api, _id):
+def abort_delivery(dis_api, _id):
     res = dis_api.abort_delivery(_id)
     if res:
         print(f'\t> Delivery aborted')
+
+def close_operation(dis_api, _id):
     operation = dis_api.get_operation_details_with_delivery_id(_id)
     res = dis_api.end_or_close_delivery(_id, verb=verb_for_operation_close(operation.state))
     if res:
@@ -94,13 +97,59 @@ class DeliveryActions(FunctionItem):
             input("Press enter to continue")
         return FunctionItem(name, action_and_pause)
 
-    def abort_action(self, _id):
-        return self.action_factory(abort_delivery_and_operation, "Abort Delivery and operation", self.__dis_api, _id)
+    def abort_delivery_action(self, _id):
+        return self.action_factory(abort_delivery, "Abort Delivery", self.__dis_api, _id)
+    
+    def close_operation_action(self, _id):
+        return self.action_factory(close_operation, "Close operation", self.__dis_api, _id)
+
+    def state_transition_action(self, _id):
+        def transition():
+            states = [
+                DeliveryStatus.STATUS_DELIVERY_REQUESTED,
+                DeliveryStatus.STATUS_DELIVERY_REQUEST_ACCEPTED,
+                DeliveryStatus.STATUS_READY_FOR_DELIVERY,
+                DeliveryStatus.STATUS_EN_ROUTE_TO_CUSTOMER,
+                DeliveryStatus.STATUS_READY_FOR_LANDING_CUSTOMER,
+                DeliveryStatus.STATUS_LANDING_CUSTOMER,
+            ]
+            state_menu = SelectionMenu(states, title="Transition to state")
+            state_menu.show()
+            choice = state_menu.selected_option
+            if self.__dis_api.delivery_status_update(_id, states[choice]):
+                print(f'Transition to {choice} successful.')
+            else:
+                print(f'Transition to {choice} failed!')
+        return self.action_factory(transition, "Change state")
+
+    def status_n_to_string(self, n):
+        return {
+            1:'DELIVERY_REQUESTED',
+            2:'REJECTED',
+            3:'DELIVERY_REQUEST_ACCEPTED',
+            4:'READY_FOR_DELIVERY',
+            12:'EN_ROUTE_TO_CUSTOMER',
+            13:'READY_FOR_LANDING_CUSTOMER',
+            14:'CLEAR_TO_LAND_CUSTOMER',
+            15:'LANDING_CUSTOMER',
+            16:'READY_FOR_TAKEOFF_CUSTOMER',
+            17:'CLEAR_FOR_TAKEOFF_CUSTOMER',
+            18:'TAKING_OFF_CUSTOMER',
+            19:'DELIVERY_ABORTED',
+            20:'READY_FOR_PACKAGE_PICKUP',
+            21:'PACKAGE_DELIVERED',
+            22:'MISSION_ABORTED'
+        }[int(n)]
 
     def actions_menu(self, delivery_id):
-        menu = ConsoleMenu("Choose an action")
-        abort = self.abort_action(delivery_id)
+        operation_status = self.status_n_to_string(self.__dis_api.get_delivery_status_id(delivery_id))
+        menu = ConsoleMenu("Choose an action", prologue_text=f'Delivery operation status: {operation_status}')
+        abort = self.abort_delivery_action(delivery_id)
+        close = self.close_operation_action(delivery_id)
+        transition = self.state_transition_action(delivery_id)
         menu.append_item(abort)
+        menu.append_item(close)
+        menu.append_item(transition)
         return menu
 
     def delivery_choice_submenu(self):
@@ -122,10 +171,19 @@ class DeliveryActions(FunctionItem):
 def delivery_filters_menu(dis_api):
     def filter_by_status(deliveries, s):
         return [d for d in deliveries if d.delivery_status == s]
-
-    f_all = DeliveryActions(dis_api, "All", lambda: get_accepted_deliveries(dis_api))
-    other = [DeliveryActions(dis_api, filter_status, lambda f: filter_by_status(get_accepted_deliveries(dis_api), f), args=[filter_status]) for filter_status in ['DELIVERY_REQUEST_ACCEPTED', 'DELIVERY_INVALID', 'DELIVERY_ABORTED']]
-    fs = [f_all] + other
+    def filter_by_id(deliveries):
+        _id = input("Delivery ID: ")
+        return [d for d in deliveries if d.id == _id]
+    deliveries = get_accepted_deliveries(dis_api)
+    f_all = DeliveryActions(dis_api, "All", lambda: deliveries)
+    other = [DeliveryActions(dis_api, filter_status, lambda f: filter_by_status(deliveries, f), args=[filter_status]) for filter_status in ['DELIVERY_REQUEST_ACCEPTED', 'DELIVERY_INVALID', 'DELIVERY_ABORTED']]
+    try:
+        f_by_id = DeliveryActions(dis_api, "By delivery ID", filter_by_id, args=[deliveries])
+    except Exception as e:
+        print(e)
+        input()
+    
+    fs = [f_all, f_by_id] + other
     menu = ConsoleMenu('Filter by')
     for f in fs:
         menu.append_item(f)
