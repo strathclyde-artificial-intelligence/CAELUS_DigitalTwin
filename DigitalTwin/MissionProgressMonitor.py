@@ -49,7 +49,7 @@ class MissionProgressMonitor(threading.Thread):
         }[s]
 
     def __wait_for_clear_to_land(self):
-        CLEAR_TO_LAND_CODE = 17
+        CLEAR_TO_LAND_CODE = 14
         def __wait():
             try:
                 while True:
