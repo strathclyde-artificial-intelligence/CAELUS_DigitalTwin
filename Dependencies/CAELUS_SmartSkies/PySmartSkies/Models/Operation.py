@@ -22,7 +22,7 @@ class Operation(JSONDeserialiser):
             # Operation ID missing as there seems to be an inconsistency between two endpoints that *should* return
             # operation objects
             # issue: https://github.com/H3xept/CAELUS_SmartSkies/issues/5
-            'control_area_id', 'ansp_id', 'user_id', 'organization_id', 'operation_volumes', 'reference_number', 'proposed_flight_speed'
+            'control_area_id', 'ansp_id', 'user_id', 'organization_id', 'operation_volumes', 'reference_number', 'proposed_flight_speed', 'state'
         ]
 
     def __process_volumes(self):

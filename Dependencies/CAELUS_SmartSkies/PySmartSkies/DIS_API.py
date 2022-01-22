@@ -87,8 +87,8 @@ class DIS_API():
         }, bearer_token=session.get_dis_token())
     
     @staticmethod
-    def __end_or_close_delivery(session, delivery_id):
-        return POST_Request(DIS_API.end_or_close_delivery_endpoint(delivery_id), { "status_type":"End" }, bearer_token=session.get_dis_token())
+    def __end_or_close_delivery(session, delivery_id, verb):
+        return POST_Request(DIS_API.end_or_close_delivery_endpoint(delivery_id), { "status_type":verb }, bearer_token=session.get_dis_token())
 
     @staticmethod
     def __get_accepted_deliveries(session):
@@ -253,8 +253,10 @@ class DIS_API():
             return ret
         return False
 
-    def end_or_close_delivery(self, delivery_id):
-        response = self.__end_or_close_delivery(self._session, delivery_id).send()
+    def end_or_close_delivery(self, delivery_id, verb='End'):
+        # Verb should be "End" for 'activated', 'non-conforming' or 'contingent' operations
+        # otherwise it should be "Cancel"
+        response = self.__end_or_close_delivery(self._session, delivery_id, verb).send()
         if response is not None and 'status_code' in response and response['status_code'] == 200:
             return response
 
