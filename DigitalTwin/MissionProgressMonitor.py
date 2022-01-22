@@ -33,7 +33,7 @@ class MissionProgressMonitor(threading.Thread):
         self.name = 'Mission Progress Monitor'
         self.__status_steps = {
             0: [STATUS_DELIVERY_REQUESTED,STATUS_DELIVERY_REQUEST_ACCEPTED, STATUS_READY_FOR_DELIVERY],
-            3: [STATUS_CLEAR_TO_LAND_CUSTOMER, STATUS_LANDING_CUSTOMER],
+            3: [STATUS_CLEAR_TO_LAND_CUSTOMER, STATUS_LANDING_CUSTOMER, STATUS_READY_FOR_PACKAGE_PICKUP, STATUS_PACKAGE_DELIVERED]
         }
         self.__delivery_id = delivery_id
         self.daemon = True

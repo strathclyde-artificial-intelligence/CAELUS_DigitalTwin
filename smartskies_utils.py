@@ -36,8 +36,20 @@ def authenticate():
     cvms_api.authenticate()
     return cvms_api, dis_api
 
+_d_cache = []
+_d_time = None
+import time
 def get_accepted_deliveries(dis_api: DIS_API):
-    return list(map(lambda xs: xs[0], dis_api.get_accepted_deliveries()))
+    global _d_cache
+    global _d_time
+    if _d_time is None or time.time() > _d_time:
+        deliveries = dis_api.get_accepted_deliveries()
+        _d_cache = deliveries
+        _d_time = time.time() + 5
+    else:
+        print(f'Returning cached deliveries (cache expires in 5 seconds)')
+        deliveries = _d_cache
+    return list(map(lambda xs: xs[0], deliveries))
 
 def verb_for_operation_close(status):
     if status in ['Activated', "Non-Conforming", "Contingent"]:
@@ -111,6 +123,7 @@ class DeliveryActions(FunctionItem):
                 DeliveryStatus.STATUS_READY_FOR_DELIVERY,
                 DeliveryStatus.STATUS_EN_ROUTE_TO_CUSTOMER,
                 DeliveryStatus.STATUS_READY_FOR_LANDING_CUSTOMER,
+                'CLEAR_TO_LAND_CUSTOMER',
                 DeliveryStatus.STATUS_LANDING_CUSTOMER,
             ]
             state_menu = SelectionMenu(states, title="Transition to state")
@@ -174,11 +187,10 @@ def delivery_filters_menu(dis_api):
     def filter_by_id(deliveries):
         _id = input("Delivery ID: ")
         return [d for d in deliveries if d.id == _id]
-    deliveries = get_accepted_deliveries(dis_api)
-    f_all = DeliveryActions(dis_api, "All", lambda: deliveries)
-    other = [DeliveryActions(dis_api, filter_status, lambda f: filter_by_status(deliveries, f), args=[filter_status]) for filter_status in ['DELIVERY_REQUEST_ACCEPTED', 'DELIVERY_INVALID', 'DELIVERY_ABORTED']]
+    f_all = DeliveryActions(dis_api, "All", lambda: get_accepted_deliveries(dis_api))
+    other = [DeliveryActions(dis_api, filter_status, lambda f: filter_by_status(get_accepted_deliveries(dis_api), f), args=[filter_status]) for filter_status in ['DELIVERY_REQUEST_ACCEPTED', 'DELIVERY_INVALID', 'DELIVERY_ABORTED']]
     try:
-        f_by_id = DeliveryActions(dis_api, "By delivery ID", filter_by_id, args=[deliveries])
+        f_by_id = DeliveryActions(dis_api, "By delivery ID", filter_by_id, args=[get_accepted_deliveries(dis_api)])
     except Exception as e:
         print(e)
         input()
@@ -189,11 +201,15 @@ def delivery_filters_menu(dis_api):
         menu.append_item(f)
     return menu
 
+def pause(f, *args, **kwargs):
+    f(*args, **kwargs)
+    input("Press enter to continue")
+    
 def build_menu(cvms_api, dis_api):
     menu = ConsoleMenu("Smartskies Utilities", "Manage smartskies deliveries and orders")
     delivery_filter = SubmenuItem("Find delivery", delivery_filters_menu(dis_api))
     abort_all = FunctionItem("Abort all deliveries and operations", abort_deliveries_and_operations, args=[dis_api])
-    generate_mission = FunctionItem("New Mission", mission_generator, args=[cvms_api, dis_api])
+    generate_mission = FunctionItem("New Mission", pause, args=[mission_generator, cvms_api, dis_api])
     menu.append_item(delivery_filter)
     menu.append_item(abort_all)
     menu.append_item(generate_mission)
