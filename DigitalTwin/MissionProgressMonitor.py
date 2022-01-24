@@ -131,8 +131,8 @@ class MissionProgressMonitor(threading.Thread):
         elif waypoint_n == 0:
             self.publish_mission_status(MissionProgressMonitor.TAKING_OFF)
         elif waypoint_n == self.__mission_items_n - 2:
-            self.publish_mission_status(MissionProgressMonitor.LANDING)
             self.__drone_ready_for_landing()
+            self.publish_mission_status(MissionProgressMonitor.LANDING)
         elif waypoint_n > 0:
             if self.__last_wp == 0:
                 self.publish_mission_status(MissionProgressMonitor.TAKEOFF_COMPLETE)
