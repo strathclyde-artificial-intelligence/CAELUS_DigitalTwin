@@ -24,11 +24,12 @@ class MongoDBWriter(Thread, DBAdapter):
                 pass
         return None        
 
-    def __init__(self, client, operation_id, flush_every_seconds=1):
+    def __init__(self, client, operation_id, group_id, flush_every_seconds=1):
         super().__init__()
         self.name = 'MongoDB Writer'
         self.daemon = True
         self.__operation_id = operation_id
+        self.__group_id = group_id
         self.__handle = client[MongoDBWriter.DEFAULT_SERVER][MongoDBWriter.SIMULATION_OUTPUTS]
         self.__data_buffer = {}
         self.__thread_queue = Queue()
@@ -70,7 +71,7 @@ class MongoDBWriter(Thread, DBAdapter):
     def __store(self):
         try:
             query = self.update_query_for(self.__data_buffer)
-            self.__handle.update_one({'operation_id':self.__operation_id}, query, upsert=True)
+            self.__handle.update_one({'operation_id':self.__operation_id, 'group_id': self.__group_id}, query, upsert=True)
             self.__data_buffer = None
         except Exception as e:
             print(e)

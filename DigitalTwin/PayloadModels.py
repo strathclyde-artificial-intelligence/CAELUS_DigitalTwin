@@ -31,6 +31,7 @@ class ControllerPayload(Unpackable):
     def __init__(self, config_dict):
         self.waypoints: Tuple[float, float, float] = get(config_dict, 'waypoints')
         self.operation_id: str = get(config_dict, 'operation_id')
+        self.operation_id: str = get(config_dict, 'group_id')
         self.delivery_id: str = get(config_dict, 'delivery_id')
         self.control_area_id: str = get(config_dict, 'control_area_id')
         self.operation_reference_number: str = get(config_dict, 'operation_reference_number')

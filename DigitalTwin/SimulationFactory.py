@@ -7,11 +7,10 @@ def cleanup(gui, sim_stack, signal, frame):
     sim_stack.graceful_stop()
     exit(0)
 
-def get_writer(operation_id):
+def get_writer(operation_id, group_id):
     try:
         client = MongoDBWriter.acquire_client()
-        print(client)
-        return MongoDBWriter(client, operation_id)
+        return MongoDBWriter(client, operation_id, group_id)
     except TimeoutError:
         print('Could not connect to database (MongoDB) -- aborting')
         exit(-1)
@@ -20,7 +19,7 @@ def new_simulation(simulator_payload: SimulatorPayload, controller_payload: Cont
     if not headless:
         from DigitalTwin.GUI.GUI import GUI
     
-    writer = get_writer(controller_payload.operation_id)
+    writer = get_writer(controller_payload.operation_id, controller_payload.group_id)
     writer.start()
 
     gui = GUI(init_file=GUI.DEFAULT_GUI_INIT_FILE_NAME) if not headless else None

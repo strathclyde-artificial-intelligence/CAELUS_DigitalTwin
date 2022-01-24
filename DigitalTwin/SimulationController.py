@@ -60,8 +60,9 @@ class SimulationController(Stoppable):
         self.__simulator_wrapper.graceful_stop()
 
     def halt(self):
-        self.__px4_wrapper.halt()
-        self.__simulator_wrapper.halt()
+        exit(0)
+        # self.__px4_wrapper.halt()
+        # self.__simulator_wrapper.halt()
     
     def reset(self):
         res = True
@@ -78,8 +79,9 @@ class SimulationController(Stoppable):
         # Wait for locks to acquire - if any fail occurs -- halt thread
         if not res:
             self.__logger.warn('Lock acquisition failed -- Halting threads.')
-            self.__px4_wrapper.halt()
-            self.__simulator_wrapper.halt()
+            # self.__px4_wrapper.halt()
+            # self.__simulator_wrapper.halt()
+            exit(0)
 
         self.__px4_wrapper = None
         self.__simulator_wrapper = None
