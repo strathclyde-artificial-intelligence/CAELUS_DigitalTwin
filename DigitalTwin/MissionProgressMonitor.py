@@ -1,5 +1,6 @@
 import threading
 import time
+from tkinter import EXCEPTION
 
 from PySmartSkies.CVMS_API import CVMS_API
 from dronekit import VehicleMode
@@ -33,7 +34,7 @@ class MissionProgressMonitor(threading.Thread):
         self.name = 'Mission Progress Monitor'
         self.__status_steps = {
             0: [STATUS_DELIVERY_REQUESTED,STATUS_DELIVERY_REQUEST_ACCEPTED, STATUS_READY_FOR_DELIVERY],
-            3: [STATUS_CLEAR_TO_LAND_CUSTOMER, STATUS_LANDING_CUSTOMER, STATUS_READY_FOR_PACKAGE_PICKUP, STATUS_PACKAGE_DELIVERED]
+            3: [STATUS_READY_FOR_LANDING_CUSTOMER, STATUS_CLEAR_TO_LAND_CUSTOMER, STATUS_LANDING_CUSTOMER, STATUS_READY_FOR_PACKAGE_PICKUP, STATUS_PACKAGE_DELIVERED]
         }
         self.__delivery_id = delivery_id
         self.daemon = True
@@ -50,11 +51,12 @@ class MissionProgressMonitor(threading.Thread):
 
     def __wait_for_clear_to_land(self):
         CLEAR_TO_LAND_CODE = 14
+        EXCEPT_CODES = [19, 22]
         def __wait():
             try:
                 while True:
                     status = self.__dis_api.get_delivery_status_id(self.__delivery_id)
-                    if status == CLEAR_TO_LAND_CODE:
+                    if status >= CLEAR_TO_LAND_CODE and status not in EXCEPT_CODES:
                         self.__logger.info("Received clear to land signal - Initiating land")
                         break
                     sleep(2)
@@ -94,6 +96,9 @@ class MissionProgressMonitor(threading.Thread):
                     if i == STATUS_CLEAR_TO_LAND_CUSTOMER: # Must be issued by CVMS
                         self.__logger.info('Customer sending clear to land signal')
                         flag = self.__cvms_api.provide_clearance_update(self.__delivery_id)
+                        time.sleep(1)
+                        self.__logger.info(f'Transitioning to {i}')
+                        flag = self.__dis_api.delivery_status_update(self.__delivery_id, i)
                     else:
                         flag = self.__dis_api.delivery_status_update(self.__delivery_id, i)
                     if flag:
@@ -120,7 +125,7 @@ class MissionProgressMonitor(threading.Thread):
                 self.__controller.mission_complete()
 
     def __process_mission_status(self, waypoint_n):
-        if self.__last_wp > 0 and waypoint_n == 0:
+        if (self.__last_wp > 0 and waypoint_n == 0) and not self.__vehicle.armed:
             self.publish_mission_status(MissionProgressMonitor.LANDING_COMPLETE)
             self.close_delivery_operation()
         elif waypoint_n == 0:
