@@ -78,7 +78,7 @@ class DIS_API():
             'vender_coordinate': delivery.pickup_coordinate,
             'customer_coordinate': delivery.dropoff_coordinate,
             'altitude': 200,
-            'takeoff_landing_radius': 100,
+            'takeoff_landing_radius': 200,
             'flight_speed': expected_cruise_speed, # miles/h
             'altitude_buffer': 100,
             'expand_factor': "LOW",

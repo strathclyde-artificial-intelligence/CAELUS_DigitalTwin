@@ -58,7 +58,7 @@ def powertrain_ESC_Motor(w_ref, m_init, v_batt, dT) -> [float, float, float, flo
         w = ((-Mt * Me / Rs) + np*csqrt(pow((Mt * Me / Rs), 2) - 4.0 * km * -Mt / Rs * Vm)) / (2.0 * km)
         ii+=1
         if ii > 30000:
-            print(f"Broke out after 30000 loops ({w.real}, {abs(w_ref_r)})")
+            print(f"Broke out after 30000 loops (control {w_ref} - {w.real}, {abs(w_ref_r)})")
             break
         
     w = w.real/9.5492965964254
