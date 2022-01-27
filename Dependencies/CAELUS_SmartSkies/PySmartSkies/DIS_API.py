@@ -324,7 +324,7 @@ class DIS_API():
         response = self.__get_weather_data(self._session, f'{lat}, {lon}').send()
         if response is not None and 'wind_direction_degrees' in response:
             wind_magnitude_m_s = response['wind_speed_kilometers_per_hour'] / 3.6
-            wind_angle = 360 - response['wind_direction_degrees'] # assumes clockwise direction from AWARE
+            wind_angle = 180 + (360 - response['wind_direction_degrees']) # assumes clockwise direction from AWARE
             wind_vector = [
                 cos(wind_angle) * wind_magnitude_m_s - sin(wind_angle) * wind_magnitude_m_s,
                 sin(wind_angle) * wind_magnitude_m_s + cos(wind_angle) * wind_magnitude_m_s,
