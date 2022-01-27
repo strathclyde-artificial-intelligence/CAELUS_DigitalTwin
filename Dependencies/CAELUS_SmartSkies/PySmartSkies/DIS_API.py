@@ -1,3 +1,4 @@
+from pickle import GET
 from geojson import Point, LineString, loads
 from json import dumps
 from geomet import wkt
@@ -13,6 +14,7 @@ from .Models.Operation import Operation
 from .Models.FlightVolume import FlightVolume
 from .DeliveryStatus import *
 import time
+from math import sin, cos
 
 class ParameterException(Exception):
     pass
@@ -23,6 +25,7 @@ class DIS_API():
 
     base_auth_endpoint = f'https://oauth.flyanra.net'
     base_aware_endpoint = f'https://spatialdev.flyanra.net/aware/api'
+    base_weather_endpoint = f'https://spatialdev.flyanra.net/rest/weather'
     base_endpoint = f'https://ss-anrademo-dis.flyanra.net'
     auth_endpoint = f'{base_auth_endpoint}/auth/realms/ANRA/protocol/openid-connect/token'
     refresh_token_endpoint = f'{base_auth_endpoint}/auth/realms/ANRA/protocol/openid-connect/token'
@@ -38,6 +41,7 @@ class DIS_API():
     end_or_close_delivery_endpoint = lambda delivery_id: f'{DIS_API.base_endpoint}/{delivery_id}/status'
     # AWARE
     get_constraints_endpoint = f'{base_aware_endpoint}/constraint'
+    get_weather_endpoint = f'{base_weather_endpoint}/wx-info'
 
     @staticmethod   
     def __auth_request(session):
@@ -145,6 +149,10 @@ class DIS_API():
             'range': range
         }, bearer_token=session.get_dis_token())
 
+    @staticmethod
+    def __get_weather_data(session, latlon: str):
+        return GET_Request(DIS_API.get_weather_endpoint, {'location':latlon}, bearer_token=session.get_dis_token())
+
     def __init__(self, session, logger=Logger()):
         self._logger = logger
         if session is None:
@@ -238,6 +246,7 @@ class DIS_API():
         if response is None or response['status_code'] != 200:
             self._logger.warn(f'Delivery {delivery_id} not aborted.')
         return response
+        
     def provide_clearance_update(self, delivery_id) -> bool:
         response_clearance = self.__provide_clearance_update(self._session, delivery_id).send()
         return response_clearance['result'] or False
@@ -304,3 +313,27 @@ class DIS_API():
         if response is not None:
             return loads(dumps(response))
         self._logger.error(f'Endpoint "get_aware_celltowers" failed to respond.')
+
+    
+    def get_weather_data(self, lat: float, lon: float):
+        """
+        example:
+        lat: -4.296904760251587
+        lon: 55.86692404205023
+        """
+        response = self.__get_weather_data(self._session, f'{lat}, {lon}').send()
+        if response is not None and 'wind_direction_degrees' in response:
+            wind_magnitude_m_s = response['wind_speed_kilometers_per_hour'] / 3.6
+            wind_angle = 360 - response['wind_direction_degrees'] # assumes clockwise direction from AWARE
+            wind_vector = [
+                cos(wind_angle) * wind_magnitude_m_s - sin(wind_angle) * wind_magnitude_m_s,
+                sin(wind_angle) * wind_magnitude_m_s + cos(wind_angle) * wind_magnitude_m_s,
+            ]
+            return {
+                'temperature':response['temperature_deg_celsius'],
+                'humidity':response['rel_humidity'],
+                'wind_vector': wind_vector # Coplanar with travel plane
+            }
+        else:
+            self._logger.error(f'Could not fetch weather data for {lat}, {lon}')
+        return None

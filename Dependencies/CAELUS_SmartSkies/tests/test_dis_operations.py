@@ -98,11 +98,6 @@ def test_get_delivery_eta():
     assert isinstance(eta, float)
     assert eta >= 0
 
-def test_abort_delivery():
-    response = authenticated_api.abort_delivery(viable_delivery.id)
-    assert response is not None
-    assert response['status_code'] == 200
-    
 def test_delivery_status_update():
     assert authenticated_api.delivery_status_update(viable_delivery.id, STATUS_READY_FOR_DELIVERY)
     
@@ -120,3 +115,16 @@ def test_request_after_token_expiry():
 def test_get_delivery_status_id():
     status = authenticated_api.get_delivery_status_id(viable_delivery.id)
     assert status > 0
+
+def test_get_weather_data():
+    res = authenticated_api.get_weather_data(-4.296904760251587, 55.86692404205023)
+    assert res is not None
+
+def test_abort_delivery():
+    response = authenticated_api.abort_delivery(viable_delivery.id)
+    assert response is not None
+    assert response['status_code'] == 200
+
+def test_close_delivery_operation():
+    response = authenticated_api.end_or_close_delivery(viable_delivery.id, 'Cancel')
+    assert response is not None
