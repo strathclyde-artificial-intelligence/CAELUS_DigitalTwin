@@ -1,5 +1,6 @@
 import enum
 import os
+from uuid import uuid4
 from PySmartSkies.Models.Operation import Operation
 from dotenv import load_dotenv
 from PySmartSkies.DIS_API import DIS_API
@@ -123,6 +124,9 @@ def make_operation(dis_api: DIS_API, product: Product):
     initial_lon_lat_alt_corrected[-1] += 0.5
     # --------
 
+    group_id = input("Group id (blank for auto generated ID): ")
+    group_id = group_id if group_id != "" else str(uuid4())
+
     payload = {
         'waypoints': wps,
         "operation_id": op_details.operation_id,
@@ -138,6 +142,7 @@ def make_operation(dis_api: DIS_API, product: Product):
         "aeroacoustic_model_timestep": 0.004,
         "drone_config":drone_config,
         "g_acceleration": 9.81,
+        "group_id":group_id,
         "effective_start_time": time_begin_unix,
         "initial_lon_lat_alt": initial_lon_lat_alt_corrected,
         "final_lon_lat_alt":op.get_landing_location()

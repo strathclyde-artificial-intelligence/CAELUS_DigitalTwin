@@ -59,6 +59,7 @@ class MissionProgressMonitor(threading.Thread):
                     if status >= CLEAR_TO_LAND_CODE and status not in EXCEPT_CODES:
                         self.__logger.info("Received clear to land signal - Initiating land")
                         break
+                    print(status)
                     sleep(2)
             except Exception as e:
                 self.__logger.error(f'Errored while waiting for clear to land signal')
@@ -67,7 +68,10 @@ class MissionProgressMonitor(threading.Thread):
         self.__logger.info('Setting vehicle to loiter')
         self.__vehicle.mode = VehicleMode("LOITER")
         t = threading.Thread(target=__wait)
+        t.name = "Landing clearance update"
         self.__logger.info('Waiting for clear to land signal from SmartSkies')
+        self.__logger.info('Customer sending clear to land signal')
+        self.__cvms_api.provide_clearance_update(self.__delivery_id)
         t.start()
         t.join()
         self.__logger.info('Drone allowed to land.')
@@ -93,11 +97,7 @@ class MissionProgressMonitor(threading.Thread):
                 for i in items:
                     flag = False
                     self.__logger.info(f'Sending {i}')
-                    if i == STATUS_CLEAR_TO_LAND_CUSTOMER: # Must be issued by CVMS
-                        self.__logger.info('Customer sending clear to land signal')
-                        flag = self.__cvms_api.provide_clearance_update(self.__delivery_id)
-                        time.sleep(1)
-                        self.__logger.info(f'Transitioning to {i}')
+                    if i == STATUS_CLEAR_TO_LAND_CUSTOMER:
                         flag = self.__dis_api.delivery_status_update(self.__delivery_id, i)
                     else:
                         flag = self.__dis_api.delivery_status_update(self.__delivery_id, i)
@@ -126,8 +126,8 @@ class MissionProgressMonitor(threading.Thread):
 
     def __process_mission_status(self, waypoint_n):
         if (self.__last_wp > 0 and waypoint_n == 0) and not self.__vehicle.armed:
-            self.publish_mission_status(MissionProgressMonitor.LANDING_COMPLETE)
             self.close_delivery_operation()
+            self.publish_mission_status(MissionProgressMonitor.LANDING_COMPLETE)
         elif waypoint_n == 0:
             self.publish_mission_status(MissionProgressMonitor.TAKING_OFF)
         elif waypoint_n == self.__mission_items_n - 2:
@@ -142,6 +142,8 @@ class MissionProgressMonitor(threading.Thread):
         self.__last_wp = waypoint_n
 
     def close_delivery_operation(self):
+        # Mission must be aborted as there's no return leg for now
+        self.__dis_api.abort_delivery(self.__delivery_id)
         self.__logger.info(f'Sending delivery end notification to SmartSkies (id: {self.__delivery_id})')
         self.__dis_api.end_or_close_delivery(self.__delivery_id)
 
