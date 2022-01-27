@@ -43,8 +43,7 @@ class MongoDBWriter(Thread, DBAdapter):
                 if k not in self.__data_buffer:
                     self.__data_buffer[k] = [] if series else 0
                 if series:
-                    if len(self.__data_buffer[k]) == 0 or self.__data_buffer[k][-1] != v:
-                        self.__data_buffer[k].append(v)
+                    self.__data_buffer[k].append(v)
                 else:
                     self.__data_buffer[k] = v
             now = time.time()
@@ -72,7 +71,6 @@ class MongoDBWriter(Thread, DBAdapter):
         try:
             query = self.update_query_for(self.__data_buffer)
             self.__handle.update_one({'operation_id':self.__operation_id, 'group_id': self.__group_id}, query, upsert=True)
-            self.__data_buffer = None
         except Exception as e:
             print(e)
 

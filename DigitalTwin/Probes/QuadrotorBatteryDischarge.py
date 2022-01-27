@@ -16,6 +16,7 @@ class QuadrotorBatteryDischarge(Subscriber):
         self.__vehicle = None
         self.__last_timestamp = 0
         self.__writer: DBAdapter = writer
+        self.__last_battery_level_stored = None
 
     def set_vehicle(self, vehicle):
         self.__vehicle: Vehicle = vehicle
@@ -47,7 +48,9 @@ class QuadrotorBatteryDischarge(Subscriber):
             int(battery_level), # battery remaining
         )
 
-        self.__writer.store({'battery_level': battery_level})
+        if battery_level != self.__last_battery_level_stored:
+            self.__writer.store({'battery_level': battery_level})
+            self.__last_battery_level_stored = battery_level
 
     def subscribes_to_streams(self):
         return [HIL_ACTUATOR_CONTROLS]

@@ -36,7 +36,7 @@ class RiskAssessment(Subscriber):
 
     def __aggregate_data(self, stream_id, datapoint):
         if stream_id == SYSTEM_TIME:
-            self.__aggregated_data[RiskAssessment.TIMESTAMP] = datapoint.time_unix_usec / 1000000.0 # usec to sec
+            self.__aggregated_data[RiskAssessment.TIMESTAMP] = datapoint.time_boot_ms / 1000.0 # ms to sec
         elif stream_id == VELOCITY:
             self.__aggregated_data[RiskAssessment.VELOCITY] = datapoint
         elif stream_id == ATTITUDE:
@@ -47,9 +47,9 @@ class RiskAssessment(Subscriber):
             }
         elif stream_id == GYRO:
             self.__aggregated_data[RiskAssessment.ROTATION_RATE] = {
-                'yaw': datapoint.yawspeed,
-                'pitch': datapoint.pitchspeed,
-                'roll': datapoint.rollspeed
+                'yawspeed': datapoint.yawspeed,
+                'pitchspeed': datapoint.pitchspeed,
+                'rollspeed': datapoint.rollspeed
             }   
         elif stream_id == GLOBAL_FRAME:
             self.__aggregated_data[RiskAssessment.POSITION] = {
@@ -61,9 +61,9 @@ class RiskAssessment(Subscriber):
     def new_datapoint(self, drone_id, stream_id, datapoint):
         self.__aggregate_data(stream_id, datapoint)
         data = self.__data_summary()        
-        if data and data['timestamp'] > self.__last_publish_time+self.__publish_frequency_s:
-            self.__writer.store({'risk_assessment_data': data})
+        if data is not None and data['timestamp'] >= self.__last_publish_time+self.__publish_frequency_s:
+            self.__writer.store({'risk_assessment_data': {**data}})
             self.__last_publish_time = data['timestamp']
-        
+                    
     def subscribes_to_streams(self):
         return [SYSTEM_TIME, VELOCITY, ATTITUDE, GLOBAL_FRAME, GYRO]

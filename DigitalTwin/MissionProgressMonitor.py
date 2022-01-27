@@ -52,11 +52,12 @@ class MissionProgressMonitor(threading.Thread):
     def __wait_for_clear_to_land(self):
         CLEAR_TO_LAND_CODE = 14
         EXCEPT_CODES = [19, 22]
+        MISSION_ABORTED = 4
         def __wait():
             try:
                 while True:
                     status = self.__dis_api.get_delivery_status_id(self.__delivery_id)
-                    if status >= CLEAR_TO_LAND_CODE and status not in EXCEPT_CODES:
+                    if (status >= CLEAR_TO_LAND_CODE and status not in EXCEPT_CODES) or status == MISSION_ABORTED:
                         self.__logger.info("Received clear to land signal - Initiating land")
                         break
                     print(status)
