@@ -7,6 +7,8 @@ from dataclasses import dataclass
 import os,signal
 import time
 
+from DigitalTwin.Probes.RiskAssessment import RiskAssessment
+
 from .error_codes import *
 from DigitalTwin.Interfaces.DBAdapter import DBAdapter
 
@@ -54,6 +56,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__battery_discharge_probe = QuadrotorBatteryDischarge(self.__writer, self.__controller_payload.drone_type)
         self.__thermal_model_probe = ThermalModelProbe(self.__writer, integrate_every_us= self.__controller_payload.thermal_model_timestep * 1000000 )
         self.__aeroacoustic_probe = Aeroacoustic(self.__writer)
+        self.__risk_assessment_probe = RiskAssessment(self.__writer)
 
     def __setup_probes(self):
         self.__logger.info('Setting up probes')
@@ -67,7 +70,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
             self.__anra_probe,
             self.__battery_discharge_probe,
             self.__thermal_model_probe,
-            self.__aeroacoustic_probe
+            self.__aeroacoustic_probe,
+            self.__risk_assessment_probe
         ]:
             for stream_id in probe.subscribes_to_streams():
                 self.__state_aggregator.subscribe(stream_id, probe)

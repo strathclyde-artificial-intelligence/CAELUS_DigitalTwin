@@ -65,3 +65,4 @@ class SimulationBridge():
         self.system.add_attribute_listener('armed', lambda _self,name, val: self.new_datapoint(_self, name, val))
         self.system.add_attribute_listener('hil_actuator_controls', lambda _self,name, val: self.new_datapoint(_self, name, val))
         self.system.add_attribute_listener('system_time', lambda _self,name, val: self.new_datapoint(_self, name, val))
+        self.system.add_attribute_listener('gyro', lambda _self,name, val: self.new_datapoint(_self, name, val))

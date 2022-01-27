@@ -46,7 +46,25 @@ class SystemTime(object):
         String representation used to print the RawIMU object. 
         """
         return f"SYSTEM_TIME: time_unix_usec={self.time_unix_usec}, time_boot_ms={self.time_boot_ms}"
-   
+
+class AttitudeSpeed(object):
+    """
+    Custom message, subset of: https://mavlink.io/en/messages/common.html#ATTITUDE
+    :param rollspeed
+    :param pitchspeed
+    :param yawspeed
+    """
+    def __init__(self, rollspeed=None, pitchspeed=None, yawspeed=None):
+        self.rollspeed = rollspeed
+        self.pitchspeed = pitchspeed
+        self.yawspeed = yawspeed
+        
+    def __str__(self):
+        """
+        String representation used to print the RawIMU object. 
+        """
+        return f"ATTITUDE: rollspeed={self.rollspeed}, pitchspeed={self.pitchspeed}, yawspeed={self.yawspeed}"
+
 class Vehicle(DronekitVehicle):
 
     def __init__(self, *args):
@@ -70,6 +88,14 @@ class Vehicle(DronekitVehicle):
             self._system_time.time_boot_ms=message.time_boot_ms
             self._system_time.time_unix_usec=message.time_unix_usec
             self.notify_attribute_listeners('system_time', self._system_time) 
+
+        self._attitude_speed = AttitudeSpeed()
+        @self.on_message('ATTITUDE')
+        def listener(self, name, message):
+            self._attitude_speed.rollspeed=message.rollspeed
+            self._attitude_speed.pitchspeed=message.pitchspeed
+            self._attitude_speed.yawspeed=message.yawspeed
+            self.notify_attribute_listeners('gyro', self._attitude_speed) 
 
     def prepare_for_mission(self, mission_items_n):
 
