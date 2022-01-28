@@ -27,6 +27,9 @@ class Logger():
     def warn(self, s):
         self.__print('[WARNING]', s)
 
+    def error(self, s):
+        self.__print('[ERROR]', s)
+
     def fatal(self, s):
         print(f'[FATAL] {s}')
         exit(-1)
