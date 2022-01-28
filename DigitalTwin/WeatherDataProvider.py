@@ -45,6 +45,8 @@ class WeatherDataProvider():
                     weather_data['temperature'].append(temp)
                 else:
                     raise Exception('AWARE weather endpoint returned with a non 2xx status code.')
+            print(json.dumps(weather_data))
+            return self.__create_virtual_file_with_data(json.dumps(weather_data))
         except Exception as e:
             self.__logger.warn(e)
         self.__logger.warn("Remote weather data (AWARE) unavailable.")
