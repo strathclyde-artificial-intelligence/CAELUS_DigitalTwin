@@ -8,7 +8,7 @@ from typing import Optional
 from ..Interfaces.Stoppable import Stoppable
 from ..Interfaces.StreamHandler import StreamHandler
 from ..PayloadModels import SimulatorPayload
-
+import tempfile
 
 class JMAVSimWrapper(threading.Thread):
 
@@ -26,6 +26,17 @@ class JMAVSimWrapper(threading.Thread):
         # Wait for this lock to properly destroy this wrapper
         self.termination_complete = threading.Condition()
         self.daemon = False
+        self.__virtual_weather_file = None
+
+    def __create_virtual_file_with_data(self, data: str):
+        try:
+            self.__virtual_weather_file = tempfile.NamedTemporaryFile(mode="r+", encoding='utf-8')
+            self.__virtual_weather_file.write(data)
+            self.__virtual_weather_file.seek(0)
+            return self.__virtual_weather_file
+        except Exception as e:
+            self.__logger.warn("Error in creating virtual file for weather data.")
+            self.__logger.warn(e)
 
     def __cleanup(self, timeout = 1):
         self.__logger.info('Cleaning up resources for Simulator Wrapper')
@@ -55,8 +66,24 @@ class JMAVSimWrapper(threading.Thread):
         if self.__stream_handler is not None:
             self.__stream_handler.invalidate_stream(stream_name)
 
+    def __get_weather_data(self):
+        weather_data_f = None
+        try:
+            weather_data_f = open(self.__simulator_payload.weather_data_filepath)
+            if self.__simulator_payload.weather_data_filepath is not None:
+                weather_data_f = open(self.__simulator_payload.weather_data_filepath)
+                weather_data = weather_data_f.read()
+                virtual_file = self.__create_virtual_file_with_data(weather_data)
+                return virtual_file
+        except Exception as e:
+            self.__logger.warn("No local weather file loaded")
+        finally:
+            if weather_data_f is not None:
+                weather_data_f.close()
+
     def run(self):
         self.termination_complete.acquire()
+        virtual_file = self.__get_weather_data()
         try:
             lon, lat, alt = self.__initial_lon_lat_alt
             drone_conf = self.__simulator_payload.drone_config
@@ -66,7 +93,7 @@ class JMAVSimWrapper(threading.Thread):
                 f'export PX4_HOME_LON={lon};'
                 f'export PX4_HOME_ALT={alt};'
                 f"java -XX:GCTimeRatio=20 -Djava.ext.dirs= -jar jmavsim_run.jar -tcp 127.0.0.1:4560 -r 250 -lockstep -no-gui -drone-config '{json.dumps(drone_conf)}' " + \
-                    f'-weather-data {self.__simulator_payload.weather_data_filepath}' if self.__simulator_payload.weather_data_filepath is not None else '',
+                    (f'-weather-data "{virtual_file.name}"' if virtual_file is not None else ''),
                 cwd=self.__sim_folder,
                 shell=True,
                 stdout=subprocess.PIPE
@@ -77,6 +104,8 @@ class JMAVSimWrapper(threading.Thread):
         except Exception as e:
             self.__logger.error(e)
         finally:
+            if virtual_file is not None:
+                virtual_file.close()
             self.__cleanup()
             self.__logger.info(f'{__name__} thread terminated')
             self.termination_complete.release()
