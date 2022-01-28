@@ -58,3 +58,4 @@ class SimulatorPayload(Unpackable):
         self.initial_lon_lat_alt: Tuple[float, float, float] = get(config_dict, 'initial_lon_lat_alt')
         self.final_lon_lat_alt: Tuple[float, float, float] = get(config_dict, 'final_lon_lat_alt')
         self.aeroacoustic_model_timestep: float = get(config_dict, 'aeroacoustic_model_timestep')
+        self.weather_data_filepath: str = get(config_dict, 'weather_data_filepath', default_if_not_found=None)

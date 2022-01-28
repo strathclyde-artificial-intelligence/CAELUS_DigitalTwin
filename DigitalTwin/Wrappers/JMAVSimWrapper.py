@@ -65,7 +65,8 @@ class JMAVSimWrapper(threading.Thread):
                 f'export PX4_HOME_LAT={lat};'
                 f'export PX4_HOME_LON={lon};'
                 f'export PX4_HOME_ALT={alt};'
-                f"java -XX:GCTimeRatio=20 -Djava.ext.dirs= -jar jmavsim_run.jar -tcp 127.0.0.1:4560 -r 250 -lockstep -no-gui -drone-config '{json.dumps(drone_conf)}'",
+                f"java -XX:GCTimeRatio=20 -Djava.ext.dirs= -jar jmavsim_run.jar -tcp 127.0.0.1:4560 -r 250 -lockstep -no-gui -drone-config '{json.dumps(drone_conf)}' " + \
+                    f'-weather-data {self.__simulator_payload.weather_data_filepath}' if self.__simulator_payload.weather_data_filepath is not None else '',
                 cwd=self.__sim_folder,
                 shell=True,
                 stdout=subprocess.PIPE
