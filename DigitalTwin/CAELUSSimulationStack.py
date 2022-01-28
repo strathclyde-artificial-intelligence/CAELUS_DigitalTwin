@@ -12,14 +12,16 @@ from .Interfaces.MissionManager import MissionManager
 from .Interfaces.SimulationStack import SimulationStack
 from .SimulationController import SimulationController
 from .PayloadModels import SimulatorPayload
+from .WeatherDataProvider import WeatherDataProvider
 
 class CAELUSSimulationStack(threading.Thread, SimulationStack, Stoppable, VehicleManager, MissionManager):
 
-    def __init__(self, simulator_payload: SimulatorPayload, stream_handler = None, logger = logging.getLogger(__name__)):
+    def __init__(self, simulator_payload: SimulatorPayload, stream_handler = None, logger = logging.getLogger(__name__), weather_provider: WeatherDataProvider = None):
         super().__init__()
         self.name = 'CAELUSSimulationStack'
         self.__operation_queue: List[Operation] = []
-        self.__sim_controller = SimulationController(simulator_payload.initial_lon_lat_alt, simulator_payload, stream_handler=stream_handler)
+        self.__weather_filepath = None if weather_provider is None else weather_provider.get_weather_data_filepath()
+        self.__sim_controller = SimulationController(simulator_payload.initial_lon_lat_alt, simulator_payload, stream_handler=stream_handler, weather_data_filepath=self.__weather_filepath)
         # Thread safe queue of ([Waypoint], altitude)
         self.__mission_queue = Queue()
         self.__logger = logger

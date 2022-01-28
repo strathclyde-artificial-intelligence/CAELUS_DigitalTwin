@@ -6,10 +6,13 @@ from PySmartSkies.Models.Drone import Drone
 KEY_NOT_FOUND = lambda k,d: f'Key {k} not found in dict'
 KEY_WRONG_TYPE = lambda k,d,t: f'Key {k} is present but with the wrong type (Expected {t}, got {type(d[k])})'
 
+class KeyNotFoundException(Exception):
+    pass
+
 def get(d, k, fail=False, default_if_not_found=None):
     if k not in d:
         if fail:
-            raise Exception(KEY_NOT_FOUND(k,d))
+            raise KeyNotFoundException(KEY_NOT_FOUND(k,d))
         else:
             logging.getLogger().warn(KEY_NOT_FOUND(k,d))
             return default_if_not_found
@@ -42,6 +45,7 @@ class ControllerPayload(Unpackable):
         self.cvms_auth_token: str = get(config_dict, 'cvms_auth_token')
         self.drone_type: str = get(config_dict['drone_config'], 'type', default_if_not_found=DRONE_TYPE_QUADROTOR)
         self.thermal_model_timestep: float = get(config_dict, 'thermal_model_timestep')
+        self.weather_data_filepath: str = get(config_dict, 'weather_data_filepath', default_if_not_found=None)
 
 class OrchestratorPayload(Unpackable):
     
@@ -58,4 +62,3 @@ class SimulatorPayload(Unpackable):
         self.initial_lon_lat_alt: Tuple[float, float, float] = get(config_dict, 'initial_lon_lat_alt')
         self.final_lon_lat_alt: Tuple[float, float, float] = get(config_dict, 'final_lon_lat_alt')
         self.aeroacoustic_model_timestep: float = get(config_dict, 'aeroacoustic_model_timestep')
-        self.weather_data_filepath: str = get(config_dict, 'weather_data_filepath', default_if_not_found=None)

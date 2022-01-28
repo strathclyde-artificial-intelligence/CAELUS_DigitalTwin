@@ -11,13 +11,14 @@ class SimulationController(Stoppable):
     
     PX4_FOLDER_ENVIRON = 'PX4_ROOT_FOLDER'
 
-    def __init__(self, initial_lon_lat_alt, simulator_payload: SimulatorPayload, stream_handler=None, logger = logging.getLogger(__name__)):
+    def __init__(self, initial_lon_lat_alt, simulator_payload: SimulatorPayload, stream_handler=None, logger = logging.getLogger(__name__), weather_data_filepath=None):
         self.__simulator_payload = simulator_payload
         self.__logger = logger
         self.__initial_lon_lat_alt = initial_lon_lat_alt
         self.__px4_wrapper = None
         self.__simulator_wrapper = None
         self.__stream_handler = stream_handler
+        self.__weather_data_filepath = weather_data_filepath
 
     def __initialise_all(self):
         if self.__px4_wrapper is None:
@@ -45,7 +46,8 @@ class SimulationController(Stoppable):
             f'{os.environ[SimulationController.PX4_FOLDER_ENVIRON]}/Tools/jMAVSim/out/production/',
             self.__initial_lon_lat_alt,
             self.__simulator_payload,
-            stream_handler=stream_handler
+            stream_handler=stream_handler,
+            weather_data_filepath=self.__weather_data_filepath
         )
 
     def start(self):
@@ -61,9 +63,7 @@ class SimulationController(Stoppable):
 
     def halt(self):
         exit(0)
-        # self.__px4_wrapper.halt()
-        # self.__simulator_wrapper.halt()
-    
+
     def reset(self):
         res = True
 
@@ -79,8 +79,6 @@ class SimulationController(Stoppable):
         # Wait for locks to acquire - if any fail occurs -- halt thread
         if not res:
             self.__logger.warn('Lock acquisition failed -- Halting threads.')
-            # self.__px4_wrapper.halt()
-            # self.__simulator_wrapper.halt()
             exit(0)
 
         self.__px4_wrapper = None
