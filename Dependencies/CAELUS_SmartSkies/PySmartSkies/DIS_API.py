@@ -330,7 +330,7 @@ class DIS_API():
                 sin(wind_angle) * wind_magnitude_m_s + cos(wind_angle) * wind_magnitude_m_s,
             ]
             return {
-                'temperature':response['temperature_deg_celsius'],
+                'temperature':[*response['temperature_deg_celsius'], 0.0], # AWARE Returns 2d wind data - simulator expects 3d
                 'humidity':response['rel_humidity'],
                 'wind_vector': wind_vector # Coplanar with travel plane
             }
