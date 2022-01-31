@@ -54,7 +54,7 @@ class WeatherDataProvider():
 
     def __create_virtual_file_with_data(self, data: str):
         try:
-            self.__virtual_weather_file = tempfile.NamedTemporaryFile(mode="r+", encoding='utf-8')
+            self.__virtual_weather_file = tempfile.NamedTemporaryFile(mode="r+", encoding='utf-8', delete=False)
             self.__virtual_weather_file.write(data)
             self.__virtual_weather_file.seek(0)
             return self.__virtual_weather_file
@@ -67,6 +67,9 @@ class WeatherDataProvider():
             return self.__get_remote_weather_data()
         return self.__get_local_weather_data()
 
+    def prepare_weather_data(self):
+        self.__virtual_file = self.__get_weather_data_virtual_file()
+
     def get_weather_data_filepath(self):
         if not self.__virtual_file:
             self.__virtual_file = self.__get_weather_data_virtual_file()
@@ -74,4 +77,6 @@ class WeatherDataProvider():
 
     def close(self):
         if self.__virtual_file:
+            self.__logger.info('Closing weather temporary file')
+            self.__virtual_file.delete = True
             self.__virtual_file.close()

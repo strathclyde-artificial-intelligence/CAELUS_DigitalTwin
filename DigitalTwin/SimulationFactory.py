@@ -5,8 +5,9 @@ import signal
 from .MongoDBWriter import MongoDBWriter
 from .WeatherDataProvider import WeatherDataProvider
 
-def cleanup(gui, sim_stack, signal, frame):
+def cleanup(gui, sim_stack, signal, frame, weather_provider):
     sim_stack.graceful_stop()
+    weather_provider.close()
     exit(0)
 
 def get_writer(operation_id, group_id):
@@ -24,14 +25,18 @@ def new_simulation(simulator_payload: SimulatorPayload, controller_payload: Cont
     writer = get_writer(controller_payload.operation_id, controller_payload.group_id)
     writer.start()
 
+    weather_provider = WeatherDataProvider(controller_payload)
+    weather_provider.prepare_weather_data()
+
     gui = GUI(init_file=GUI.DEFAULT_GUI_INIT_FILE_NAME) if not headless else None
     drone_controller = DroneController(controller_payload, writer)
     drone_controller.set_time_series_handler(gui)
-    weather_provider = WeatherDataProvider(controller_payload)
+
     sstack = CAELUSSimulationStack(simulator_payload, stream_handler=gui, weather_provider=weather_provider)
     if gui is not None:
         gui.set_mission_manager(drone_controller)
         gui.set_simulation_stack(sstack)
-    signal.signal(signal.SIGINT, lambda a,b: cleanup(gui, sstack, a, b))
+
+    signal.signal(signal.SIGINT, lambda a,b: cleanup(gui, sstack, a, b, weather_provider))
     
     return gui, drone_controller, sstack
