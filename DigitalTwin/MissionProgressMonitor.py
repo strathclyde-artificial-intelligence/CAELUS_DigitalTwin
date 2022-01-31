@@ -10,6 +10,7 @@ from .Interfaces.DBAdapter import DBAdapter
 import logging
 import queue
 from time import sleep
+from .error_codes import PREMATURE_LANDING
 
 class MissionProgressMonitor(threading.Thread):
 
@@ -39,6 +40,7 @@ class MissionProgressMonitor(threading.Thread):
         self.__delivery_id = delivery_id
         self.daemon = True
         self.__last_wp = -1
+        self.__mission_complete = False
 
     def __mission_status_to_string(self, s):
         return {
@@ -110,6 +112,10 @@ class MissionProgressMonitor(threading.Thread):
             self.__logger.error(f'Error in publishing status update (SmartSkies): {e}')
             print(traceback.print_exc())
 
+    def __handle_premature_landing(self):
+        self.__logger.warn("Premature landing detected!")
+        exit(PREMATURE_LANDING)
+
     def publish_mission_status(self, status):
         if status not in MissionProgressMonitor.mission_status:
             self.__logger.warn("Tried to publish an invalid mission status!")
@@ -119,6 +125,7 @@ class MissionProgressMonitor(threading.Thread):
             wp_n = max(0, self.__vehicle.commands.next-1) if not (status == MissionProgressMonitor.LANDING_COMPLETE) else self.__mission_items_n
             self.__writer.store({MissionProgressMonitor.DB_MISSION_STATUS:f"{wp_n}/{self.__mission_items_n}"}, series=False)
         if status == MissionProgressMonitor.LANDING_COMPLETE:
+            self.__mission_complete = True
             if self.__controller is None:
                 self.__logger.warn('Mission complete but no handler to notify!')
             else:
@@ -154,11 +161,13 @@ class MissionProgressMonitor(threading.Thread):
 
     def run(self):
         try:
-            while True:
+            while self.__last_wp == -1 or self.__vehicle.armed:
                 new_waypoint = self.__vehicle.commands.next
                 if self.__last_wp != new_waypoint:
                     self.__process_mission_status(new_waypoint)
                 time.sleep(1)
+            if not self.__mission_complete:
+                self.__handle_premature_landing()
 
         except Exception as e:
             self.__logger.error('Error in main loop (Mission progress monitor):')
