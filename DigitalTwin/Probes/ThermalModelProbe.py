@@ -32,13 +32,16 @@ class ThermalModelProbe(Subscriber):
         return solution[-1]
     
     def new_datapoint(self, drone_id, stream_id, datapoint):
-        elapsed_time_us = (datapoint.time_boot_ms * 1000) - self.__time_usec
-        if elapsed_time_us > self.__integrate_every_us:
-            new_state = self.step_state(elapsed_time_us)
-            self.__state = new_state
-            self.__time_usec += elapsed_time_us
-            self.__writer.store({'payload_temperature': self.__state[2]})
-            self.__writer.store({'simulation_time_elapsed': self.__time_usec / 1000000}, series=False)
+        if stream_id == HYRGOMETER:
+            print(datapoint)
+        else:
+            elapsed_time_us = (datapoint.time_boot_ms * 1000) - self.__time_usec
+            if elapsed_time_us > self.__integrate_every_us:
+                new_state = self.step_state(elapsed_time_us)
+                self.__state = new_state
+                self.__time_usec += elapsed_time_us
+                self.__writer.store({'payload_temperature': self.__state[2]})
+                self.__writer.store({'simulation_time_elapsed': self.__time_usec / 1000000}, series=False)
         
     # Used by the anra telemetry probe and mission writer -- DO NOT DELETE nor REFACTOR (unless you really know what you are doing)
     def get_payload_temperature(self):
@@ -48,4 +51,4 @@ class ThermalModelProbe(Subscriber):
         return self.__time_usec
         
     def subscribes_to_streams(self):
-        return [SYSTEM_TIME]
+        return [SYSTEM_TIME, HYRGOMETER]

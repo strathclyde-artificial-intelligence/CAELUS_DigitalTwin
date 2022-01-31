@@ -85,3 +85,6 @@ SYSTEM_TIME = 'system_time'
 
 # Custom message with roll, pitch, yaw speeds (gyro data)
 GYRO = 'gyro'
+
+# Custom message to broadcast temperature data
+HYRGOMETER = "hygrometer"
