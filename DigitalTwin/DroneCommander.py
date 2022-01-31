@@ -134,7 +134,6 @@ class DroneCommander():
         self.__wait_for_vehicle_armable()
         self.__logger.info('Starting vehicle mission')
         self.__px4_set_mode(DroneCommander.MAV_MODE_AUTO)
-        # +2 to account for takeoff nad landing items
-        self.__vehicle.prepare_for_mission(len(self.__mission_waypoints)+2)
+        self.__vehicle.prepare_for_mission(len(self.__mission_waypoints))
         self.__vehicle.armed = True
 

@@ -126,6 +126,7 @@ class MissionProgressMonitor(threading.Thread):
                 self.__controller.mission_complete()
 
     def __process_mission_status(self, waypoint_n):
+        print(waypoint_n)
         if (self.__last_wp > 0 and waypoint_n == 0) and not self.__vehicle.armed:
             self.close_delivery_operation()
             self.publish_mission_status(MissionProgressMonitor.LANDING_COMPLETE)
