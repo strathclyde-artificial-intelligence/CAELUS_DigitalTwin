@@ -48,16 +48,17 @@ class ThermalModelProbe(Subscriber):
         super().__init__()
         self.__logger = logging.getLogger()
 
-        if initial_state is None:
-            initial_state = [20, 20, 5, 0, 20]
-
         self.__latest_seq = 0
         self.__writer = writer
         self.__time_usec = 0
         self.__integrate_every_us = integrate_every_us
-        self.__state = initial_state
         self.__temp_parser = TemperatureParser(weather_provider)
         self.__thermal_sim  = ThermalSim(input_geometry(), lambda _: self.__temp_parser.current_temp(), model_ode, UpdateNodeLink)
+        if initial_state is None:
+            # 20s need to be the initial state for the package
+            wp_0_temp = self.__temp_parser.current_temp()
+            initial_state = [wp_0_temp, wp_0_temp, 5, 0, wp_0_temp]      
+        self.__state = initial_state
 
     def step_state(self, elapsed_time_us):
         dt_s = elapsed_time_us / 1000000
