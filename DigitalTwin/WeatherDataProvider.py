@@ -14,16 +14,17 @@ class WeatherDataProvider():
     def __get_local_weather_data(self):
         weather_data_f = None
         try:
-            if self.__controller_payload.weather_data_filepath.endswith('.json'):
+            if not self.__controller_payload.weather_data_filepath.endswith('.json'):
                 raise Exception('Weather data can only be read from local json files')
-            weather_data_f = open(self.__simulator_payload.weather_data_filepath)
+            weather_data_f = open(self.__controller_payload.weather_data_filepath)
             if self.__controller_payload.weather_data_filepath is not None:
                 weather_data_f = open(self.__controller_payload.weather_data_filepath)
                 weather_data = weather_data_f.read()
                 virtual_file = self.__create_virtual_file_with_data(weather_data)
                 return virtual_file
-        except Exception as _:
+        except Exception as e:
             self.__logger.warn("No local weather file loaded")
+            print(e)
         finally:
             if weather_data_f is not None:
                 weather_data_f.close()
@@ -45,7 +46,6 @@ class WeatherDataProvider():
                     weather_data['temperature'].append(temp)
                 else:
                     raise Exception('AWARE weather endpoint returned with a non 2xx status code.')
-            print(json.dumps(weather_data))
             return self.__create_virtual_file_with_data(json.dumps(weather_data))
         except Exception as e:
             self.__logger.warn(e)
