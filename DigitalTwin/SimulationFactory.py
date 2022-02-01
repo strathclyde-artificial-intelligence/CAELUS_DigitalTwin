@@ -29,7 +29,7 @@ def new_simulation(simulator_payload: SimulatorPayload, controller_payload: Cont
     weather_provider.prepare_weather_data()
 
     gui = GUI(init_file=GUI.DEFAULT_GUI_INIT_FILE_NAME) if not headless else None
-    drone_controller = DroneController(controller_payload, writer)
+    drone_controller = DroneController(controller_payload, weather_provider, writer)
     drone_controller.set_time_series_handler(gui)
 
     sstack = CAELUSSimulationStack(simulator_payload, stream_handler=gui, weather_provider=weather_provider)

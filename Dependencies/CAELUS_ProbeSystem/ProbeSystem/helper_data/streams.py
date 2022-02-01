@@ -86,5 +86,5 @@ SYSTEM_TIME = 'system_time'
 # Custom message with roll, pitch, yaw speeds (gyro data)
 GYRO = 'gyro'
 
-# Custom message to broadcast temperature data
-HYRGOMETER = "hygrometer"
+# Tells info about which mission items has just been reached (might be published multiple times!)
+MISSION_ITEM_REACHED = "mission_item_reached"

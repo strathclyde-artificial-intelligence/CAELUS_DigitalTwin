@@ -6,21 +6,58 @@ from ThermalModel.inputs import input_geometry
 from ThermalModel.model_atmospheric import model_atmospheric
 from ThermalModel.UpdateNodeLink import UpdateNodeLink
 from ThermalModel.model_ode import model_ode
-
+from Dependencies.CAELUS_ProbeSystem.ProbeSystem.helper_data.streams import MISSION_ITEM_REACHED
+import json
+import logging
 from DigitalTwin.Interfaces.DBAdapter import DBAdapter
+from DigitalTwin.WeatherDataProvider import WeatherDataProvider
+
+class TemperatureParser():
+    DEFAULT_TEMP = 25.0
+
+    def __init__(self, weather_provider: WeatherDataProvider):
+        self.__logger = logging.getLogger()
+        self.__temps = []
+        self.__prepare_file(weather_provider.get_weather_data_filepath())
+        self.__current_wp = 0
+
+    def __prepare_file(self, f_name):
+        try:
+            with open(f_name, 'r') as f:
+                self.__temps = json.loads(f.read())['temperature']
+                f.seek(0)
+                self.__logger.info("Thermal probe temperature parser OK")
+        except Exception as e:
+            self.__logger.warn("Error in parsing file for temperature data")
+            self.__logger.warn(e)
+
+    def set_current_wp(self, wp):
+        if self.__current_wp >= len(self.__temps):
+            self.__logger.warn("Requested temperature for out-of-bounds seq. Skipping...")                    
+        if wp > self.__current_wp:
+            self.__current_wp += 1
+
+    def current_temp(self):
+        temp = self.__temps[self.__current_wp] if self.__current_wp >= 0 else TemperatureParser.DEFAULT_TEMP
+        return temp
 
 class ThermalModelProbe(Subscriber):
-    
-    def __init__(self, writer: DBAdapter, initial_state=None, integrate_every_us = (5 * 60 * 1000000)): # 5 min (5 * 60 * 1000000) integration default
+
+    def __init__(self, writer: DBAdapter, weather_provider: WeatherDataProvider, initial_state=None, integrate_every_us = (5 * 60 * 1000000)): # 5 min (5 * 60 * 1000000) integration default
+        
         super().__init__()
+        self.__logger = logging.getLogger()
+
         if initial_state is None:
             initial_state = [20, 20, 5, 0, 20]
 
+        self.__latest_seq = 0
         self.__writer = writer
         self.__time_usec = 0
         self.__integrate_every_us = integrate_every_us
         self.__state = initial_state
-        self.__thermal_sim  = ThermalSim(input_geometry(), model_atmospheric, model_ode, UpdateNodeLink)
+        self.__temp_parser = TemperatureParser(weather_provider)
+        self.__thermal_sim  = ThermalSim(input_geometry(), lambda _: self.__temp_parser.current_temp(), model_ode, UpdateNodeLink)
 
     def step_state(self, elapsed_time_us):
         dt_s = elapsed_time_us / 1000000
@@ -32,8 +69,9 @@ class ThermalModelProbe(Subscriber):
         return solution[-1]
     
     def new_datapoint(self, drone_id, stream_id, datapoint):
-        if stream_id == HYRGOMETER:
-            print(datapoint)
+        if stream_id == MISSION_ITEM_REACHED:
+            self.__latest_seq = datapoint
+            self.__temp_parser.set_current_wp(self.__latest_seq)
         else:
             elapsed_time_us = (datapoint.time_boot_ms * 1000) - self.__time_usec
             if elapsed_time_us > self.__integrate_every_us:
@@ -51,4 +89,4 @@ class ThermalModelProbe(Subscriber):
         return self.__time_usec
         
     def subscribes_to_streams(self):
-        return [SYSTEM_TIME, HYRGOMETER]
+        return [SYSTEM_TIME, MISSION_ITEM_REACHED]

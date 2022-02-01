@@ -8,6 +8,7 @@ import os,signal
 import time
 
 from DigitalTwin.Probes.RiskAssessment import RiskAssessment
+from DigitalTwin.WeatherDataProvider import WeatherDataProvider
 
 from .error_codes import *
 from DigitalTwin.Interfaces.DBAdapter import DBAdapter
@@ -39,7 +40,7 @@ class Mission():
     dis_token: str
 
 class DroneController(VehicleManager, MissionManager, Stoppable):
-    def __init__(self, controller_payload: ControllerPayload, writer: DBAdapter):
+    def __init__(self, controller_payload: ControllerPayload, weather_provider: WeatherDataProvider, writer: DBAdapter):
         self.__controller_payload = controller_payload
         self.__connection_manager = VehicleConnectionManager(self)
         self.__commander = DroneCommander(controller_payload.drone_type)
@@ -49,12 +50,13 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__connection_manager.connect_to_vehicle()
         self.__telemetry_feedback = TelemetryFeedback()
         self.__writer = writer
+        self.__weather_provider = weather_provider
         self.__initialise_probes()
 
     def __initialise_probes(self):
         self.__anra_probe = AnraTelemetryPush()
         self.__battery_discharge_probe = QuadrotorBatteryDischarge(self.__writer, self.__controller_payload.drone_type)
-        self.__thermal_model_probe = ThermalModelProbe(self.__writer, integrate_every_us= self.__controller_payload.thermal_model_timestep * 1000000 )
+        self.__thermal_model_probe = ThermalModelProbe(self.__writer, self.__weather_provider, integrate_every_us= self.__controller_payload.thermal_model_timestep * 1000000 )
         self.__aeroacoustic_probe = Aeroacoustic(self.__writer)
         self.__risk_assessment_probe = RiskAssessment(self.__writer)
 

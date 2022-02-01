@@ -65,21 +65,6 @@ class AttitudeSpeed(object):
         """
         return f"ATTITUDE: rollspeed={self.rollspeed}, pitchspeed={self.pitchspeed}, yawspeed={self.yawspeed}"
 
-class Hygrometer(object):
-    """
-    Hygrometer message: https://mavlink.io/en/messages/common.html#HYGROMETER_SENSOR
-    :param temperature
-    :param humidity
-    """
-    def __init__(self, temperature=None, humidity=None):
-        self.temperature = temperature
-        self.humidity = humidity
-        
-    def __str__(self):
-        """
-        String representation used to print the Hyrgrometer object. 
-        """
-        return f"HYGROMETER: temperature={self.temperature}, humidity={self.humidity}"
 
 class Vehicle(DronekitVehicle):
 
@@ -88,6 +73,7 @@ class Vehicle(DronekitVehicle):
         
         self.__logger = logging.getLogger()
         self.__writer = None
+        self.__latest_wp_reached = -1
 
         self._hil_actuator_controls = HilActuatorControls()
         @self.on_message('HIL_ACTUATOR_CONTROLS')
@@ -113,12 +99,10 @@ class Vehicle(DronekitVehicle):
             self._attitude_speed.yawspeed=message.yawspeed
             self.notify_attribute_listeners('gyro', self._attitude_speed) 
 
-        self._hyrgometer = AttitudeSpeed()
-        @self.on_message('HYGROMETER_SENSOR')
+        @self.on_message('MISSION_ITEM_REACHED')
         def listener(self, name, message):
-            self._hyrgometer.temperature=message.temperature
-            self._hyrgometer.humidity=message.humidity
-            self.notify_attribute_listeners('hygrometer', self._hyrgometer) 
+            self.__latest_wp_reached = message.seq
+            self.notify_attribute_listeners('mission_item_reached', self.__latest_wp_reached) 
 
     def prepare_for_mission(self, mission_items_n):
 
