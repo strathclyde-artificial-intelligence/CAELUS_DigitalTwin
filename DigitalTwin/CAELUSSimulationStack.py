@@ -65,3 +65,4 @@ class CAELUSSimulationStack(threading.Thread, SimulationStack, Stoppable, Vehicl
 
     def cleanup(self):
         self.__logger.info("CAELUSSimulationStack cleaning up...")
+        self.__sim_controller.graceful_stop()

@@ -23,6 +23,7 @@ def get_writer(operation_id, group_id):
         exit(-1)
 
 def new_simulation(simulator_payload: SimulatorPayload, controller_payload: ControllerPayload, headless=False):
+    headless = True
     if not headless:
         from DigitalTwin.GUI.GUI import GUI
 

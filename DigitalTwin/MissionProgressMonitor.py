@@ -6,6 +6,8 @@ from PySmartSkies.CVMS_API import CVMS_API
 from dronekit import VehicleMode
 from PySmartSkies.DIS_API import DIS_API
 from PySmartSkies.DeliveryStatus import *
+
+from DigitalTwin.ExitHandler import ExitHandler
 from .Interfaces.DBAdapter import DBAdapter
 import logging
 import queue
@@ -131,6 +133,7 @@ class MissionProgressMonitor(threading.Thread):
             self.publish_mission_status(MissionProgressMonitor.LANDING_COMPLETE)
         elif waypoint_n == 0:
             self.publish_mission_status(MissionProgressMonitor.TAKING_OFF)
+            ExitHandler.shared().issue_exit_with_code_and_message(420, "I felt like it, bitch")
         elif waypoint_n == self.__mission_items_n - 2:
             self.__drone_ready_for_landing()
             self.publish_mission_status(MissionProgressMonitor.LANDING)

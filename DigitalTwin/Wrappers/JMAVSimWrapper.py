@@ -25,7 +25,7 @@ class JMAVSimWrapper(threading.Thread):
         self.__streams = set()
         # Wait for this lock to properly destroy this wrapper
         self.termination_complete = threading.Condition()
-        self.daemon = True
+        self.daemon = False
         self.__weather_data_filepath = weather_data_filepath
 
     def __cleanup(self):
@@ -39,6 +39,7 @@ class JMAVSimWrapper(threading.Thread):
         self.__logger.info(f'Waiting for Simulator process to exit...')
         if self.__process is not None:
             self.__process.kill()
+            self.__process.wait()
 
     def __new_stream_available(self, stream_name, stream):
         if self.__stream_handler is not None:
@@ -54,16 +55,32 @@ class JMAVSimWrapper(threading.Thread):
         try:
             lon, lat, alt = self.__initial_lon_lat_alt
             drone_conf = self.__simulator_payload.drone_config
-            self.__process = subprocess.Popen(
-                'export PX4_SIM_SPEED_FACTOR=10; '
-                f'export PX4_HOME_LAT={lat};'
-                f'export PX4_HOME_LON={lon};'
-                f'export PX4_HOME_ALT={alt};'
-                f"java -XX:GCTimeRatio=20 -Djava.ext.dirs= -jar jmavsim_run.jar -tcp 127.0.0.1:4560 -r 250 -lockstep -no-gui -drone-config '{json.dumps(drone_conf)}' " + \
-                    (f'-weather-data "{self.__weather_data_filepath}"' if self.__weather_data_filepath is not None else ''),
+            
+            commands = [
+                'java',
+                '-XX:GCTimeRatio=20',
+                '-Djava.ext.dirs=',
+                '-jar',
+                'jmavsim_run.jar',
+                '-tcp',
+                '127.0.0.1:4560',
+                '-r',
+                '250',
+                '-lockstep',
+                '-no-gui',
+                '-drone-config',
+                json.dumps(drone_conf),
+            ] + ([f'-weather-data "{self.__weather_data_filepath}"'] if self.__weather_data_filepath is not None else [])
+
+            self.__process = subprocess.Popen(commands,
                 cwd=self.__sim_folder,
-                shell=True,
-                stdout=subprocess.PIPE
+                stdout=subprocess.PIPE,
+                env={
+                    'PX4_SIM_SPEED_FACTOR':str(10),
+                    'PX4_HOME_LAT':str(lat),
+                    'PX4_HOME_LON':str(lon),
+                    'PX4_HOME_ALT':str(alt)
+                }
             )
             self.__new_stream_available('sim_stdout', self.__process.stdout)
             while not self.__should_stop and self.__process.poll() is None:
@@ -77,8 +94,7 @@ class JMAVSimWrapper(threading.Thread):
 
     def graceful_stop(self):
         self.__should_stop = True
-        self.__process.send_signal(signal.SIGINT)
-        self.__cleanup(timeout=1)
+        self.__cleanup()
 
     def halt(self):
         exit(-1)

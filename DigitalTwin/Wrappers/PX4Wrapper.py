@@ -24,7 +24,7 @@ class PX4Wrapper(threading.Thread):
         self.termination_complete = threading.Condition()
         self.__streams = set()
         self.__drone_type = drone_type
-        self.daemon = True
+        self.daemon = False
 
     def __new_stream_available(self, stream_name, stream):
         if self.__stream_handler is not None:

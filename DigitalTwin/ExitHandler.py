@@ -44,26 +44,29 @@ class ExitHandler():
                 self.__logger.error(f"Error in processing cleanup for {t.name}")
                 if e.__repr__() != '':
                     self.__logger.error(e)
-        
-    def should_exit(self):
-        
-        if threading.main_thread() != threading.current_thread():
-            raise OnlyOnMain("should_exit must be called on the main thread!")
-
+    
+    def exit_if_needed(self):
         try:
             code, msg = self.__exit.get_nowait()
             self.__run_cleanup_actions()
             return code, msg
         except Exception as _:
             pass
-    
+
+    def should_exit(self):
+        
+        if threading.main_thread() != threading.current_thread():
+            raise OnlyOnMain("should_exit must be called on the main thread!")
+
+        return not self.__exit.empty()
+
     def block_until_exit(self):
         signal.signal(signal.SIGINT, lambda _,__: self.issue_exit_with_code_and_message(OK, None))
         self.__logger.info("Entering idle loop for exit handler...")
-        while True:
-            e = self.should_exit()
-            if e is None:
-                time.sleep(1)
-            else:
-                break
-        return e
+        while not self.should_exit():
+            time.sleep(1)
+        self.__logger.info("\n" + "="*30)
+        self.__logger.info('Commencing DigitalTwin shutdown!')
+        self.__logger.info("="*30 + "\n")
+        code, msg = self.exit_if_needed()
+        return (code, msg)

@@ -22,7 +22,7 @@ class SimulatorWrapper(threading.Thread):
         self.termination_complete = threading.Condition()
         self.daemon = False
 
-    def __cleanup(self, timeout = 1):
+    def __cleanup(self):
         self.__logger.info('Cleaning up resources for Simulator Wrapper')
         
         self.__logger.info(f'Invalidating streams for {__name__}')

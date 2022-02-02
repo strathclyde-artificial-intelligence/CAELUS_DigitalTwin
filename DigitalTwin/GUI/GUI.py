@@ -42,8 +42,9 @@ class GUI(StreamHandler, TimeSeriesHandler):
         self.__logger.info('Initialising GUI')
         self.__logger.info('Creating GUI Subwindows')
         self.__create_sub_windows()
+        exit_handler = ExitHandler.shared()
         try:
-            while dpg.is_dearpygui_running() and not self.__should_stop:
+            while dpg.is_dearpygui_running() and not self.__should_stop and not exit_handler.should_exit():
                 for w_name, w in [a for a in self.__sub_windows.items()]:
                     w.update()
                 dpg.render_dearpygui_frame()
