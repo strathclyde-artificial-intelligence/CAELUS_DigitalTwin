@@ -32,12 +32,16 @@ class TemperatureParser():
             self.__logger.warn(e)
 
     def set_current_wp(self, wp):
+        if len(self.__temps) == 0:
+            return
         if self.__current_wp >= len(self.__temps):
             self.__logger.warn("Requested temperature for out-of-bounds seq. Skipping...")                    
         if wp > self.__current_wp:
             self.__current_wp += 1
 
     def current_temp(self):
+        if len(self.__temps) == 0:
+            return TemperatureParser.DEFAULT_TEMP
         temp = self.__temps[self.__current_wp] if self.__current_wp >= 0 else TemperatureParser.DEFAULT_TEMP
         return temp
 
