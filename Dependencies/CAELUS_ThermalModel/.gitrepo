@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/strathclyde-artificial-intelligence/CAELUS_ThermalModel
 	branch = main
-	commit = 0ff53ebccda80f83aa767a899ed07020e91527ee
-	parent = b89fb0e2e937d22e3b44b4d430bc5e21abd7c32f
+	commit = da727e0098774f641507545d279e95e60e3bea61
+	parent = 8669b81c7d310a9446a842fa045b199925ce76ec
 	method = merge
 	cmdver = 0.4.3

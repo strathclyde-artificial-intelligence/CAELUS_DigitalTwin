@@ -4,7 +4,16 @@ from numpy.linalg import inv
 
 def model_ode(t, y, model_atmospheric, params, update_node_link):
     """
-    Explain me!
+    t: time
+    y: vector of temperatures. In this proble it is:
+        y[0]: external wall
+        y[1]: internal wall
+        y[2]: payload
+        y[3]: PCM
+        y[4]: air
+    model_atmospheric: function
+    params
+    update_node_link: function
     """
 
     update = update_node_link(params, t, [y[0], y[3]], model_atmospheric)

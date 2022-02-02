@@ -14,7 +14,12 @@ def test_integration():
 
     initial_time = 0  # [seconds]
     final_time = 10000  # [seconds]
-    initial_state = [20, 20, 5, 0, 20]  # temperature: array of 5 elements [Kelvin]
+    initial_state = [20, 20, 5, 0, 20]  # temperature: array of 5 elements
+                                        # y[0]: external wall. At the intial condition = ambient temperature
+                                        # y[1]: internal wall. At the intial condition = ambient temperature
+                                        # y[2]: payload. It depends on the package. 5 seems to be a reasonable number
+                                        # y[3]: PCM. 0 seems to be a reasonable number
+                                        # y[4]: internal container air. At the intial condition = ambient temperature
 
     # RUN EXAMPLE
 
