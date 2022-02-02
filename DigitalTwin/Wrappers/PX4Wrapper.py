@@ -24,7 +24,7 @@ class PX4Wrapper(threading.Thread):
         self.termination_complete = threading.Condition()
         self.__streams = set()
         self.__drone_type = drone_type
-        self.daemon = False
+        self.daemon = True
 
     def __new_stream_available(self, stream_name, stream):
         if self.__stream_handler is not None:
@@ -35,7 +35,7 @@ class PX4Wrapper(threading.Thread):
         if self.__stream_handler is not None:
             self.__stream_handler.invalidate_stream(stream_name)
 
-    def __cleanup(self, timeout = 1):
+    def __cleanup(self):
         self.__logger.info('Cleaning up resources for PX4 Wrapper')
         
         self.__logger.info(f'Invalidating streams for {__name__}')
@@ -45,13 +45,6 @@ class PX4Wrapper(threading.Thread):
 
         self.__logger.info(f'Waiting for PX4 process to exit...')
         if self.__process is not None:
-            for t in range(timeout):
-                code = self.__process.poll()
-                if code is not None:
-                    self.__logger.info(f'Process spontaneously exited with code {code}.')
-                    return code
-                sleep(t)
-            self.__logger.info(f'Poll timeout expired, killing {self.__process}')    
             self.__process.kill()
     
     # To be run on a separate thread 

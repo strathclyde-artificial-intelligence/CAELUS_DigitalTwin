@@ -155,6 +155,9 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
     def halt(self):
         exit(-1)
 
+    def cleanup(self):
+        self.__logger.info("DroneController cleaning up...")
+
     def set_time_series_handler(self, ts_handler: TimeSeriesHandler):
         if ts_handler is not None:
             self.__telemetry_feedback.set_time_series_handler(ts_handler)

@@ -62,3 +62,6 @@ class CAELUSSimulationStack(threading.Thread, SimulationStack, Stoppable, Vehicl
     def restart_stack(self):
         self.graceful_stop(wait_time=4)
         self.__start_stack()
+
+    def cleanup(self):
+        self.__logger.info("CAELUSSimulationStack cleaning up...")

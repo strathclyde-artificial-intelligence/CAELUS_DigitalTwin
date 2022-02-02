@@ -16,7 +16,7 @@ class ThreadMonitor():
                 self.__dpg.add_table_column(label='Thread Name')
 
     def update(self):
-        current_threads = [t.name for t in threading.enumerate()]
+        current_threads = [f'{t.name}' + (' (Daemon)' if t.daemon else '') for t in threading.enumerate()]
         to_delete = set(self.__threads).difference(set(current_threads))
         to_add =  set(current_threads).difference(set(self.__threads))
         self.__threads = current_threads

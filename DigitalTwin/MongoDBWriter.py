@@ -1,3 +1,4 @@
+import logging
 from .Interfaces.DBAdapter import DBAdapter
 from pymongo import MongoClient
 from threading import Thread
@@ -34,23 +35,28 @@ class MongoDBWriter(Thread, DBAdapter):
         self.__data_buffer = {}
         self.__thread_queue = Queue()
         self.__flush_every_seconds = flush_every_seconds
+        self.__should_stop = False
+        self.__logger = logging.getLogger()
+
+    def __process_items(self, last):
+        data, series = self.__thread_queue.get()
+        for k,v in data.items():
+            if k not in self.__data_buffer:
+                self.__data_buffer[k] = [] if series else 0
+            if series:
+                self.__data_buffer[k].append(v)
+            else:
+                self.__data_buffer[k] = v
+        now = time.time()
+        if now - last >= self.__flush_every_seconds:
+            last = now
+            self.__store()
+            self.__data_buffer = {}
 
     def run(self):
         last = time.time()
-        while True:
-            data, series = self.__thread_queue.get()
-            for k,v in data.items():
-                if k not in self.__data_buffer:
-                    self.__data_buffer[k] = [] if series else 0
-                if series:
-                    self.__data_buffer[k].append(v)
-                else:
-                    self.__data_buffer[k] = v
-            now = time.time()
-            if now - last >= self.__flush_every_seconds:
-                last = now
-                self.__store()
-                self.__data_buffer = {}
+        while not self.__should_stop:
+            self.__process_items(last)
 
     def update_query_for(self, data):
         
@@ -74,6 +80,12 @@ class MongoDBWriter(Thread, DBAdapter):
         except Exception as e:
             print(e)
 
+    def cleanup(self):
+        self.__logger.info("Dumping database buffer...")
+        self.__should_stop = True
+        self.__flush_every_seconds = 0
+        while not self.__thread_queue.empty():
+            self.__process_items(time.time())
 
     def store(self, data, series=True):
         self.__thread_queue.put_nowait((data, series))

@@ -25,10 +25,10 @@ class JMAVSimWrapper(threading.Thread):
         self.__streams = set()
         # Wait for this lock to properly destroy this wrapper
         self.termination_complete = threading.Condition()
-        self.daemon = False
+        self.daemon = True
         self.__weather_data_filepath = weather_data_filepath
 
-    def __cleanup(self, timeout = 1):
+    def __cleanup(self):
         self.__logger.info('Cleaning up resources for Simulator Wrapper')
         
         self.__logger.info(f'Invalidating streams for {__name__}')
@@ -38,13 +38,6 @@ class JMAVSimWrapper(threading.Thread):
 
         self.__logger.info(f'Waiting for Simulator process to exit...')
         if self.__process is not None:
-            for t in range(timeout):
-                code = self.__process.poll()
-                if code is not None:
-                    self.__logger.info(f'Process spontaneously exited with code {code}.')
-                    return code
-                sleep(t)
-            self.__logger.info(f'Poll timeout expired, killing {self.__process}')    
             self.__process.kill()
 
     def __new_stream_available(self, stream_name, stream):

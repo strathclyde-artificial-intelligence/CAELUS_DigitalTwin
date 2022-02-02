@@ -9,4 +9,3 @@ class Stoppable(ABC):
     @abstractmethod
     def halt(self):
         pass
-

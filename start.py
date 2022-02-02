@@ -8,6 +8,7 @@ import logging
 from os.path import exists
 from DigitalTwin.SimulationFactory import new_simulation
 from DigitalTwin.error_codes import *
+from DigitalTwin.ExitHandler import ExitHandler
 
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
@@ -25,6 +26,8 @@ def start_with_payload(payload, headless=True):
     check_exported_px4()
 
     print('Staring simulation...')
+    exit_handler: ExitHandler = ExitHandler.shared()
+
     sim_payload = SimulatorPayload(payload)
     controller_payload = ControllerPayload(payload)
     gui, controller, sstack = new_simulation(sim_payload, controller_payload, headless=headless)
@@ -32,6 +35,8 @@ def start_with_payload(payload, headless=True):
     sstack.start()
     if gui is not None:
         gui.start()
+    
+    exit_handler.block_until_exit()
 
 import json
 import sys
