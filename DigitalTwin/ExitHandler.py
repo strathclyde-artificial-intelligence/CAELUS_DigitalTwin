@@ -31,9 +31,9 @@ class ExitHandler():
         
     def issue_exit_with_code_and_message(self, code, message):
         self.__logger.error(f'Exit issued by {threading.current_thread().name} with code {code}:')
-        if message != '':
+        if message is not None and message != '':
             self.__logger.error(message)
-        self.__exit.put_nowait({'code':code, 'message':message})
+        self.__exit.put_nowait((code, message))
     
     def __run_cleanup_actions(self):
         for t, f in self.__cleanup.values():
@@ -58,7 +58,7 @@ class ExitHandler():
             pass
     
     def block_until_exit(self):
-        signal.signal(signal.SIGINT, lambda _,__: self.issue_exit_with_code_and_message(OK, ''))
+        signal.signal(signal.SIGINT, lambda _,__: self.issue_exit_with_code_and_message(OK, None))
         self.__logger.info("Entering idle loop for exit handler...")
         while True:
             e = self.should_exit()

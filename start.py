@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from os import environ
 from DigitalTwin.PayloadModels import ControllerPayload, SimulatorPayload
 load_dotenv()
+import sys
 
 from os import environ, path
 import logging 
@@ -36,7 +37,10 @@ def start_with_payload(payload, headless=True):
     if gui is not None:
         gui.start()
     
-    exit_handler.block_until_exit()
+    code, msg = exit_handler.block_until_exit()
+    if msg is not None:
+        logging.getLogger().error(f'Exiting with error message: {msg}')
+    sys.exit(code)
 
 import json
 import sys

@@ -23,7 +23,6 @@ def get_writer(operation_id, group_id):
         exit(-1)
 
 def new_simulation(simulator_payload: SimulatorPayload, controller_payload: ControllerPayload, headless=False):
-    headless = True
     if not headless:
         from DigitalTwin.GUI.GUI import GUI
 
@@ -43,7 +42,7 @@ def new_simulation(simulator_payload: SimulatorPayload, controller_payload: Cont
         gui.set_simulation_stack(sstack)
 
     def main_cleanup():
-        logging.getLogger().info('Main threading cleaning up...')
+        logging.getLogger().info('Main thread cleaning up...')
         weather_provider.close()
         drone_controller.cleanup()
 

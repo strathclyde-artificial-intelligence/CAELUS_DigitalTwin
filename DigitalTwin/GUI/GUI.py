@@ -1,3 +1,4 @@
+from DigitalTwin.ExitHandler import ExitHandler
 from DigitalTwin.Interfaces.MissionManager import MissionManager
 from DigitalTwin.Interfaces.SimulationStack import SimulationStack
 from .ThreadMonitor import ThreadMonitor
@@ -8,6 +9,8 @@ from ..Interfaces.TimeSeriesHandler import TimeSeriesHandler
 from ..Interfaces.SimulationStack import SimulationStack
 import dearpygui.dearpygui as dpg
 import logging 
+import signal
+from DigitalTwin.error_codes import OK, JSON_READ_EC
 
 class GUI(StreamHandler, TimeSeriesHandler):
     DEFAULT_GUI_INIT_FILE_NAME = 'gui_layout.ini'
@@ -20,6 +23,7 @@ class GUI(StreamHandler, TimeSeriesHandler):
         self.__logger = logger
         self.__mission_manager = None
         self.__sim_stack = None
+        self.__should_stop = False
 
     def __setup_gui(self):
         dpg.create_context()
@@ -34,20 +38,26 @@ class GUI(StreamHandler, TimeSeriesHandler):
         self.__sub_windows['series_plot_window'] = SeriesPlotsWindow(dpg)
 
     def start(self):
+        signal.signal(signal.SIGINT, lambda _,__: self.cleanup())
         self.__logger.info('Initialising GUI')
         self.__logger.info('Creating GUI Subwindows')
         self.__create_sub_windows()
         try:
-            while dpg.is_dearpygui_running():
+            while dpg.is_dearpygui_running() and not self.__should_stop:
                 for w_name, w in [a for a in self.__sub_windows.items()]:
                     w.update()
                 dpg.render_dearpygui_frame()
         except Exception as e:
-            raise e
+            self.__logger.warn(e)
         finally:
-            dpg.save_init_file(GUI.DEFAULT_GUI_INIT_FILE_NAME)
-            dpg.destroy_context()    
-    
+            self.__logger.info("DearPyGUI exiting")
+
+    def cleanup(self):
+        exit_handler = ExitHandler.shared()
+        self.__should_stop = True
+        dpg.save_init_file(GUI.DEFAULT_GUI_INIT_FILE_NAME)    
+        exit_handler.issue_exit_with_code_and_message(OK, None)
+
     def new_stream_available(self, stream_name, stream):
         self.__logger.info(f'GUI module has received a new stream: {stream_name}')
         name = f'stream_{stream_name}'
