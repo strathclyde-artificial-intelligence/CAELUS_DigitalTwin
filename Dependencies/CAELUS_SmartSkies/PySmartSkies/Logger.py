@@ -32,4 +32,3 @@ class Logger():
 
     def fatal(self, s):
         print(f'[FATAL] {s}')
-        exit(-1)
