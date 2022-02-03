@@ -58,14 +58,16 @@ class MissionProgressMonitor(threading.Thread):
         CLEAR_TO_LAND_CODE = 14
         EXCEPT_CODES = [19, 22]
         MISSION_ABORTED = 4
+        ERR_STATUS = -1
         def __wait():
             try:
                 while True:
                     status = self.__dis_api.get_delivery_status_id(self.__delivery_id)
+                    if status == ERR_STATUS:
+                        break
                     if (status >= CLEAR_TO_LAND_CODE and status not in EXCEPT_CODES) or status == MISSION_ABORTED:
                         self.__logger.info("Received clear to land signal - Initiating land")
                         break
-                    print(status)
                     sleep(2)
             except Exception as e:
                 self.__logger.error(f'Errored while waiting for clear to land signal')
@@ -131,11 +133,11 @@ class MissionProgressMonitor(threading.Thread):
 
     def __process_mission_status(self, waypoint_n):
         if (self.__last_wp > 0 and waypoint_n == 0):
-            self.publish_mission_status(MissionProgressMonitor.LANDING_COMPLETE)
             self.close_delivery_operation()
+            self.publish_mission_status(MissionProgressMonitor.LANDING_COMPLETE)
         elif waypoint_n == 0:
             self.publish_mission_status(MissionProgressMonitor.TAKING_OFF)
-        elif waypoint_n == self.__mission_items_n - 2:
+        elif waypoint_n == self.__mission_items_n - 1:
             self.__drone_ready_for_landing()
             self.publish_mission_status(MissionProgressMonitor.LANDING)
             self.__landing_wp_reached = True

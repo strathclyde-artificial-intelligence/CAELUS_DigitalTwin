@@ -6,6 +6,7 @@ from typing import Tuple, List
 from dataclasses import dataclass
 import os,signal
 import time
+from DigitalTwin.ExitHandler import ExitHandler
 
 from DigitalTwin.Probes.RiskAssessment import RiskAssessment
 from DigitalTwin.WeatherDataProvider import WeatherDataProvider
@@ -81,9 +82,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
     
     # Called by vehicle when the mission has been completed
     def mission_complete(self):
-        print("Mission complete. Waiting 2 seconds to allow other threads to sync.")
-        time.sleep(2)
-        exit(signal.SIGINT)
+        print("Mission complete. Issuing exit...")
+        ExitHandler.shared().issue_exit_with_code_and_message(OK, "Mission complete")
 
     def vehicle_available(self, vehicle):
         
@@ -125,7 +125,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
     def vehicle_timeout(self, vehicle):
         self.__logger.info(f'Vehicle timed out!')
         self.__connection_manager.stop_connecting()
-        exit(VEHICLE_TIMED_OUT)
+        ExitHandler.shared().issue_exit_with_code_and_message(VEHICLE_TIMED_OUT, "Vehicle timed out.")
 
     def add_mission(self, mission: Mission):
         self.__logger.info(f'Received new mission!')

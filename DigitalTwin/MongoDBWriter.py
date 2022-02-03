@@ -38,20 +38,28 @@ class MongoDBWriter(Thread, DBAdapter):
         self.__should_stop = False
         self.__logger = logging.getLogger()
 
+    def __dump_buffer(self):
+        self.__store()
+        self.__data_buffer = {}
+
     def __process_items(self, last):
-        data, series = self.__thread_queue.get()
-        for k,v in data.items():
-            if k not in self.__data_buffer:
-                self.__data_buffer[k] = [] if series else 0
-            if series:
-                self.__data_buffer[k].append(v)
-            else:
-                self.__data_buffer[k] = v
-        now = time.time()
-        if now - last >= self.__flush_every_seconds:
-            last = now
-            self.__store()
-            self.__data_buffer = {}
+        try:
+            data, series = self.__thread_queue.get()
+            for k,v in data.items():
+                if k not in self.__data_buffer:
+                    self.__data_buffer[k] = [] if series else 0
+                if series:
+                    self.__data_buffer[k].append(v)
+                else:
+                    self.__data_buffer[k] = v
+        except Exception as e:
+            self.__logger.warn('Failed in getting queue elements for DB write operation')
+            self.__logger.warn(e)
+        finally:
+            now = time.time()
+            if now - last >= self.__flush_every_seconds:
+                last = now
+                self.__dump_buffer()
 
     def run(self):
         last = time.time()
@@ -83,9 +91,19 @@ class MongoDBWriter(Thread, DBAdapter):
     def cleanup(self):
         self.__logger.info("Dumping database buffer...")
         self.__should_stop = True
-        self.__flush_every_seconds = 0
+        total_to_process = max(self.__thread_queue.qsize(), 1)
+        logger_throttle = total_to_process
         while not self.__thread_queue.empty():
-            self.__process_items(time.time())
+            left = self.__thread_queue.qsize()
+            if left < logger_throttle:
+                self.__logger.info(f'Processed {int((1 - self.__thread_queue.qsize() / total_to_process)*100)}%')
+                logger_throttle = max(logger_throttle - (total_to_process / 10), 0)
+            self.__process_items(time.time()+5+self.__flush_every_seconds) # always in the future
+        
+        self.__logger.info('Writing buffer...')
+        self.__dump_buffer()
+            
 
     def store(self, data, series=True):
-        self.__thread_queue.put_nowait((data, series))
+        if not self.__should_stop:
+            self.__thread_queue.put_nowait((data, series))

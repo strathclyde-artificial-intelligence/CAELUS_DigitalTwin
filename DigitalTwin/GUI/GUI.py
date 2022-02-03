@@ -52,6 +52,7 @@ class GUI(StreamHandler, TimeSeriesHandler):
             self.__logger.warn(e)
         finally:
             self.__logger.info("DearPyGUI exiting")
+            dpg.stop_dearpygui()
 
     def cleanup(self):
         exit_handler = ExitHandler.shared()
