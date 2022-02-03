@@ -79,7 +79,8 @@ class JMAVSimWrapper(threading.Thread):
                     'PX4_SIM_SPEED_FACTOR':str(10),
                     'PX4_HOME_LAT':str(lat),
                     'PX4_HOME_LON':str(lon),
-                    'PX4_HOME_ALT':str(alt)
+                    'PX4_HOME_ALT':str(alt),
+                    'PX4_LANDING_HEIGHT':str(self.__simulator_payload.final_lon_lat_alt[-1])
                 }
             )
             self.__new_stream_available('sim_stdout', self.__process.stdout)

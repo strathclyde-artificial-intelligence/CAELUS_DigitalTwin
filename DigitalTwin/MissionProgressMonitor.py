@@ -8,6 +8,7 @@ from PySmartSkies.DIS_API import DIS_API
 from PySmartSkies.DeliveryStatus import *
 
 from DigitalTwin.ExitHandler import ExitHandler
+from DigitalTwin.error_codes import PREMATURE_LANDING
 from .Interfaces.DBAdapter import DBAdapter
 import logging
 import queue
@@ -26,7 +27,9 @@ class MissionProgressMonitor(threading.Thread):
 
     def __init__(self, vehicle, writer: DBAdapter, controller, mission_items_n, delivery_id = None, smartskies_session = None):
         super().__init__()
+        self.__landing_wp_reached = False
         self.__writer = writer
+        self.__has_taken_off = False
         self.__logger = logging.getLogger()
         self.__vehicle = vehicle
         self.__controller = controller
@@ -110,7 +113,6 @@ class MissionProgressMonitor(threading.Thread):
         except Exception as e:
             import traceback
             self.__logger.error(f'Error in publishing status update (SmartSkies): {e}')
-            print(traceback.print_exc())
 
     def publish_mission_status(self, status):
         if status not in MissionProgressMonitor.mission_status:
@@ -128,17 +130,19 @@ class MissionProgressMonitor(threading.Thread):
                 self.__controller.mission_complete()
 
     def __process_mission_status(self, waypoint_n):
-        if (self.__last_wp > 0 and waypoint_n == 0) and not self.__vehicle.armed:
-            self.close_delivery_operation()
+        if (self.__last_wp > 0 and waypoint_n == 0):
             self.publish_mission_status(MissionProgressMonitor.LANDING_COMPLETE)
+            self.close_delivery_operation()
         elif waypoint_n == 0:
             self.publish_mission_status(MissionProgressMonitor.TAKING_OFF)
         elif waypoint_n == self.__mission_items_n - 2:
             self.__drone_ready_for_landing()
             self.publish_mission_status(MissionProgressMonitor.LANDING)
+            self.__landing_wp_reached = True
         elif waypoint_n > 0:
             if self.__last_wp == 0:
                 self.publish_mission_status(MissionProgressMonitor.TAKEOFF_COMPLETE)
+                self.__has_taken_off = True
             self.publish_mission_status(MissionProgressMonitor.CRUISING)
         else:
             self.__logger.warn(f'Unrecognised waypoint number: {waypoint_n}')
@@ -154,13 +158,14 @@ class MissionProgressMonitor(threading.Thread):
         self.__command_queue.put(command)
 
     def run(self):
-        try:
-            while True:
+        while True:
+            try:        
+                if not self.__vehicle.armed and not self.__landing_wp_reached and self.__has_taken_off:
+                    ExitHandler.shared().issue_exit_with_code_and_message(PREMATURE_LANDING, "Premature landing detected!")
                 new_waypoint = self.__vehicle.commands.next
                 if self.__last_wp != new_waypoint:
                     self.__process_mission_status(new_waypoint)
                 time.sleep(1)
-
-        except Exception as e:
-            self.__logger.error('Error in main loop (Mission progress monitor):')
-            self.__logger.error(e)
+            except Exception as e:
+                self.__logger.error('Error in main loop (Mission progress monitor):')
+                self.__logger.error(e)
