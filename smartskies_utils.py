@@ -14,21 +14,42 @@ from consolemenu import *
 from consolemenu.items import *
 from mission_generator import mission_generator
 from PySmartSkies import DeliveryStatus
+import csv
 
-dis_credentials = DIS_Credentials(
-    os.environ['DIS_GRANT_TYPE'],
-    os.environ['DIS_CLIENT_ID'],
-    os.environ['DIS_USERNAME'],
-    os.environ['DIS_PASSWORD']
-)
-
-cvms_credentials = CVMS_Credentials(
-    os.environ['CVMS_PHONE'],
-    os.environ['CVMS_PASSWORD'],
-    os.environ['CVMS_DEVICE_ID']
-)
+def get_cvms_credentials():
+    try:
+        with open('.env.customers.csv', 'r') as f:
+            rows = list(csv.reader(f.readlines()))
+            menu = SelectionMenu([r[0] for r in rows], "Authenticate with customer")
+            menu.show()
+            name, phone, password = rows[menu.selected_option]
+            print(f"Logging in with customer {name}")
+            return CVMS_Credentials(
+                phone,
+                password,
+                1
+            )
+    except Exception as e:
+        print('Could not find local CVMS login file (.env.customers.csv)')
+        print('Defaulting to .env for CVMS login')
+        print(e)
+    return CVMS_Credentials(
+        os.environ['CVMS_PHONE'],
+        os.environ['CVMS_PASSWORD'],
+        os.environ['CVMS_DEVICE_ID']
+    )
 
 def authenticate():
+
+    dis_credentials = DIS_Credentials(
+        os.environ['DIS_GRANT_TYPE'],
+        os.environ['DIS_CLIENT_ID'],
+        os.environ['DIS_USERNAME'],
+        os.environ['DIS_PASSWORD']
+    )
+    
+    cvms_credentials = get_cvms_credentials()
+
     session = Session(cvms_credentials, dis_credentials)
     dis_api = DIS_API(session)
     dis_api.authenticate()
@@ -210,9 +231,11 @@ def build_menu(cvms_api, dis_api):
     delivery_filter = SubmenuItem("Find delivery", delivery_filters_menu(dis_api))
     abort_all = FunctionItem("Abort all deliveries and operations", abort_deliveries_and_operations, args=[dis_api])
     generate_mission = FunctionItem("New Mission", pause, args=[mission_generator, cvms_api, dis_api])
+    auth = FunctionItem("Re-auth", pause, args=[authenticate])
     menu.append_item(delivery_filter)
     menu.append_item(abort_all)
     menu.append_item(generate_mission)
+    menu.append_item(auth)
     return menu
 
 build_menu(*authenticate()).show()

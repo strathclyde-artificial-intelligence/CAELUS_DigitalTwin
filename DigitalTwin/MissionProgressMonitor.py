@@ -131,6 +131,9 @@ class MissionProgressMonitor(threading.Thread):
                 self.__logger.info("Controller notified of mission completion.")
                 self.__controller.mission_complete()
 
+    def __landing_groundspeed(self, max_allowed_groundspeed = 2):
+        return self.__vehicle.groundspeed < max_allowed_groundspeed
+
     def __process_mission_status(self, waypoint_n):
         if (self.__last_wp > 0 and waypoint_n == 0):
             self.close_delivery_operation()
@@ -138,6 +141,10 @@ class MissionProgressMonitor(threading.Thread):
         elif waypoint_n == 0:
             self.publish_mission_status(MissionProgressMonitor.TAKING_OFF)
         elif waypoint_n == self.__mission_items_n - 1:
+            while not self.__landing_groundspeed():
+                self.__logger.info('Waiting for acceptable landing groundspeed...')
+                time.sleep(0.5)
+            self.__logger.info('Acceptable landing groundspeed reached! Initiating land sequence...')
             self.__drone_ready_for_landing()
             self.publish_mission_status(MissionProgressMonitor.LANDING)
             self.__landing_wp_reached = True

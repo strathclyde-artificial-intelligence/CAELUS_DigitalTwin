@@ -2,7 +2,7 @@
 *.o
 __pycache__
 venv
-.env
+.env*
 .vscode
 Dependencies/PX4-Autopilot
 *.simout

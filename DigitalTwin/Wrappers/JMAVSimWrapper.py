@@ -70,7 +70,7 @@ class JMAVSimWrapper(threading.Thread):
                 '-no-gui',
                 '-drone-config',
                 json.dumps(drone_conf),
-            ] + ([f'-weather-data "{self.__weather_data_filepath}"'] if self.__weather_data_filepath is not None else [])
+            ] + (['-weather-data', self.__weather_data_filepath] if self.__weather_data_filepath is not None else [])
 
             self.__process = subprocess.Popen(commands,
                 cwd=self.__sim_folder,
