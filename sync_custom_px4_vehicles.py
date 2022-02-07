@@ -103,7 +103,14 @@ def sync_px4_for_vehicle_with_file(airframes_folder, sitl_cmake, cmake_lists, ve
         create_new_airframe_for_vehicle(cmake_lists, airframes_folder, obj)
         add_model_to_sitl_target_cmake(sitl_cmake, obj[AIRFRAME_REFERENCE_KEY])
 
+def prompt_for_warning_and_agreement():
+    print("[WARNING] This script is meant to be used as a shortcut to the manual PX4 vehicle config creation.")
+    print("It performs **unsafe** file edits within the PX4 folder.")
+    print("**BACKUP** any change in the PX4 folder before running the script!")
+    input("(Press enter to continue or CTRL+C to terminate this script)")
+    
 if __name__ == '__main__':
+    prompt_for_warning_and_agreement()
     all_drones = os.listdir(CUSTOM_VEHICLES_FOLDER)
     for drone_file in all_drones:
         try:
