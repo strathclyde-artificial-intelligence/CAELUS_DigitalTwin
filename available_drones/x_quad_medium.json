@@ -1,0 +1,19 @@
+{
+    "name": "QuadCopter Medium",
+    "px4_airframe_reference": "custom_quad_medium",
+    "type": "QUADCOPTER",
+    "limits": {
+        "max_payload_weight": 1.5,
+        "max_pitch_deg": 30.0,
+        "max_roll_deg": 30.0
+    }, 
+    "drone_config": {
+        "mass": 1.37,
+        "arm_length": 0.2,
+        "max_thrust": 6.0,
+        "max_torque": 0.07,
+        "Ixx": 0.0247,
+        "Iyy": 0.0247,
+        "Izz": 0.0483
+    }
+}
