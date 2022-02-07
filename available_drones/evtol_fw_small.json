@@ -51,6 +51,7 @@
         "arm_length": 0.25,
         "max_thrust": 8.0,
         "max_torque": 0.10,
+        "drag_move": 0.01,
         "Ixx": 0.023,
         "Iyy": 0.02,
         "Izz": 0.033,
