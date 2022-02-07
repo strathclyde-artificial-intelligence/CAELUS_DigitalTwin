@@ -1,33 +1,3 @@
-# import json
-# from this import d
-# from typing_extensions import Self
-
-# class BaseVehicle():
-    
-#     ID_KEY = 'id'
-#     NAME_KEY = 'name'
-#     AIRFRAME_REFERENCE_KEY = 'px4_airframe_reference'
-
-#     def __init__(self,
-#         identifier: str,
-#         name: str,
-#         airframe_reference: str):
-
-#         self.identifier = identifier
-#         self.name = name
-#         self.airframe_reference = airframe_reference
-
-# class Multicopter(BaseVehicle):
-
-#     LIMITS_KEY = 'limits'
-#     DRONE_CONFIG_KEY = 'drone_config'
-
-#     def __init__(self, limits, drone_config):
-#         self.limits = limits
-#         self.drone_config = drone_config
-
-# class FixedWing(Multicopter):
-
 import json
 import os
 
@@ -91,8 +61,8 @@ def generate_airframe_contents(vehicle_obj):
 def get_complete_airframe_name(airframes_folder, airframe_reference):
     return f'{get_new_airframe_number(airframes_folder)}_{airframe_reference}'
 
-def create_new_airframe_for_vehicle(vehicle_obj, airframes_folder):
-    existing_airframes = ['_'.join(name.split('_')[:1]) for name in get_existing_vehicles(airframes_folder)]
+def create_new_airframe_for_vehicle(cmake_lists, airframes_folder, vehicle_obj):
+    existing_airframes = ['_'.join(name.split('_')[1:]) for name in get_existing_vehicles(airframes_folder)]
     airframe_reference = vehicle_obj[AIRFRAME_REFERENCE_KEY]
     if airframe_reference in existing_airframes:
         print(f'Airframe "{airframe_reference}" already exists. Skipping...')
@@ -102,22 +72,27 @@ def create_new_airframe_for_vehicle(vehicle_obj, airframes_folder):
         with open(f'{AIRFRAMES_FOLDER}/{complete_airframe_ref_name}', 'w') as f:
             f.writelines([f'{line}\n' for line in data])
         print(f'Done writing airframe file "{complete_airframe_ref_name}".')
+        add_airframe_to_cmake_lists(cmake_lists, complete_airframe_ref_name)
 
 def add_model_to_sitl_target_cmake(sitl_cmake_filename, airframe_reference):
+    model_string = f'\t{airframe_reference}\n'
     with open(sitl_cmake_filename, 'r+') as f:
         data = f.readlines()
+        if model_string in data:
+            print(f'Model string "{airframe_reference}" already in sitl_cmake. Skipping...')
+            return
         line_n = data.index("set(models\n")
-        data.insert(line_n+1, f'\t{airframe_reference}\n')
+        data.insert(line_n+1, model_string)
         f.seek(0)
         f.writelines(data)
     print(f'Added "{airframe_reference}" to {sitl_cmake_filename}')
 
-def add_airframe_to_cmake_lists(cmake_lists, airframes_folder, airframe_reference):
-    complete_airframe_name = get_complete_airframe_name(airframes_folder, airframe_reference)
+def add_airframe_to_cmake_lists(cmake_lists, complete_airframe_name):
+    airframe_string = f'\t{complete_airframe_name}\n'
     with open(cmake_lists, 'r+') as f:
         data = f.readlines()
         line_n = data.index("px4_add_romfs_files(\n")
-        data.insert(line_n+1, f'\t{complete_airframe_name}\n')
+        data.insert(line_n+1, airframe_string)
         f.seek(0)
         f.writelines(data)
     print(f'Added {complete_airframe_name} to {cmake_lists}')
@@ -125,6 +100,16 @@ def add_airframe_to_cmake_lists(cmake_lists, airframes_folder, airframe_referenc
 def sync_px4_for_vehicle_with_file(airframes_folder, sitl_cmake, cmake_lists, vehicle_file_name):
     with open(vehicle_file_name, 'r') as f:
         obj = json.loads(f.read())
-        create_new_airframe_for_vehicle(obj, airframes_folder)
+        create_new_airframe_for_vehicle(cmake_lists, airframes_folder, obj)
         add_model_to_sitl_target_cmake(sitl_cmake, obj[AIRFRAME_REFERENCE_KEY])
-        add_airframe_to_cmake_lists(cmake_lists, airframes_folder, obj[AIRFRAME_REFERENCE_KEY])
+
+if __name__ == '__main__':
+    all_drones = os.listdir(CUSTOM_VEHICLES_FOLDER)
+    for drone_file in all_drones:
+        try:
+            print(f'Sync-ing "{drone_file}"')
+            sync_px4_for_vehicle_with_file(AIRFRAMES_FOLDER, SITL_CMAKE, CMAKE_LISTS, f'{CUSTOM_VEHICLES_FOLDER}/{drone_file}')
+            print("="*20 + "\n")
+        except Exception as e:
+            print(f'Error in sync-ing "{drone_file}":')
+            print(e)
