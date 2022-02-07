@@ -50,6 +50,7 @@
         "mass": 2.9,
         "arm_length": 0.25,
         "max_thrust": 8.0,
+        "max_back_propeller_thrust": 13.0,
         "max_torque": 0.10,
         "drag_move": 0.01,
         "Ixx": 0.335,
