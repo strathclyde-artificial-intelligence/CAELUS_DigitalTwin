@@ -1,4 +1,5 @@
 {
+    "id": "quad_medium",
     "name": "QuadCopter Medium",
     "px4_airframe_reference": "custom_quad_medium",
     "type": "QUADCOPTER",

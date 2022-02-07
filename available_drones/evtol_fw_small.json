@@ -1,4 +1,5 @@
 {
+    "id": "evtol_fw_small",
     "name": "EVTOL FW Small",
     "px4_airframe_reference": "custom_evtolfw_small",
     "type": "EVTOL_FW",

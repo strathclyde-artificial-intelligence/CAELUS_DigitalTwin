@@ -1,4 +1,5 @@
 {
+    "id": "evtol_fw_medium"
     "name": "EVTOL FW Medium",
     "px4_airframe_reference": "custom_evtolfw_medium",
     "type": "EVTOL_FW",
