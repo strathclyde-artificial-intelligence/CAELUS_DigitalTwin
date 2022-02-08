@@ -2,6 +2,7 @@
     "id": "evtol_fw_small",
     "name": "EVTOL FW Small",
     "px4_airframe_reference": "custom_evtolfw_small",
+    "px4_airframe_parameters": {},
     "type": "EVTOL_FW",
     "aerodynamics": {
         "wing_span": 0.9,
