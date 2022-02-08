@@ -6,7 +6,7 @@ class Session():
     @staticmethod
     def with_tokens(dis_token, dis_refresh_token, cvms_token):
         s = Session(None, None)
-        s.store_dis_bearer(dis_token, dis_refresh_token, time.time() + 10)
+        s.store_dis_bearer(dis_token, dis_refresh_token, time.time())
         s.store_cvms_bearer(cvms_token)
         return s
 

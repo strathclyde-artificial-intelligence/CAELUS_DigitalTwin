@@ -333,7 +333,10 @@ class DIS_API():
             return {
                 'temperature':response['temperature_deg_celsius'],
                 'humidity':response['rel_humidity'],
-                'wind_vector': wind_vector # Coplanar with travel plane
+                'wind_vector': wind_vector, # Coplanar with travel plane
+                'clouds': response['clouds'],
+                'visibility_km':response['visibility_km'],
+                'description': response['description']
             }
         else:
             self._logger.error(f'Could not fetch weather data for {lat}, {lon}')
