@@ -63,16 +63,20 @@ def get_complete_airframe_name(airframes_folder, airframe_reference):
     return f'{get_new_airframe_number(airframes_folder)}_{airframe_reference}'
 
 def create_new_airframe_for_vehicle(cmake_lists, airframes_folder, vehicle_obj):
+    response = None
     existing_airframes = ['_'.join(name.split('_')[1:]) for name in get_existing_vehicles(airframes_folder)]
     airframe_reference = vehicle_obj[AIRFRAME_REFERENCE_KEY]
     if airframe_reference in existing_airframes:
-        print(f'Airframe "{airframe_reference}" already exists. Skipping...')
-    else:
-        data = generate_airframe_contents(vehicle_obj)
-        complete_airframe_ref_name = get_complete_airframe_name(airframes_folder, airframe_reference)
-        with open(f'{AIRFRAMES_FOLDER}/{complete_airframe_ref_name}', 'w') as f:
-            f.writelines([f'{line}\n' for line in data])
-        print(f'Done writing airframe file "{complete_airframe_ref_name}".')
+        print(f'Airframe "{airframe_reference}" already exists.')
+        response = input(f'Do you want to override the existing file with the new configuration? (enter to skip, y to override)')
+        if response != 'y':
+            return
+    data = generate_airframe_contents(vehicle_obj)
+    complete_airframe_ref_name = get_complete_airframe_name(airframes_folder, airframe_reference)
+    with open(f'{AIRFRAMES_FOLDER}/{complete_airframe_ref_name}', 'w') as f:
+        f.writelines([f'{line}\n' for line in data])
+    print(f'Done writing airframe file "{complete_airframe_ref_name}".')
+    if response is None:
         add_airframe_to_cmake_lists(cmake_lists, complete_airframe_ref_name)
 
 def add_model_to_sitl_target_cmake(sitl_cmake_filename, airframe_reference):
