@@ -3,6 +3,9 @@
     "name": "EVTOL FW Large",
     "px4_airframe_reference": "custom_evtolfw_large",
     "type": "EVTOL_FW",
+    "px4_airframe_parameters": {
+        "VT_TRANS_MIN_TM":10
+    },
     "limits": {
         "max_payload_weight": 2.0,
         "max_pitch_deg": 30.0,

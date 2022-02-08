@@ -62,6 +62,13 @@ def generate_airframe_contents(vehicle_obj):
 def get_complete_airframe_name(airframes_folder, airframe_reference):
     return f'{get_new_airframe_number(airframes_folder)}_{airframe_reference}'
 
+def get_airframe_number(airframes_folder, airframe_reference):
+    afs = get_existing_vehicles(airframes_folder)
+    for a in afs:
+        if airframe_reference in a:
+            return a.split('_')[0]
+    return None
+    
 def create_new_airframe_for_vehicle(cmake_lists, airframes_folder, vehicle_obj):
     response = None
     existing_airframes = ['_'.join(name.split('_')[1:]) for name in get_existing_vehicles(airframes_folder)]
@@ -72,7 +79,8 @@ def create_new_airframe_for_vehicle(cmake_lists, airframes_folder, vehicle_obj):
         if response != 'y':
             return
     data = generate_airframe_contents(vehicle_obj)
-    complete_airframe_ref_name = get_complete_airframe_name(airframes_folder, airframe_reference)
+    airframe_n = get_airframe_number(airframes_folder, airframe_reference)
+    complete_airframe_ref_name = get_complete_airframe_name(airframes_folder, airframe_reference) if response is None else f'{airframe_n}_{airframe_reference}'
     with open(f'{AIRFRAMES_FOLDER}/{complete_airframe_ref_name}', 'w') as f:
         f.writelines([f'{line}\n' for line in data])
     print(f'Done writing airframe file "{complete_airframe_ref_name}".')
