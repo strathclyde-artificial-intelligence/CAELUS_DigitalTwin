@@ -35,7 +35,7 @@ def generate_airframe_contents(vehicle_obj):
             f"# @name {name}",
             f"# @type {drone_type}",
             ". ${R}etc/init.d/rc.mc_defaults" if drone_type == "QUADCOPTER" else ". ${R}etc/init.d/rc.vtol_defaults",
-            ". ${R}etc/init.d-posix/airframes/4200_custom_quad" if drone_type == "QUADCOPTER" else ". ${R}etc/init.d-posix/airframes/4200_custom_evtol"
+            ". ${R}etc/init.d-posix/airframes/4200_custom_quad" if drone_type == "QUADCOPTER" else ". ${R}etc/init.d-posix/airframes/4201_custom_evtol"
         ]
 
     def format_parameters(params):
