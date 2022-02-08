@@ -3,11 +3,6 @@
     "name": "QuadCopter Small",
     "px4_airframe_reference": "custom_quad_small",
     "type": "QUADCOPTER",
-    "limits": {
-        "max_payload_weight": 1.0,
-        "max_pitch_deg": 30.0,
-        "max_roll_deg": 30.0
-    }, 
     "drone_config": {
         "mass": 0.7,
         "arm_length": 0.15,

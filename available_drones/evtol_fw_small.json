@@ -3,11 +3,6 @@
     "name": "EVTOL FW Small",
     "px4_airframe_reference": "custom_evtolfw_small",
     "type": "EVTOL_FW",
-    "limits": {
-        "max_payload_weight": 2.0,
-        "max_pitch_deg": 30.0,
-        "max_roll_deg": 30.0
-    }, 
     "aerodynamics": {
         "wing_span": 0.9,
         "wing_area": 0.9,
