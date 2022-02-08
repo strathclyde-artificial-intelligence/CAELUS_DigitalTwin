@@ -1,3 +1,4 @@
+from typing import final
 from dotenv import load_dotenv
 from os import environ
 from DigitalTwin.PayloadModels import ControllerPayload, SimulatorPayload
@@ -29,18 +30,22 @@ def start_with_payload(payload, headless=True):
     print('Staring simulation...')
     exit_handler: ExitHandler = ExitHandler.shared()
 
-    sim_payload = SimulatorPayload(payload)
-    controller_payload = ControllerPayload(payload)
-    gui, controller, sstack = new_simulation(sim_payload, controller_payload, headless=headless)
+    try:
+        sim_payload = SimulatorPayload(payload)
+        controller_payload = ControllerPayload(payload)
+        gui, controller, sstack = new_simulation(sim_payload, controller_payload, headless=headless)
 
-    sstack.start()
-    if gui is not None:
-        gui.start()
-    
-    code, msg = exit_handler.block_until_exit()
-    if msg is not None:
-        logging.getLogger().error(f'Exiting with error message: {msg}')
-    sys.exit(code)
+        sstack.start()
+        if gui is not None:
+            gui.start()
+    except Exception as e:
+        logging.getLogger().error(f'Digital Twin Top Level Error:')
+        logging.getLogger().error(e)
+    finally:
+        code, msg = exit_handler.block_until_exit()
+        if msg is not None:
+            logging.getLogger().error(f'Exiting with error message: {msg}')
+        sys.exit(code)
 
 import json
 import sys

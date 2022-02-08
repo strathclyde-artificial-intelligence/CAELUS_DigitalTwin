@@ -8,6 +8,8 @@ from PySmartSkies.CVMS_API import CVMS_API
 from PySmartSkies.Credentials import DIS_Credentials, CVMS_Credentials
 from PySmartSkies.Session import Session
 import json
+
+from matplotlib.style import available
 from Dependencies.CAELUS_SmartSkies.PySmartSkies.Models.Product import Product
 from start import start_with_payload
 import time
@@ -83,13 +85,20 @@ def prompt_selection(options: dict):
         except Exception as e:
             print(e)
 
+import os
+
 def drone_selection():
-    drone_conf = {}
-    _type = prompt_selection({'quadrotor':0, 'fixed-wing':1})
-    drone_conf.update({'type':_type})
-    if _type == 1:
-        drone_conf.update({'tail_length':0.30})
-    return drone_conf
+    AVAILABLE_DRONES_DIR = './available_drones/'
+    drone_files = os.listdir()
+    while True:
+        try:
+            print("Choose one of the available drones:")
+            for i,drone in enumerate(drone_files):
+                print(f'{i}) {drone.split(".json")[0]}')
+            return f'{AVAILABLE_DRONES_DIR}/{drone_files[int(input(f"(0-{len(drone_files)}): "))]}'
+        except:
+            print(f"Please choose a number between 0 and {len(drone_files)}")
+            pass
 
 import datetime
 def make_operation(dis_api: DIS_API, product: Product):
@@ -105,17 +114,11 @@ def make_operation(dis_api: DIS_API, product: Product):
     time_begin_unix = time.time() + 2 * 60 + 60
     ops = dis_api.create_operation(deliveries[-1], drone, control_areas[-1], effective_time_begin.isoformat())
     op_details = dis_api.get_operation_details_with_delivery_id(deliveries[-1].id)
-    base_mass = get_drone_base_weight()
     op: Operation = ops[0]
     wps = op.get_waypoints()
 
-    total_mass = base_mass + product.per_item_weight
-    drone_config = drone_selection()
-    drone_config.update({'mass':total_mass})
-    drone_config.update(drone_params_from_weight(base_mass))
-
-    if total_mass * 9.81 > 0.7 * drone_config['max_thrust']:
-        print(f'[WARNING] Drone is too heavy -- there will be stabilty problems.')
+    payload_mass = product.per_item_weight
+    drone_config_file = drone_selection()
 
     # Takeoff location must be rounded up / increased slightly
     # To prevent collision of the drone with the bottom of the
@@ -140,7 +143,8 @@ def make_operation(dis_api: DIS_API, product: Product):
         "delivery_id": deliveries[-1].id,
         "thermal_model_timestep": 1,
         "aeroacoustic_model_timestep": 0.004,
-        "drone_config":drone_config,
+        "drone_config_file":drone_config_file,
+        "payload_mass":payload_mass,
         "g_acceleration": 9.81,
         "group_id":group_id,
         "effective_start_time": time_begin_unix,

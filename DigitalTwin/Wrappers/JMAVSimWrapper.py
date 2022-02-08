@@ -9,6 +9,7 @@ from ..Interfaces.Stoppable import Stoppable
 from ..Interfaces.StreamHandler import StreamHandler
 from ..PayloadModels import SimulatorPayload
 import tempfile
+import os
 
 class JMAVSimWrapper(threading.Thread):
 
@@ -54,7 +55,7 @@ class JMAVSimWrapper(threading.Thread):
         self.termination_complete.acquire()
         try:
             lon, lat, alt = self.__initial_lon_lat_alt
-            drone_conf = self.__simulator_payload.drone_config
+            drone_conf_file = self.__simulator_payload.drone_config_file
             
             commands = [
                 'java',
@@ -68,8 +69,8 @@ class JMAVSimWrapper(threading.Thread):
                 '250',
                 '-lockstep',
                 '-no-gui',
-                '-drone-config',
-                json.dumps(drone_conf),
+                '-drone-config-file',
+                drone_conf_file,
             ] + (['-weather-data', self.__weather_data_filepath] if self.__weather_data_filepath is not None else [])
 
             self.__process = subprocess.Popen(commands,
@@ -80,7 +81,9 @@ class JMAVSimWrapper(threading.Thread):
                     'PX4_HOME_LAT':str(lat),
                     'PX4_HOME_LON':str(lon),
                     'PX4_HOME_ALT':str(alt),
-                    'PX4_LANDING_HEIGHT':str(self.__simulator_payload.final_lon_lat_alt[-1])
+                    'PX4_LANDING_HEIGHT':str(self.__simulator_payload.final_lon_lat_alt[-1]),
+                    'PAYLOAD_MASS':str(self.__simulator_payload.payload_mass),
+                    'AVAILABLE_DRONES_FOLDER': os.path.abspath('../../available_drones')
                 }
             )
             self.__new_stream_available('sim_stdout', self.__process.stdout)
