@@ -14,7 +14,7 @@ class KeyNotFoundException(Exception):
 
 def get_config_from_file(fname):
     try:
-        with open(fname, 'r') as f:
+        with open(f'./available_drones/{fname}', 'r') as f:
             complete_config = json.loads(f.read())
             return complete_config
     except Exception as e:
@@ -80,3 +80,4 @@ class SimulatorPayload(Unpackable):
         self.final_lon_lat_alt: Tuple[float, float, float] = get(config_dict, 'final_lon_lat_alt')
         self.aeroacoustic_model_timestep: float = get(config_dict, 'aeroacoustic_model_timestep')
         self.payload_mass = get(config_dict, 'payload_mass')
+        self.airframe_id = self.drone_config_full['px4_airframe_reference']

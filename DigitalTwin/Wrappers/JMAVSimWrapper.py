@@ -1,19 +1,16 @@
-import json
 import threading
 import subprocess
 import logging
-import signal
 from time import sleep
 from typing import Optional
 from ..Interfaces.Stoppable import Stoppable
 from ..Interfaces.StreamHandler import StreamHandler
 from ..PayloadModels import SimulatorPayload
-import tempfile
 import os
 
 class JMAVSimWrapper(threading.Thread):
 
-    def __init__(self, simulator_jar_file_location, initial_lon_lat_alt, simulator_payload: SimulatorPayload, stream_handler: Optional[StreamHandler] = None, logger=logging.getLogger(__name__), weather_data_filepath=None):
+    def __init__(self, simulator_jar_file_location, initial_lon_lat_alt, simulator_payload: SimulatorPayload, stream_handler: Optional[StreamHandler] = None, logger=logging.getLogger(), weather_data_filepath=None):
         super().__init__()
         self.name = 'JMAVSimWrapper'
         self.__simulator_payload: SimulatorPayload = simulator_payload
@@ -72,7 +69,7 @@ class JMAVSimWrapper(threading.Thread):
                 '-drone-config-file',
                 drone_conf_file,
             ] + (['-weather-data', self.__weather_data_filepath] if self.__weather_data_filepath is not None else [])
-
+            
             self.__process = subprocess.Popen(commands,
                 cwd=self.__sim_folder,
                 stdout=subprocess.PIPE,
@@ -83,12 +80,14 @@ class JMAVSimWrapper(threading.Thread):
                     'PX4_HOME_ALT':str(alt),
                     'PX4_LANDING_HEIGHT':str(self.__simulator_payload.final_lon_lat_alt[-1]),
                     'PAYLOAD_MASS':str(self.__simulator_payload.payload_mass),
-                    'AVAILABLE_DRONES_FOLDER': os.path.abspath('../../available_drones')
+                    'AVAILABLE_DRONES_DIR': os.path.abspath('./available_drones')
                 }
             )
             self.__new_stream_available('sim_stdout', self.__process.stdout)
             while not self.__should_stop and self.__process.poll() is None:
+                # If process fails to start at all, there will be a silent fail!
                 sleep(1)
+            self.__logger.warn('Simulator thread spontaneously exited!')
         except Exception as e:
             self.__logger.error(e)
         finally:

@@ -88,14 +88,14 @@ def prompt_selection(options: dict):
 import os
 
 def drone_selection():
-    AVAILABLE_DRONES_DIR = './available_drones/'
-    drone_files = os.listdir()
+    AVAILABLE_DRONES_DIR = './available_drones'
+    drone_files = os.listdir(AVAILABLE_DRONES_DIR)
     while True:
         try:
             print("Choose one of the available drones:")
             for i,drone in enumerate(drone_files):
                 print(f'{i}) {drone.split(".json")[0]}')
-            return f'{AVAILABLE_DRONES_DIR}/{drone_files[int(input(f"(0-{len(drone_files)}): "))]}'
+            return f'{drone_files[int(input(f"(0-{len(drone_files)}): "))]}'
         except:
             print(f"Please choose a number between 0 and {len(drone_files)}")
             pass

@@ -24,7 +24,7 @@ def check_exported_px4():
             logger.error(f'You must export your local copy of the CAELUS px4 fork folder (export PX4_ROOT_FOLDER=<px4 folder>)')
             exit(-1)
 
-def start_with_payload(payload, headless=True):
+def start_with_payload(payload, headless=False):
     check_exported_px4()
 
     print('Staring simulation...')

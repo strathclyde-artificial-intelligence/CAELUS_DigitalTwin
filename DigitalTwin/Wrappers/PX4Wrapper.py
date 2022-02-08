@@ -12,7 +12,7 @@ from ..error_codes import *
 
 class PX4Wrapper(threading.Thread):
 
-    def __init__(self, px4_root_folder_location, initial_lon_lat_alt, drone_type: int, stream_handler: Optional[StreamHandler] = None, logger=logging.getLogger(__name__)):
+    def __init__(self, px4_root_folder_location, initial_lon_lat_alt, airframe_id: str, stream_handler: Optional[StreamHandler] = None, logger=logging.getLogger(__name__)):
         super().__init__()
         self.name = 'PX4Wrapper'
         self.__should_stop = False
@@ -23,7 +23,7 @@ class PX4Wrapper(threading.Thread):
         self.__stream_handler = stream_handler
         self.termination_complete = threading.Condition()
         self.__streams = set()
-        self.__drone_type = drone_type
+        self.__airframe_id = airframe_id
         self.daemon = False
 
     def __new_stream_available(self, stream_name, stream):
@@ -63,11 +63,10 @@ class PX4Wrapper(threading.Thread):
                     exit(triggers[k])
 
     def run(self):
-        QUAD = 0
         self.termination_complete.acquire()
         try:
             self.__process = subprocess.Popen(
-                f'make px4_sitl {"none_custom_quad" if self.__drone_type == QUAD else "none_avy_aera"}', 
+                f'make px4_sitl none_{self.__airframe_id}', 
                 shell=True,
                 cwd=self.__px4_folder,
                 stdout=subprocess.PIPE if self.__stream_handler is not None else None
