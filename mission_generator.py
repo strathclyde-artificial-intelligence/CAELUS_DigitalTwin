@@ -54,12 +54,6 @@ def make_order(cvms_api: CVMS_API, product, vendor):
     res = cvms_api.place_order(vendor, [product])
     o = cvms_api.checkout_orders(res)
     return o, product
-
-def drone_params_from_weight(base_w):
-    # Should be able to lift 3 times its weight
-    max_thrust = ((base_w * 3) * 9.81) / 4
-    max_torque = (0.05 * base_w) / 0.8 # proportional to default torque
-    return {'max_thrust': max_thrust, 'max_torque':max_torque, 'max_back_propeller_thrust':max_thrust * 2}
     
 
 def get_drone_base_weight():

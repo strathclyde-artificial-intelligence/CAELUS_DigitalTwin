@@ -90,9 +90,14 @@ To add a new drone configuration:
     "drone_config": {
         "mass": 2.0,
         "arm_length": 0.25,
-        "max_thrust": 8.0,
+        "max_rpm": 13000,
         "max_torque": 0.10,
         "drag_move": 0.01,
+        "propeller_specs": {
+            "diameter_cm": 18.0,
+            "pitch_cm": 10.0,
+            "blades_n": 2
+        },
         "max_back_propeller_thrust": 13.0,
         "Ixx": 0.023,
         "Iyy": 0.02,
