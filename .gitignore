@@ -10,3 +10,4 @@ Dependencies/PX4-Autopilot
 *.ini
 gui_layout.ini
 *.pickle
+mission.json
