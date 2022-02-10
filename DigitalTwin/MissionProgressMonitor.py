@@ -65,7 +65,7 @@ class MissionProgressMonitor(threading.Thread):
                     status = self.__dis_api.get_delivery_status_id(self.__delivery_id)
                     if status == ERR_STATUS:
                         break
-                    if (status >= CLEAR_TO_LAND_CODE and status not in EXCEPT_CODES) or status == MISSION_ABORTED:
+                    if (status >= CLEAR_TO_LAND_CODE and status not in EXCEPT_CODES) or status == MISSION_ABORTED or status == STATUS_READY_FOR_LANDING_CUSTOMER:
                         self.__logger.info("Received clear to land signal - Initiating land")
                         break
                     sleep(2)
