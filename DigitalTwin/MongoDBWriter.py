@@ -37,7 +37,13 @@ class MongoDBWriter(Thread, DBAdapter):
         self.__flush_every_seconds = flush_every_seconds
         self.__should_stop = False
         self.__logger = logging.getLogger()
+        self.__delete_old_data()
 
+    def __delete_old_data(self):
+        # Check if the database contains a document with the same operation id and group id
+        # if so delete it
+        self.__handle.delete_one({'operation_id':self.__operation_id, 'group_id': self.__group_id})
+        
     def __dump_buffer(self):
         self.__store()
         self.__data_buffer = {}
