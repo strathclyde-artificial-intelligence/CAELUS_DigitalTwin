@@ -24,7 +24,7 @@ from .Interfaces.Stoppable import Stoppable
 from .Probes.AnraTelemetryPush import AnraTelemetryPush
 from .Probes.Aeroacoustic import Aeroacoustic
 from .Probes.TelemetryDisplay import TelemetryDisplay
-from .Probes.QuadrotorBatteryDischarge import QuadrotorBatteryDischarge
+from .Probes.BatteryDischarge import BatteryDischarge
 from .Interfaces.TimeSeriesHandler import TimeSeriesHandler
 from .PayloadModels import ControllerPayload
 from .TelemetryFeedback import TelemetryFeedback
@@ -56,7 +56,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
 
     def __initialise_probes(self):
         self.__anra_probe = AnraTelemetryPush()
-        self.__battery_discharge_probe = QuadrotorBatteryDischarge(self.__writer, self.__controller_payload.drone_type)
+        self.__battery_discharge_probe = BatteryDischarge(self.__writer, self.__controller_payload.drone_type, self.__controller_payload.max_rpm, self.__controller_payload.propeller_specs)
         self.__thermal_model_probe = ThermalModelProbe(self.__writer, self.__weather_provider, integrate_every_us= self.__controller_payload.thermal_model_timestep * 1000000 )
         self.__aeroacoustic_probe = Aeroacoustic(self.__writer)
         self.__risk_assessment_probe = RiskAssessment(self.__writer)

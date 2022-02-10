@@ -7,7 +7,7 @@ def test_battery_discharge():
     assert round(vbatt, 4) == 23.9631
 
 def test_powertrain():
-    w,thrust,mod,qcon,idis = powertrain_ESC_Motor(0.5,  0.3, 22, 0.004)
+    w,thrust,mod,qcon,idis = powertrain_ESC_Motor()(0.5,  0.3, 22, 0.004)
     assert round(w,4) == 159.4633
     assert round(thrust,4) == 1.5766
     assert round(mod,4) == 0.2973

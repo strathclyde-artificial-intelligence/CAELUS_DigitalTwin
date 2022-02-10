@@ -1,15 +1,23 @@
 from typing import List, Tuple
+
+from numpy import power
 from .batt_disc import batt_disc
 from .power_train_esc_motor import powertrain_ESC_Motor
 from time import time
 
 class Battery():
-    def __init__(self, initial_voltage, initial_modulation_idx, motors_n = 4):
+
+    @staticmethod
+    def rpm_to_rads(rpm):
+        return rpm * 0.10472
+
+    def __init__(self, initial_voltage, initial_modulation_idx, max_motor_rpm, propeller_thrust_factor, motors_n = 4):
         self.__current_modulation_idxs = [initial_modulation_idx]*motors_n
         self.__current_voltage = initial_voltage
         self.__internal_time = 0
         self.__depth_of_discharge = 0
         self.__motors_n = motors_n
+        self.__power_train = powertrain_ESC_Motor(Battery.rpm_to_rads(max_motor_rpm), propeller_thrust_factor)
 
     def new_control(self, controls: List[float], dt_hr: float) -> Tuple[float, float]:
         controls = [max(v, 0) for v in controls]
@@ -22,7 +30,7 @@ class Battery():
         for i in range(self.__motors_n):
             c = controls[i]
             if c > 0:
-                _, _, new_mod_idx, capacity_extracted, current_demand = powertrain_ESC_Motor(
+                _, _, new_mod_idx, capacity_extracted, current_demand = self.__power_train(
                         controls[i],
                         self.__current_modulation_idxs[i],
                         self.__current_voltage,

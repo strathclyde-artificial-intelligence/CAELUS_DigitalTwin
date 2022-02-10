@@ -58,6 +58,8 @@ class ControllerPayload(Unpackable):
         self.cvms_auth_token: str = get(config_dict, 'cvms_auth_token')
         self.drone_config_file = get(config_dict, 'drone_config_file')
         self.drone_config_full = get_config_from_file(self.drone_config_file)
+        self.max_rpm = self.drone_config_full['drone_config']['max_rpm']
+        self.propeller_specs = self.drone_config_full['drone_config']['propeller_specs']
         self.drone_type: str = DRONE_TYPE_QUADROTOR if get(self.drone_config_full, 'type', default_if_not_found=DRONE_TYPE_QUADROTOR) == "QUADCOPTER" else DRONE_TYPE_FIXED_WING
         self.thermal_model_timestep: float = get(config_dict, 'thermal_model_timestep')
         self.weather_data_filepath: str = get(config_dict, 'weather_data_filepath', default_if_not_found=None)
