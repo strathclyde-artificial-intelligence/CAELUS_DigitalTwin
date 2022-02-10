@@ -27,7 +27,7 @@ getCt = lambda k, theta, e_d: \
     4/3 * k * theta * (1 - ((1 - e_d) ** 3)) - k * ((k * (1 + k))**0.5 - k**0.5) * (1 - ((1 - e_d) ** 2))
 
 getKf = lambda rho, prop_radius, e_d, c_t: \
-    1/16 * rho * pi * prop_radius**4 * e_d**4 * c_t
+    1/16 * rho * pi * prop_radius**4 * e_d**4 * c_t * (1.0 / 10000.0)
 
 getCdRatio = lambda prop_diameter: \
     bucketise(

@@ -48,7 +48,6 @@ def powertrain_ESC_Motor(max_omega = None, propeller_thrust_factor = 6.2e-5):
         Vm = m_init*v_batt # Voltage applied to motor
         w = (  (-Mt*Me/Rs) + np*csqrt( (Mt*Me/Rs)**2 - 4*km*(-Mt/Rs)*Vm ) )/(2*km)
         w_ref_r = w_ref * w_max # motor reference speed in rad/s
-
         tol = 1 # Tolerance value to allow convergence: rad/s
         mod = m_init
 
