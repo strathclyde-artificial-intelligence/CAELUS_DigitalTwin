@@ -88,3 +88,6 @@ GYRO = 'gyro'
 
 # Tells info about which mission items has just been reached (might be published multiple times!)
 MISSION_ITEM_REACHED = "mission_item_reached"
+
+# Subset of attitude quaternioin message - only contains q1, q2, q3, q4
+ATTITUDE_QUATERNION = "attitude_quaternion"

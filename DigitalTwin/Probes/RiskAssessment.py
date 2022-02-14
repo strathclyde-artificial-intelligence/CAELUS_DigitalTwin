@@ -18,7 +18,7 @@ class RiskAssessment(Subscriber):
             RiskAssessment.TIMESTAMP: None,
             RiskAssessment.POSITION: None, # LatLonAlt
             RiskAssessment.VELOCITY: None, # NED
-            RiskAssessment.ROTATION: None, # ypr?
+            RiskAssessment.ROTATION: None, # quaternions
             RiskAssessment.ROTATION_RATE: None # Gyro
         }
 
@@ -39,11 +39,12 @@ class RiskAssessment(Subscriber):
             self.__aggregated_data[RiskAssessment.TIMESTAMP] = datapoint.time_boot_ms / 1000.0 # ms to sec
         elif stream_id == VELOCITY:
             self.__aggregated_data[RiskAssessment.VELOCITY] = datapoint
-        elif stream_id == ATTITUDE:
+        elif stream_id == ATTITUDE_QUATERNION:
             self.__aggregated_data[RiskAssessment.ROTATION] = {
-                'yaw': datapoint.yaw,
-                'pitch': datapoint.pitch,
-                'roll': datapoint.roll
+                'q1': datapoint.q1,
+                'q2': datapoint.q2,
+                'q3': datapoint.q3,
+                'q4': datapoint.q4
             }
         elif stream_id == GYRO:
             self.__aggregated_data[RiskAssessment.ROTATION_RATE] = {
@@ -66,4 +67,4 @@ class RiskAssessment(Subscriber):
             self.__last_publish_time = data['timestamp']
                     
     def subscribes_to_streams(self):
-        return [SYSTEM_TIME, VELOCITY, ATTITUDE, GLOBAL_FRAME, GYRO]
+        return [SYSTEM_TIME, VELOCITY, ATTITUDE_QUATERNION, GLOBAL_FRAME, GYRO]

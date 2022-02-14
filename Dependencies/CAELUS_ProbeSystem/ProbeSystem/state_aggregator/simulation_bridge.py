@@ -67,3 +67,4 @@ class SimulationBridge():
         self.system.add_attribute_listener('system_time', lambda _self,name, val: self.new_datapoint(_self, name, val))
         self.system.add_attribute_listener('gyro', lambda _self,name, val: self.new_datapoint(_self, name, val))
         self.system.add_attribute_listener('mission_item_reached', lambda _self,name, val: self.new_datapoint(_self, name, val))
+        self.system.add_attribute_listener('attitude_quaternion', lambda _self,name, val: self.new_datapoint(_self, name, val))

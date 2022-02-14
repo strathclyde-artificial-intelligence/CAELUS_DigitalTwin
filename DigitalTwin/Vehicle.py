@@ -65,6 +65,26 @@ class AttitudeSpeed(object):
         """
         return f"ATTITUDE: rollspeed={self.rollspeed}, pitchspeed={self.pitchspeed}, yawspeed={self.yawspeed}"
 
+class AttitudeQuaternion(object):
+    """
+    Mavlink standard message, stnadard definition here: https://mavlink.io/en/messages/common.html#ATTITUDE_QUATERNION
+    q1	float		Quaternion component 1, w (1 in null-rotation)
+    q2	float		Quaternion component 2, x (0 in null-rotation)
+    q3	float		Quaternion component 3, y (0 in null-rotation)
+    q4	float		Quaternion component 4, z (0 in null-rotation)
+
+    """
+    def __init__(self, q1=None, q2=None, q3=None, q4=None):
+        self.q1 = q1
+        self.q2 = q2
+        self.q3 = q3
+        self.q4 = q4
+        
+    def __str__(self):
+        """
+        String representation used to print the Quaternion object.
+        """
+        return f"ATTITUDE_QUATERNION: q1={self.q1}, q2={self.q2}, q3={self.q3}, q4={self.q4}"
 
 class Vehicle(DronekitVehicle):
 
@@ -98,11 +118,17 @@ class Vehicle(DronekitVehicle):
             self._attitude_speed.pitchspeed=message.pitchspeed
             self._attitude_speed.yawspeed=message.yawspeed
             self.notify_attribute_listeners('gyro', self._attitude_speed) 
-
+        
+        self._attitude_quaternion = AttitudeQuaternion()
         @self.on_message('MISSION_ITEM_REACHED')
         def listener(self, name, message):
             self.__latest_wp_reached = message.seq
             self.notify_attribute_listeners('mission_item_reached', self.__latest_wp_reached) 
+
+        @self.on_message('ATTITUDE_QUATERNION')
+        def listener(self, name, message):
+            self._attitude_quaternion = AttitudeQuaternion(q1=message.q1, q2=message.q2, q3=message.q3, q4=message.q4)
+            self.notify_attribute_listeners('attitude_quaternion', self._attitude_quaternion)
 
     def prepare_for_mission(self, mission_items_n):
 
