@@ -4,9 +4,9 @@
     "px4_airframe_reference": "custom_evtolfw_medium",
     "type": "EVTOL_FW",
     "aerodynamics": {
-        "wing_span": 2.1,
-        "wing_area": 0.8,
-        "mean_aerodynamic_chord": 0.357,
+        "wing_span": 1.5,
+        "wing_area": 0.51,
+        "mean_aerodynamic_chord": 0.3085,
         "m_CL_0": 0.0389,
         "m_CL_alpha": 3.2684,
         "m_CL_delta_e": 0.7237,
@@ -42,20 +42,20 @@
         "m_Cn_r": -0.0192
     },
     "drone_config": {
-        "mass": 2.9,
-        "arm_length": 0.25,
+        "mass": 1.9,
+        "arm_length": 0.2,
         "max_rpm": 13000,
         "max_torque": 0.10,
-        "drag_move": 0.01,
+        "drag_move": 0.027,
         "propeller_specs": {
             "diameter_cm": 18.0,
             "pitch_cm": 10.0,
             "blades_n": 2
         },
-        "Ixx": 0.335,
-        "Iyy": 0.14,
-        "Izz": 0.4,
-        "Ixz": -0.029,
-        "Izx": -0.029
+        "Ixx": 0.179,
+        "Iyy": 0.08,
+        "Izz": 0.2165,
+        "Ixz": -0.0115,
+        "Izx": -0.0115
     }
 }

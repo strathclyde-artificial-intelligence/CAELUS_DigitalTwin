@@ -43,11 +43,11 @@
         "m_Cn_r": -0.0192
     },
     "drone_config": {
-        "mass": 2.0,
+        "mass": 0.9,
         "arm_length": 0.25,
         "max_rpm": 13000,
         "max_torque": 0.10,
-        "drag_move": 0.01,
+        "drag_move": 0.012,
         "propeller_specs": {
             "diameter_cm": 18.0,
             "pitch_cm": 10.0,

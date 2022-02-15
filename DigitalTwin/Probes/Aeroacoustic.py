@@ -69,6 +69,7 @@ class Aeroacoustic(Subscriber):
 
     def pwm_to_rps(self, pwm):
         # THIS IS JMAVSim's ESC
+        # TODO: replace literal 9 with max RPM
         new_pwms = [0] * Aeroacoustic.ROTOR_N
         for i in range(len(pwm)):
             new_pwms[i] = self.__last_pwms[i] + (pwm[i] - self.__last_pwms[i]) * (1.0 - E ** (-0.004 / 0.005)) 
