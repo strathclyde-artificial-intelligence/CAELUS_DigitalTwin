@@ -11,13 +11,14 @@ from DigitalTwin.Vehicle import Vehicle
 
 class Aeroacoustic(Subscriber):
     ROTOR_N = 5
-    def __init__(self, writer: DBAdapter):
+    def __init__(self, max_rpm: float, writer: DBAdapter):
         super().__init__()
         self.lat_lon_alt = None
         self.rotors_speed = None
         self.attitude = None
         self.time_us = None
         self.__last_time = 0
+        self.__max_rpm = max_rpm
         self.rows = []
         self.__last_pwms = [0] * Aeroacoustic.ROTOR_N
         self.__drone_id = None
@@ -74,7 +75,7 @@ class Aeroacoustic(Subscriber):
         for i in range(len(pwm)):
             new_pwms[i] = self.__last_pwms[i] + (pwm[i] - self.__last_pwms[i]) * (1.0 - E ** (-0.004 / 0.005)) 
         self.__last_pwms = new_pwms
-        return [pwm * 9 for pwm in new_pwms]
+        return [pwm * self.__max_rpm for pwm in new_pwms]
 
     def store_row(self):
         if self.attitude is not None and self.lat_lon_alt is not None and self.rotors_speed is not None and self.time_us is not None:
