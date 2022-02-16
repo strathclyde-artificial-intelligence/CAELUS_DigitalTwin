@@ -159,6 +159,7 @@ def mission_generator(cvms, dis):
         pp_vendors_and_products(vs, ps)
         s = input("Vendor number - Product number: ")
         chosen_vendor, chosen_product = parse_product_and_vendor(s, vs, ps)
+        print(f'Chosen vendor: {chosen_vendor}')
         order, product = make_order(cvms,chosen_product, chosen_vendor)
         if order is not None and order['result']:
             print(f"Order successful ({order})")
