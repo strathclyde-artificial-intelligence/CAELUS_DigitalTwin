@@ -65,7 +65,6 @@ class JMAVSimWrapper(threading.Thread):
                 '-r',
                 '250',
                 '-lockstep',
-                '-no-gui',
                 '-drone-config-file',
                 drone_conf_file,
             ] + (['-weather-data', self.__weather_data_filepath] if self.__weather_data_filepath is not None else [])

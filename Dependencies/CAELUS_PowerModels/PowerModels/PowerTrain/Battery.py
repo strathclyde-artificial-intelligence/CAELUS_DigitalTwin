@@ -17,7 +17,7 @@ class Battery():
         self.__internal_time = 0
         self.__depth_of_discharge = 0
         self.__motors_n = motors_n
-        self.__power_train = powertrain_ESC_Motor(Battery.rpm_to_rads(max_motor_rpm), propeller_thrust_factor)
+        self.__power_train = powertrain_ESC_Motor(max_motor_rpm, propeller_thrust_factor)
 
     def new_control(self, controls: List[float], dt_hr: float) -> Tuple[float, float]:
         controls = [max(v, 0) for v in controls]

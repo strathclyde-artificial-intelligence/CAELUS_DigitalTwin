@@ -28,22 +28,55 @@ from typing import Tuple
 #   
 #   All motors (including cruise motor) are identical
 
+def compute_w_max(Mt, Me, Rs, np, Vmax, km):
+    return (((-Mt * Me / Rs) + np*csqrt((Mt * Me / Rs)**2 - 4 * km * -Mt / Rs * Vmax)) / (2 * km)).real
+
+# Binary search for Mt values such that compute_w_max(Mt, Me, Rs, np, Vmax, km) = max_omega
+def binary_search(Mt, Rs, np, Vmax, km, max_omega):
+    Mt_low = Mt*0.0001
+    Mt_high = Mt*10000
+    while True:
+        Mt_mid = (Mt_low + Mt_high)/2
+        
+        current_w_max = compute_w_max(Mt_mid, Mt_mid, Rs, np, Vmax, km)
+        if abs(current_w_max - max_omega) < 10:
+            break
+        elif current_w_max > max_omega:
+            Mt_high = Mt_mid
+        else:
+            Mt_low = Mt_mid
+    return Mt_mid
+
 def powertrain_ESC_Motor(max_omega = None, propeller_thrust_factor = 6.2e-5):
+        
+    n_conv = 90 #   ESC Converter Efficiency
+    Nseries = 6 #   Number of battery cells in series
+    Vcell_max = 4.2 #   %   Maximum cell voltage
+    Vmax = Nseries*Vcell_max #   Maximum battery voltage
+
+    kt = propeller_thrust_factor # Thrust Factor: Thrust = kt*omega**2 (N)
+    km = kt/42 # Motor Coefficient: Torque = km*omega**2   (Nm)
+    np = 3 # Number of poles on the motor 
+    Me = 1/(490*np*(pi/30)) # EMF constant: (V / rad/s)
+    Mt = Me # Torque constant: (Nm/Amp)
+    Rs = 0.10 # Motor resistance: (ohm)
+
+    # Me and Mt need to be corrected
+    # Do a binary search for the correct Me such that compute_w_max(Mt, Me, Rs, np, Vmax, km) = max_omega
+
+    print(f'Running binary search to determine a value of Mt such that compute_w_max(Mt, Me, Rs, np, Vmax, km) ~= {max_omega}')
+    Mt = binary_search(Mt, Rs, np, Vmax, km, max_omega)
+    Me = Mt
+    w_max = compute_w_max(Mt, Me, Rs, np, Vmax, km)
+
+    print(f'Power model initialised with:')
+    print(f'\t propeller thrust factor = {propeller_thrust_factor}')
+    print(f'\t max_omega = {max_omega}')
+    print(f'\t w_max = {w_max}')
+    print(f'\t Mt = {Mt}')
+    print(f'\t km = {km}')
+
     def _powertrain_ESC_Motor(w_ref, m_init, v_batt, dT) -> Tuple[float, float, float, float, float]:
-        n_conv = 90 #   ESC Converter Efficiency
-        Nseries = 6 #   Number of battery cells in series
-        Vcell_max = 4.2 #   %   Maximum cell voltage
-        Vmax = Nseries*Vcell_max #   Maximum battery voltage
-
-        kt = propeller_thrust_factor # Thrust Factor: Thrust = kt*omega**2 (N)
-        km = kt/42 # Motor Coefficient: Torque = km*omega**2   (Nm)
-        np = 3 # Number of poles on the motor       (Ask Avy?)  
-        Me = 1/(490*np*(pi/30)) # EMF constant: (V / rad/s)
-        Mt = Me # Torque constant: (Nm/Amp)
-        Rs = 0.10 # Motor resistance: (ohm)
-        Im = 0.0007 # Motor and Propeller inertia
-
-        w_max = ((-Mt * Me / Rs) + np*csqrt((Mt * Me / Rs)**2 - 4 * km * -Mt / Rs * Vmax)) / (2 * km) if max_omega is None else max_omega
 
         Vm = m_init*v_batt # Voltage applied to motor
         w = (  (-Mt*Me/Rs) + np*csqrt( (Mt*Me/Rs)**2 - 4*km*(-Mt/Rs)*Vm ) )/(2*km)
@@ -62,7 +95,7 @@ def powertrain_ESC_Motor(max_omega = None, propeller_thrust_factor = 6.2e-5):
                 print(f"Broke out after 30000 loops (control {w_ref} - {w.real}, {abs(w_ref_r)})")
                 break
             
-        w = w.real/9.5492965964254
+        w = w.real / 9.54
         thrust = kt * pow(w, 2)
         Torque = km * pow(w, 2)
 

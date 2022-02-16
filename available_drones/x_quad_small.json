@@ -10,7 +10,7 @@
         "max_torque": 0.05,
         "drag_move": 0.01,
         "propeller_specs": {
-            "diameter_cm": 18.0,
+            "diameter_cm": 15.0,
             "pitch_cm": 10.0,
             "blades_n": 3
         },
