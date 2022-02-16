@@ -49,8 +49,8 @@
         "drag_move": 0.027,
         "propeller_specs": {
             "diameter_cm": 18.0,
-            "pitch_cm": 10.0,
-            "blades_n": 2
+            "pitch_cm": 12.0,
+            "blades_n": 3
         },
         "Ixx": 0.179,
         "Iyy": 0.08,

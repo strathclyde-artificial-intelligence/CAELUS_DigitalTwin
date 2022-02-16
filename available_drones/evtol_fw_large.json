@@ -48,8 +48,8 @@
         "max_torque": 0.10,
         "propeller_specs": {
             "diameter_cm": 18.0,
-            "pitch_cm": 10.0,
-            "blades_n": 2
+            "pitch_cm": 13.0,
+            "blades_n": 3
         },
         "drag_move": 0.028,
         "Ixx": 0.335,
