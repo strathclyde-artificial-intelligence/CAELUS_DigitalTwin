@@ -1,6 +1,4 @@
 from typing import List, Tuple
-
-from numpy import power
 from .batt_disc import batt_disc
 from .power_train_esc_motor import powertrain_ESC_Motor
 from time import time

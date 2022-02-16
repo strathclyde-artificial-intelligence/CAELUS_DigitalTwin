@@ -47,7 +47,7 @@ def binary_search(Mt, Rs, np, Vmax, km, max_omega):
             Mt_low = Mt_mid
     return Mt_mid
 
-def powertrain_ESC_Motor(max_omega = None, propeller_thrust_factor = 6.2e-5):
+def powertrain_ESC_Motor(max_omega, propeller_thrust_factor = 6.2e-5):
         
     n_conv = 90 #   ESC Converter Efficiency
     Nseries = 6 #   Number of battery cells in series

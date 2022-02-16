@@ -7,9 +7,11 @@ def test_battery_discharge():
     assert round(vbatt, 4) == 23.9631
 
 def test_powertrain():
-    w,thrust,mod,qcon,idis = powertrain_ESC_Motor()(0.5,  0.3, 22, 0.004)
-    assert round(w,4) == 159.4633
-    assert round(thrust,4) == 1.5766
+    max_rpm = 13000
+    thrust_factor = 6e-7
+    w,thrust,mod,qcon,idis = powertrain_ESC_Motor(max_rpm, thrust_factor)(0.5,  0.3, 22, 0.004)
+    assert round(w,4) == 681.4062
+    assert round(thrust,4) == .2786
     assert round(mod,4) == 0.2973
-    assert round(qcon,4) == 0.0208
-    assert round(idis,4) == 5.7784
+    assert round(qcon,4) == 0.0212
+    assert round(idis,4) == 5.8835
