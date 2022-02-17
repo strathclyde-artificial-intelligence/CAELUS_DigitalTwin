@@ -9,6 +9,8 @@ import numpy as np
 from DigitalTwin.Interfaces.DBAdapter import DBAdapter
 from DigitalTwin.Vehicle import Vehicle
 
+RPM_TO_RAD = 0.10472
+
 class Aeroacoustic(Subscriber):
     ROTOR_N = 5
     def __init__(self, max_rpm: float, writer: DBAdapter):
@@ -75,7 +77,7 @@ class Aeroacoustic(Subscriber):
         for i in range(len(pwm)):
             new_pwms[i] = self.__last_pwms[i] + (pwm[i] - self.__last_pwms[i]) * (1.0 - E ** (-0.004 / 0.005)) 
         self.__last_pwms = new_pwms
-        return [pwm * self.__max_rpm for pwm in new_pwms]
+        return [pwm * self.__max_rpm * RPM_TO_RAD for pwm in new_pwms]
 
     def store_row(self):
         if self.attitude is not None and self.lat_lon_alt is not None and self.rotors_speed is not None and self.time_us is not None:
