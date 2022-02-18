@@ -3,6 +3,9 @@
     "name": "EVTOL FW Large",
     "px4_airframe_reference": "custom_evtolfw_large",
     "type": "EVTOL_FW",
+    "px4_airframe_parameters": {
+        "FW_THR_CRUISE": 0.54
+    },
     "aerodynamics": {
         "wing_span": 2.1,
         "wing_area": 0.8,

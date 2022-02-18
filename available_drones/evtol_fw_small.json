@@ -2,7 +2,9 @@
     "id": "evtol_fw_small",
     "name": "EVTOL FW Small",
     "px4_airframe_reference": "custom_evtolfw_small",
-    "px4_airframe_parameters": {},
+    "px4_airframe_parameters": {
+        "FW_THR_CRUISE": 0.62
+    },
     "type": "EVTOL_FW",
     "aerodynamics": {
         "wing_span": 0.9,
@@ -50,7 +52,7 @@
         "drag_move": 0.012,
         "propeller_specs": {
             "diameter_cm": 18.0,
-            "pitch_cm": 10.0,
+            "pitch_cm": 13.0,
             "blades_n": 3
         },
         "Ixx": 0.023,

@@ -3,6 +3,9 @@
     "name": "EVTOL FW Medium",
     "px4_airframe_reference": "custom_evtolfw_medium",
     "type": "EVTOL_FW",
+    "px4_airframe_parameters": {
+        "FW_THR_CRUISE": 0.60
+    },
     "aerodynamics": {
         "wing_span": 1.5,
         "wing_area": 0.51,
@@ -49,7 +52,7 @@
         "drag_move": 0.027,
         "propeller_specs": {
             "diameter_cm": 18.0,
-            "pitch_cm": 12.0,
+            "pitch_cm": 13.0,
             "blades_n": 3
         },
         "Ixx": 0.179,

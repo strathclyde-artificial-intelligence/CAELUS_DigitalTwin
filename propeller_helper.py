@@ -39,16 +39,11 @@ def inch_to_cm(inch):
     return inch * 2.54
 
 diameters_cm = [
-    10,
-    11,
-    12,
-    13,
+18
 ]
 
 pitches_cm = [
-    10,
-    11,
-    12
+    13
 ]
 
 def generate_propeller_combinations(diameters_cm, pitches_cm, blades_n=3):
