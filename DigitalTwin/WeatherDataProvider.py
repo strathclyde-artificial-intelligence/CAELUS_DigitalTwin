@@ -40,6 +40,7 @@ class WeatherDataProvider():
             for lat, lon, _ in self.__controller_payload.waypoints:
                 self.__logger.info(f'Requesting weather for lat: {lat} lon: {lon}')
                 data = self.__dis_api.get_weather_data(lat, lon)
+                print(f'\t {data}')
                 if data:
                     temp, wind = data['temperature'], data['wind_vector']
                     weather_data['wind'].append(wind)

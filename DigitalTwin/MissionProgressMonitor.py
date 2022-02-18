@@ -169,7 +169,8 @@ class MissionProgressMonitor(threading.Thread):
     def run(self):
         while True:
             try:        
-                if not self.__vehicle.armed and not self.__landing_wp_reached and self.__has_taken_off:
+                vehicle_alt = self.__vehicle.location.global_relative_frame.alt
+                if (not self.__vehicle.armed or vehicle_alt < 0.1) and not self.__landing_wp_reached and self.__has_taken_off:
                     ExitHandler.shared().issue_exit_with_code_and_message(PREMATURE_LANDING, "Premature landing detected!")
                 new_waypoint = self.__vehicle.commands.next
                 if self.__last_wp != new_waypoint:
