@@ -54,7 +54,7 @@ class Aeroacoustic(Subscriber):
 
     def get_rotor_speed(self, datapoint):
         rps = self.pwm_to_rps([c if c > 0 else 0 for c in datapoint.controls][:5])
-        self.rotors_speed = [s * 60 for s in rps]
+        self.rotors_speed = rps
         self.time_us = datapoint.time_usec
 
     def store_lat_lon_alt(self, datapoint):
