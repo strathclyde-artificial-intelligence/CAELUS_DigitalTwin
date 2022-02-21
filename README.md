@@ -42,12 +42,14 @@ To add a new drone configuration:
 1. Add a `.json` file in the `available_drones` folder with the example specified below:
 
 ```json
-
 {
     "id": "evtol_fw_large",
     "name": "EVTOL FW Large",
     "px4_airframe_reference": "custom_evtolfw_large",
     "type": "EVTOL_FW",
+    "px4_airframe_parameters": {
+        "FW_THR_CRUISE": 0.54
+    },
     "aerodynamics": {
         "wing_span": 2.1,
         "wing_area": 0.8,
@@ -104,7 +106,6 @@ To add a new drone configuration:
         "Izx": -0.029
     }
 }
-
 ```
 
 **NOTE**: "px4_airframe_parameters" contains non-standard parameters for the new airframe. Dependeing on the drone type there are some defaults specified in the PX4 fork airframe files `4200_custom_quad` and `4201_custom_evtol`.
