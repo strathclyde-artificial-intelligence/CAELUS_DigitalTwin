@@ -1,4 +1,3 @@
-from typing import final
 from dotenv import load_dotenv
 from os import environ
 from DigitalTwin.PayloadModels import ControllerPayload, SimulatorPayload

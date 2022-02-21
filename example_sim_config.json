@@ -36,6 +36,5 @@
     "group_id": "test_2",
     "effective_start_time": 1645197638.302293,
     "initial_lon_lat_alt": [-4.235670388, 55.8640195695, 67.55272782688205],
-    "final_lon_lat_alt": [-4.435110004, 55.8690899995, 27.125876257238644],
-    "weather_data_filepath": "/Users/h3xept/Desktop/CAELUS_DigitalTwin/example_weather_data.json"
+    "final_lon_lat_alt": [-4.435110004, 55.8690899995, 27.125876257238644]
 }
