@@ -17,4 +17,6 @@ echo "[⚙️] Building JMAVSim"
 (cd $PX4_DIR; git submodule update --init --recursive --remote)
 (cd $PX4_DIR/Tools/jMAVSim/; ant create_run_jar copy_res)
 
+echo "[⚙️] Patching PX4-Autopilot with custom vehicles"
+yes | python3 sync_custom_px4_vehicles.py
 echo -e "Make sure to issue '${RED}export PX4_ROOT_FOLDER=$PX4_DIR${NC}' before starting the digital twin."
