@@ -49,7 +49,7 @@
         "arm_length": 0.2,
         "max_rpm": 13000,
         "max_torque": 0.10,
-        "drag_move": 0.027,
+        "drag_move": 0.016,
         "propeller_specs": {
             "diameter_cm": 18.0,
             "pitch_cm": 13.0,

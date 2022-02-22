@@ -38,7 +38,7 @@ class MissionProgressMonitor(threading.Thread):
         self.__dis_api = DIS_API(smartskies_session) if smartskies_session is not None else None
         self.name = 'Mission Progress Monitor'
         self.__status_steps = {
-            0: [STATUS_DELIVERY_REQUESTED,STATUS_DELIVERY_REQUEST_ACCEPTED, STATUS_READY_FOR_DELIVERY],
+            0: [STATUS_READY_FOR_DELIVERY],
             3: [STATUS_READY_FOR_LANDING_CUSTOMER, STATUS_CLEAR_TO_LAND_CUSTOMER, STATUS_LANDING_CUSTOMER, STATUS_READY_FOR_PACKAGE_PICKUP, STATUS_PACKAGE_DELIVERED]
         }
         self.__delivery_id = delivery_id
@@ -107,8 +107,6 @@ class MissionProgressMonitor(threading.Thread):
                     self.__logger.info(f'Sending {i}')
                     if i == STATUS_CLEAR_TO_LAND_CUSTOMER:
                         flag = self.__dis_api.delivery_status_update(self.__delivery_id, i)
-                    else:
-                        flag = self.__dis_api.delivery_status_update(self.__delivery_id, i)
                     if flag:
                         self.__logger.info(f'Sent Smartskies Update: {i}')
                     time.sleep(1)
@@ -122,7 +120,7 @@ class MissionProgressMonitor(threading.Thread):
         self.__logger.info(f'Mission status updated: {self.__mission_status_to_string(status)}')
         self.publish_smartskies_status_update(status)
         if self.__writer is not None:
-            wp_n = max(0, self.__vehicle.commands.next-1) if not (status == MissionProgressMonitor.LANDING_COMPLETE) else self.__mission_items_n
+            wp_n = max(0, self.__vehicle.commands.next) if not (status == MissionProgressMonitor.LANDING_COMPLETE) else self.__mission_items_n
             self.__writer.store({MissionProgressMonitor.DB_MISSION_STATUS:f"{wp_n}/{self.__mission_items_n}"}, series=False)
         if status == MissionProgressMonitor.LANDING_COMPLETE:
             if self.__controller is None:

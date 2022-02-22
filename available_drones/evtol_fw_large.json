@@ -54,7 +54,7 @@
             "pitch_cm": 13.0,
             "blades_n": 3
         },
-        "drag_move": 0.028,
+        "drag_move": 0.018,
         "Ixx": 0.335,
         "Iyy": 0.14,
         "Izz": 0.4,
