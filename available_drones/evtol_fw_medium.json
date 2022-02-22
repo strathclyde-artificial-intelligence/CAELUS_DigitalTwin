@@ -4,7 +4,10 @@
     "px4_airframe_reference": "custom_evtolfw_medium",
     "type": "EVTOL_FW",
     "px4_airframe_parameters": {
-        "FW_THR_CRUISE": 0.60
+        "FW_THR_CRUISE": 0.60,
+        "EKF2_ARSP_THR": 1,
+        "EKF2_FUSE_BETA": 1,
+        "WV_EN": 1
     },
     "aerodynamics": {
         "wing_span": 1.5,
@@ -49,7 +52,7 @@
         "arm_length": 0.2,
         "max_rpm": 13000,
         "max_torque": 0.10,
-        "drag_move": 0.016,
+        "drag_move": 0.027,
         "propeller_specs": {
             "diameter_cm": 18.0,
             "pitch_cm": 13.0,

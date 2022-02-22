@@ -4,7 +4,10 @@
     "px4_airframe_reference": "custom_evtolfw_large",
     "type": "EVTOL_FW",
     "px4_airframe_parameters": {
-        "FW_THR_CRUISE": 0.54
+        "FW_THR_CRUISE": 0.54,
+        "EKF2_ARSP_THR": 1,
+        "EKF2_FUSE_BETA": 1,
+        "WV_EN": 1
     },
     "aerodynamics": {
         "wing_span": 2.1,
@@ -54,7 +57,7 @@
             "pitch_cm": 13.0,
             "blades_n": 3
         },
-        "drag_move": 0.018,
+        "drag_move": 0.028,
         "Ixx": 0.335,
         "Iyy": 0.14,
         "Izz": 0.4,
