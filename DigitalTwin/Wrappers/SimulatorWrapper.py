@@ -32,7 +32,7 @@ class SimulatorWrapper(threading.Thread):
 
         self.__logger.info(f'Waiting for Simulator process to exit...')
         if self.__process is not None:
-            for t in range(timeout):
+            for t in range(2):
                 code = self.__process.poll()
                 if code is not None:
                     self.__logger.info(f'Process spontaneously exited with code {code}.')

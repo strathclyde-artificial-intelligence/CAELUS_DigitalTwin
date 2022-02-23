@@ -51,7 +51,8 @@ class PX4Wrapper(threading.Thread):
     def monitor_px4_output(self, stream):
         triggers = {
             'IGN MISSION_ITEM': MISSION_UPLOAD_FAIL,
-            'Operation timeout': MISSION_UPLOAD_FAIL
+            'Operation timeout': MISSION_UPLOAD_FAIL,
+            'poll timeout': PX4_SIM_DESYNC
         }
         t_keys = triggers.keys()
         if stream is None:
