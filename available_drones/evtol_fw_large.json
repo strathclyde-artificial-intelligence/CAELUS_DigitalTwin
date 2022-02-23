@@ -49,10 +49,10 @@
     "drone_config": {
         "mass": 2.0,
         "arm_length": 0.25,
-        "max_rpm": 13000,
+        "max_rpm": 15000,
         "max_torque": 0.10,
         "propeller_specs": {
-            "diameter_cm": 18.0,
+            "diameter_cm": 20.0,
             "pitch_cm": 13.0,
             "blades_n": 3
         },

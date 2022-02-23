@@ -25,10 +25,11 @@
     "thermal_model_timestep": 1,
     "aeroacoustic_model_timestep": 0.004,
     "drone_config_file": "evtol_fw_large.json",
-    "payload_mass": 2.0,
+    "payload_mass": 0.5,
     "g_acceleration": 9.81,
     "group_id": "verification",
     "effective_start_time": 1645627453.407094,
     "initial_lon_lat_alt": [-4.425421176, 55.9064512595, 38.59814081072844],
-    "final_lon_lat_alt": [-4.338128364, 55.86263611, 33.22157878695519]
+    "final_lon_lat_alt": [-4.338128364, 55.86263611, 33.22157878695519],
+    "weather_data_filepath": "./example_weather_data.json"
 }
