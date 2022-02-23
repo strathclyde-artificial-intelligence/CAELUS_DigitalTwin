@@ -3,7 +3,7 @@ import logging
 from typing import List, Tuple, Dict
 from PySmartSkies.Models.Drone import Drone
 
-from DigitalTwin.error_codes import JSON_READ_EC
+from DigitalTwin.error_codes import UNKNOWN_VEHICLE
 from .ExitHandler import ExitHandler
 
 KEY_NOT_FOUND = lambda k,d: f'Key {k} not found in dict'
@@ -20,7 +20,7 @@ def get_config_from_file(fname):
     except Exception as e:
         logging.getLogger().error('Error in reading drone config file')
         logging.getLogger().error(e)
-        ExitHandler.shared().issue_exit_with_code_and_message(JSON_READ_EC, f"Failed in reading drone configuration file '{fname}'")
+        ExitHandler.shared().issue_exit_with_code_and_message(UNKNOWN_VEHICLE, f"Failed in reading drone configuration file '{fname}'")
 
 def get(d, k, fail=False, default_if_not_found=None):
     if k not in d:
