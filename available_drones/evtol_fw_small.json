@@ -5,8 +5,7 @@
     "px4_airframe_parameters": {
         "FW_THR_CRUISE": 0.62,
         "EKF2_ARSP_THR": 1,
-        "EKF2_FUSE_BETA": 1,
-        "WV_EN": 1
+        "EKF2_FUSE_BETA": 1
     },
     "type": "EVTOL_FW",
     "aerodynamics": {
