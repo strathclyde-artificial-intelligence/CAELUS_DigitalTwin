@@ -30,7 +30,7 @@
     "delivery_id": "8a38316a-92ad-4320-8bbd-9fc3507c7353",
     "thermal_model_timestep": 1,
     "aeroacoustic_model_timestep": 0.004,
-    "drone_config_file": "evtol_fw_lar3ge.json",
+    "drone_config_file": "evtol_fw_large.json",
     "payload_mass": 0.25,
     "g_acceleration": 9.81,
     "group_id": "\u00f9",
