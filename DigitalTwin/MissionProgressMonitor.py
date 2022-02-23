@@ -149,7 +149,6 @@ class MissionProgressMonitor(threading.Thread):
         elif waypoint_n > 0:
             if self.__last_wp == 0:
                 self.publish_mission_status(MissionProgressMonitor.TAKEOFF_COMPLETE)
-                self.__has_taken_off = True
             self.publish_mission_status(MissionProgressMonitor.CRUISING)
         else:
             self.__logger.warn(f'Unrecognised waypoint number: {waypoint_n}')
@@ -171,6 +170,7 @@ class MissionProgressMonitor(threading.Thread):
                 if (not self.__vehicle.armed or vehicle_alt < 0.1) and not self.__landing_wp_reached and self.__has_taken_off:
                     ExitHandler.shared().issue_exit_with_code_and_message(PREMATURE_LANDING, "Premature landing detected!")
                 new_waypoint = self.__vehicle.commands.next
+                self.__has_taken_off = self.__has_taken_off if self.__has_taken_off else self.__vehicle.location.global_relative_frame.alt > 0.1
                 if self.__last_wp != new_waypoint:
                     self.__process_mission_status(new_waypoint)
                 time.sleep(1)
