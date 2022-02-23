@@ -5,7 +5,7 @@ from .Vehicle import Vehicle
 from dronekit import connect
 
 class VehicleConnectionManager(VehicleManager):
-    def __init__(self, vehicle_manager: VehicleManager = None, vehicle_addr = '127.0.0.1:14540', connection_timeout=40):
+    def __init__(self, vehicle_manager: VehicleManager = None, vehicle_addr = '127.0.0.1:14550', connection_timeout=40):
         print(self)
         self.__vehicle_addr = vehicle_addr
         self.__vehicle_manager = vehicle_manager
