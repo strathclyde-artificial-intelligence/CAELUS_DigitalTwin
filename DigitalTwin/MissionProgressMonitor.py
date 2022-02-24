@@ -107,11 +107,8 @@ class MissionProgressMonitor(threading.Thread):
                 items = self.__status_steps[status]
                 self.__logger.info(f'About to publish updates: {items}')
                 for i in items:
-                    flag = False
                     self.__logger.info(f'Sending {i}')
-                    if i == STATUS_CLEAR_TO_LAND_CUSTOMER:
-                        flag = self.__dis_api.delivery_status_update(self.__delivery_id, i)
-                    if flag:
+                    if self.__dis_api.delivery_status_update(self.__delivery_id, i):
                         self.__logger.info(f'Sent Smartskies Update: {i}')
                     time.sleep(1)
         except Exception as e:
