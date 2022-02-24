@@ -14,6 +14,7 @@ from Dependencies.CAELUS_SmartSkies.PySmartSkies.Models.Product import Product
 from start import start_with_payload
 import time
 import pickle
+from datetime import datetime
 
 def authenticate(cvms_credentials, dis_credentials):
     session = Session(cvms_credentials, dis_credentials)
@@ -94,9 +95,11 @@ def drone_selection():
             print(f"Please choose a number between 0 and {len(drone_files)}")
             pass
 
-import datetime
 def make_operation(dis_api: DIS_API, product: Product):
     deliveries, pilots, drones, control_areas = dis_api.get_requested_deliveries()
+    deliveries = sorted(deliveries, key=
+        lambda d: datetime.strptime(d['submit_time'].split('T')[1], '%H:%M:%S').time()
+    )
     if len(deliveries) == 0:
         print('Smartskies failed in creating delivery. Hospitals may be too far apart!')
         exit(-1)
