@@ -70,7 +70,8 @@ class PX4Wrapper(threading.Thread):
                 f'make px4_sitl none_{self.__airframe_id}', 
                 shell=True,
                 cwd=self.__px4_folder,
-                stdout=subprocess.PIPE# if self.__stream_handler is not None else None
+                stdout=subprocess.PIPE, # if self.__stream_handler is not None else None,
+                stderr=subprocess.STDOUT
             )
             output_monitor = Thread(target=self.monitor_px4_output, args=(self.__process.stdout,))
             output_monitor.name = 'PX4 Output Monitor'

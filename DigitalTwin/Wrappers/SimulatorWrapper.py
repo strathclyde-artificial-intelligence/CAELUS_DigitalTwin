@@ -54,7 +54,8 @@ class SimulatorWrapper(threading.Thread):
             self.__process = subprocess.Popen('./6dof',
                 cwd=self.__sim_folder,
                 shell=True,
-                stdout=subprocess.PIPE
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
             )
             self.__new_stream_available('sim_stdout', self.__process.stdout)
             while not self.__should_stop and self.__process.poll() is None:

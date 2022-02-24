@@ -137,10 +137,7 @@ class MissionProgressMonitor(threading.Thread):
         return self.__vehicle.groundspeed < max_allowed_groundspeed
 
     def __process_mission_status(self, waypoint_n):
-        if (self.__last_wp > 0 and waypoint_n == 0):
-            self.close_delivery_operation()
-            self.publish_mission_status(MissionProgressMonitor.LANDING_COMPLETE)
-        elif waypoint_n == 0:
+        if waypoint_n == 0:
             self.publish_mission_status(MissionProgressMonitor.TAKING_OFF)
         elif waypoint_n == self.__mission_items_n - 1:
             while not self.__landing_groundspeed():
@@ -171,13 +168,17 @@ class MissionProgressMonitor(threading.Thread):
         while True:
             try:        
                 vehicle_alt = self.__vehicle.location.global_relative_frame.alt
-                if (not self.__vehicle.armed or vehicle_alt < 0.1) and not self.__landing_wp_reached and self.__has_taken_off:
-                    ExitHandler.shared().issue_exit_with_code_and_message(PREMATURE_LANDING, "Premature landing detected!")
+                if (not self.__vehicle.armed or vehicle_alt < 0.1) and self.__has_taken_off:
+                    if (not self.__landing_wp_reached):
+                        ExitHandler.shared().issue_exit_with_code_and_message(PREMATURE_LANDING, "Premature landing detected!")
+                    else:
+                        self.close_delivery_operation()
+                        self.publish_mission_status(MissionProgressMonitor.LANDING_COMPLETE)
                 new_waypoint = self.__vehicle.commands.next
                 self.__has_taken_off = self.__has_taken_off if self.__has_taken_off else self.__vehicle.location.global_relative_frame.alt > 0.1
                 if self.__last_wp != new_waypoint:
                     self.__process_mission_status(new_waypoint)
-                time.sleep(1)
+                time.sleep(0.2)
             except Exception as e:
                 self.__logger.error('Error in main loop (Mission progress monitor):')
                 self.__logger.error(e)
