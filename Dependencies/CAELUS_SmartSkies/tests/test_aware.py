@@ -83,3 +83,9 @@ def test_get_celltowers():
     assert celltowers is not None
     celltowers = authenticated_api.get_aware_celltowers(point, _range)
     assert celltowers is not None
+
+def test_get_weather_data():
+    lat = -4.425421176
+    lon = 55.9064512595
+    weather_data = authenticated_api.get_weather_data(lat, lon)
+    assert type(weather_data) == dict
