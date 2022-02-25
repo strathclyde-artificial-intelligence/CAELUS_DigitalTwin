@@ -134,7 +134,7 @@ class MissionProgressMonitor(threading.Thread):
         return self.__vehicle.groundspeed < max_allowed_groundspeed
 
     def __process_mission_status(self, waypoint_n):
-        if waypoint_n == 0:
+        if waypoint_n == 0 and not self.__has_taken_off:
             self.publish_mission_status(MissionProgressMonitor.TAKING_OFF)
         elif waypoint_n == self.__mission_items_n - 1:
             while not self.__landing_groundspeed():
@@ -155,6 +155,7 @@ class MissionProgressMonitor(threading.Thread):
     def close_delivery_operation(self):
         # Mission must be aborted as there's no return leg for now
         self.__dis_api.abort_delivery(self.__delivery_id)
+        time.sleep(1) # Allow ANRA to sync
         self.__logger.info(f'Sending delivery end notification to SmartSkies (id: {self.__delivery_id})')
         self.__dis_api.end_or_close_delivery(self.__delivery_id)
 
