@@ -159,9 +159,6 @@ class MissionProgressMonitor(threading.Thread):
         self.__logger.info(f'Sending delivery end notification to SmartSkies (id: {self.__delivery_id})')
         self.__dis_api.end_or_close_delivery(self.__delivery_id)
 
-    def put_command_in_queue(self, command):
-        self.__command_queue.put(command)
-
     def run(self):
         while True:
             try:        

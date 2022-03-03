@@ -58,7 +58,7 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__anra_probe = AnraTelemetryPush()
         self.__battery_discharge_probe = BatteryDischarge(self.__writer, self.__controller_payload.drone_type, self.__controller_payload.max_rpm, self.__controller_payload.propeller_specs)
         self.__thermal_model_probe = ThermalModelProbe(self.__writer, self.__weather_provider, integrate_every_us= self.__controller_payload.thermal_model_timestep * 1000000 )
-        self.__aeroacoustic_probe = Aeroacoustic(self.__controller_payload.max_rpm, self.__writer)
+        self.__aeroacoustic_probe = Aeroacoustic(self.__controller_payload.max_rpm, self.__controller_payload.waypoints, self.__controller_payload.home_elevation, self.__writer)
         self.__risk_assessment_probe = RiskAssessment(self.__writer)
 
     def __setup_probes(self):
@@ -101,7 +101,6 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
         self.__state_aggregator_thread.start()
 
         self.__battery_discharge_probe.set_vehicle(vehicle)
-        self.__aeroacoustic_probe.set_vehicle(vehicle)
 
         self.__load_mission_from_payload()
 

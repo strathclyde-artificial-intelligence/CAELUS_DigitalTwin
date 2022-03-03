@@ -1,4 +1,4 @@
-from logging import root
+from typing import List
 from ProbeSystem.helper_data.subscriber import Subscriber
 from ProbeSystem.helper_data.streams import *
 from datetime import datetime
@@ -7,13 +7,12 @@ from math import e as E
 from queue import Empty, Queue
 import numpy as np
 from DigitalTwin.Interfaces.DBAdapter import DBAdapter
-from DigitalTwin.Vehicle import Vehicle
 
 RPM_TO_RAD = 0.10472
 
 class Aeroacoustic(Subscriber):
     ROTOR_N = 5
-    def __init__(self, max_rpm: float, writer: DBAdapter):
+    def __init__(self, max_rpm: float, waypoints: List[List[float]], home_elevation: float, writer: DBAdapter):
         super().__init__()
         self.lat_lon_alt = None
         self.rotors_speed = None
@@ -24,10 +23,8 @@ class Aeroacoustic(Subscriber):
         self.rows = []
         self.__last_pwms = [0] * Aeroacoustic.ROTOR_N
         self.__drone_id = None
-        self.__vehicle = None
-        self.__mission_status_queue = Queue()
-        self.__agl_altitude = None
-        self.__home_elevation = None
+        self.__home_elevation = home_elevation
+        self.__agl_altitude = waypoints[0][2] - self.__home_elevation
         self.__writer: DBAdapter = writer
         self.__cruise_sample_step = 0
         self.__cruise_sample_throttle = 25 # Save every x
@@ -67,12 +64,7 @@ class Aeroacoustic(Subscriber):
         self.attitude = self.get_direction_vector_from_rpy([0,0,1], datapoint.roll, datapoint.pitch, datapoint.yaw)
         self.pusher_attitude = self.get_direction_vector_from_rpy([-1,0,0], datapoint.roll, datapoint.pitch, datapoint.yaw)
 
-    def set_vehicle(self, v):
-        self.__vehicle = v
-
     def pwm_to_rps(self, pwm):
-        # THIS IS JMAVSim's ESC
-        # TODO: replace literal 9 with max RPM
         new_pwms = [0] * Aeroacoustic.ROTOR_N
         for i in range(len(pwm)):
             new_pwms[i] = self.__last_pwms[i] + (pwm[i] - self.__last_pwms[i]) * (1.0 - E ** (-0.004 / 0.005)) 
@@ -81,7 +73,6 @@ class Aeroacoustic(Subscriber):
 
     def store_row(self):
         if self.attitude is not None and self.lat_lon_alt is not None and self.rotors_speed is not None and self.time_us is not None:
-            self.__process_mission_status()
             should_store = self.__cruise_sample_step % self.__cruise_sample_throttle == 0
             self.__cruise_sample_step += 1
             if not should_store:
@@ -89,19 +80,8 @@ class Aeroacoustic(Subscriber):
             row = [*self.lat_lon_alt, round(self.time_us / 1000000.0, 6)]
             for rs, att in zip(self.rotors_speed, [self.attitude]*4 + [self.pusher_attitude]):
                 row.extend([rs, *att])
+            row = self.convert_lon_lat_to_easting_northing([row])[0]
             self.__writer.store({'aeroacoustic': row})
-
-    def __process_mission_status(self):
-        try:
-            new_status = self.__mission_status_queue.get_nowait()
-            self.__mission_status = new_status
-            if new_status == Vehicle.TAKING_OFF:
-                self.__home_elevation = self.__vehicle.home_location.alt
-            if new_status == Vehicle.TAKEOFF_COMPLETE:
-                # ASSUMES CONSTANT AGL ALTITUDE AFTER TAKEOFF
-                self.__agl_altitude = self.lat_lon_alt[2]
-        except Empty as _:
-            pass
 
     def new_datapoint(self, drone_id, stream_id, datapoint):
 

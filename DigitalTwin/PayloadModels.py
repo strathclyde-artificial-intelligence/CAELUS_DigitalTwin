@@ -46,6 +46,7 @@ class ControllerPayload(Unpackable):
 
     def __init__(self, config_dict):
         self.waypoints: Tuple[float, float, float] = get(config_dict, 'waypoints')
+        self.home_elevation: float = get(config_dict, 'initial_lon_lat_alt')[2]
         self.operation_id: str = get(config_dict, 'operation_id')
         self.group_id: str = get(config_dict, 'group_id')
         self.delivery_id: str = get(config_dict, 'delivery_id')

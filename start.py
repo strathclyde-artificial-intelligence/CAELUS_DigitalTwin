@@ -40,6 +40,8 @@ def start_with_payload(payload, headless=False):
     except Exception as e:
         logging.getLogger().error(f'Digital Twin Top Level Error:')
         logging.getLogger().error(e)
+        import traceback
+        traceback.print_exc()
     finally:
         code, msg = exit_handler.block_until_exit()
         if msg is not None:

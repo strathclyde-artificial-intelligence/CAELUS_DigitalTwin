@@ -14,7 +14,8 @@ class BatteryDischarge(Subscriber):
     
     def __init__(self, writer: DBAdapter, drone_type: int, max_rpm: float, propeller_specs: dict):
         super().__init__()
-        self.__battery = Battery(25.2, 0.0, max_rpm, get_thrust_coefficient(propeller_specs), motors_n=4 if drone_type == DRONE_TYPE_QUADROTOR else 5)
+        motors_n = (4 if drone_type == DRONE_TYPE_QUADROTOR else 5)
+        self.__battery = Battery(25.2, 0.0, max_rpm, get_thrust_coefficient(propeller_specs), motors_n=motors_n)
         self.__vehicle = None
         self.__last_timestamp = 0
         self.__writer: DBAdapter = writer
