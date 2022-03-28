@@ -13,7 +13,7 @@ class DroneCommander():
 
     @staticmethod
     def commands_from_waypoints(waypoints: Tuple[float, float, float]):
-        return list(map(lambda wp: Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, float('nan'), wp[1], wp[0], wp[2]), waypoints))
+        return list(map(lambda wp: Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 20, 0, float('nan'), wp[1], wp[0], wp[2]), waypoints))
 
     @staticmethod
     def mission_from_waypoints_vtol(waypoints: Tuple[float, float, float]):
