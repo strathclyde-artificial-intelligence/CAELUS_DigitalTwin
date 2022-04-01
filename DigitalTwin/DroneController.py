@@ -142,9 +142,6 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
             # telemetry should not be sent.
             try:
                 uuid_obj = UUID(mission.operation_id, version=4)
-            except ValueError:
-                pass # invalid v4 UUID
-            if str(uuid_obj) == mission.operation_id:
                 self.__anra_probe.start_sending_telemetry(
                     drone_registration=mission.drone_registration_number,
                     operation_id=mission.operation_id,
@@ -152,6 +149,8 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
                     reference_number=mission.reference_number,
                     dis_token=mission.dis_token
                 )
+            except ValueError:
+                pass # invalid v4 UUID
 
         except Empty as e:
             pass
