@@ -6,6 +6,7 @@ from typing import Tuple, List
 from dataclasses import dataclass
 import os,signal
 import time
+from uuid import UUID
 from DigitalTwin.ExitHandler import ExitHandler
 
 from DigitalTwin.Probes.RiskAssessment import RiskAssessment
@@ -135,13 +136,22 @@ class DroneController(VehicleManager, MissionManager, Stoppable):
             self.__commander.set_mission(waypoints_alt)
             self.__setup_probes()
             self.__commander.start_mission()
-            self.__anra_probe.start_sending_telemetry(
-                drone_registration=mission.drone_registration_number,
-                operation_id=mission.operation_id,
-                control_area_id=mission.control_area_id,
-                reference_number=mission.reference_number,
-                dis_token=mission.dis_token
-            )
+
+            # check operation ID. If it is not a valid v4 UUID
+            # then it does not correspond to an ANRA mission and
+            # telemetry should not be sent.
+            try:
+                uuid_obj = UUID(mission.operation_id, version=4)
+            except ValueError:
+                pass # invalid v4 UUID
+            if str(uuid_obj) == mission.operation_id:
+                self.__anra_probe.start_sending_telemetry(
+                    drone_registration=mission.drone_registration_number,
+                    operation_id=mission.operation_id,
+                    control_area_id=mission.control_area_id,
+                    reference_number=mission.reference_number,
+                    dis_token=mission.dis_token
+                )
 
         except Empty as e:
             pass
