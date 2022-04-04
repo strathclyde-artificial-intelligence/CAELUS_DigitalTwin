@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:strathclyde-artificial-intelligence/CAELUS_SmartSkies
 	branch = main
-	commit = f89c0bde9a7277330f3987c7490454e1d3a5a90c
-	parent = c7be7cbc58369d7e70e2683fdfbc43639c22cd12
+	commit = 042b667eaa1b9ba578432c2a2b1d5a16e5d3091d
+	parent = ee42d6139359811dffafb1d80a73d960b3ed5e84
 	method = merge
 	cmdver = 0.4.3

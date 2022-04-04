@@ -8,7 +8,7 @@ class Vendor(JSONDeserialiser):
     
     def get_object_properties(self):
         return [
-            'id', 'vendor_id', 'name', 'uuid', 'locationList', 'location_lat', 'location_long', 'address', 'location_text'
+            'id', 'vendor_id', 'name', 'uuid', 'locationList', 'location_lat', 'location_long', 'address', 'location_text', 'maxChargingCapacity', 'maxStorageCapacity', 'isChargingStation'
         ]
 
     def __repr__(self):
